@@ -60,8 +60,8 @@ These paths need review by the owner (or someone the owner names) in addition to
 | `infra/migrations/`                                                            | Schema changes reach every environment                       |
 
 Concurrent agents must not edit the same core file in parallel (PLAN-001 §5.1); split the task
-instead. When the owner provides the GitHub handles, these paths go into the repository's
-`.github/CODEOWNERS` and branch protection requires code-owner review.
+instead. These paths (and `.github/`) are listed in `.github/CODEOWNERS`; branch protection on
+`main` should require code-owner review so the list is enforced.
 
 ## Never
 

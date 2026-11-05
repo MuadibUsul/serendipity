@@ -4,7 +4,7 @@ Shared libraries, consumed as TypeScript source by the apps and services.
 
 | Directory       | What                                                       | Created by                           |
 | --------------- | ---------------------------------------------------------- | ------------------------------------ |
-| `domain/`       | State machines and invariants; no I/O                      | seeded by `ser-p01-01`; `ser-p04-01` |
+| `domain/`       | Date state machine and invariants; no I/O                  | seeded by `ser-p01-01`; `ser-p04-01` |
 | `consent/`      | Principal, purpose, scope; `authorize()` denies by default | `ser-p01-05`                         |
 | `schemas/`      | Zod / JSON schemas and API types                           | first task that needs them           |
 | `ai-adapters/`  | Voice, vision and LLM provider adapters                    | `ser-p02-01`, `ser-p02-07`           |
