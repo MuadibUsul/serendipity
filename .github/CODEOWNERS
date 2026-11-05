@@ -1,0 +1,7 @@
+# Paths that need the owner's review (CONTRIBUTING.md, "Code ownership").
+# Enforced once branch protection on main requires code-owner review.
+/packages/domain/            @MuadibUsul
+/packages/consent/           @MuadibUsul
+/services/api/src/payment/   @MuadibUsul
+/infra/migrations/           @MuadibUsul
+/.github/                    @MuadibUsul
