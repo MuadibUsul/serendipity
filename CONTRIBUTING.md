@@ -1,6 +1,6 @@
 # Contributing to Serendipity
 
-These rules apply to every change under `serendipity/`, whether a person or an agent writes it.
+These rules apply to every change in this repository, whether a person or an agent writes it.
 They come from PLAN-001 §5–§8 and §12 (`doc://engineering-delivery-plan`).
 
 ## Setup and the one check
@@ -9,6 +9,10 @@ They come from PLAN-001 §5–§8 and §12 (`doc://engineering-delivery-plan`).
 nvm use            # Node 22 (see .nvmrc); npm 10
 npm ci
 npm run check      # format check, lint, typecheck, tests — the same command CI runs
+
+# Changes to infra/migrations or packages/db also need the database suites:
+sudo infra/postgres/install-ubuntu.sh   # once: PostgreSQL 17 + PostGIS + pgvector
+DATABASE_URL=postgresql://serendipity:serendipity@127.0.0.1:5432/postgres npm run test:db
 ```
 
 `npm run format` fixes formatting. Every script runs from the repository root.
@@ -41,7 +45,7 @@ npm run check      # format check, lint, typecheck, tests — the same command C
 
 A pull request merges only when all of these hold; none of them is skipped to go faster:
 
-1. The `check` CI job is green (`npm run check`).
+1. The `check` and `db` CI jobs are green (`npm run check`, `npm run test:db`).
 2. At least one reviewer who did not write the change approved it.
 3. Every acceptance item of the task has evidence in the PR.
 4. Nobody merges automatically and nothing deploys from an unreviewed branch.

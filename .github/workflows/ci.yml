@@ -26,3 +26,21 @@ jobs:
       - run: npm ci
       # Format check, lint, typecheck and tests: the same command as locally.
       - run: npm run check
+
+  db:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Throwaway credentials created by the install script on this runner only.
+      DATABASE_URL: postgresql://serendipity:serendipity@127.0.0.1:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      # PostgreSQL 17 + PostGIS + pgvector, installed the same way as on a developer machine.
+      - run: sudo infra/postgres/install-ubuntu.sh
+      - run: npm ci
+      # Every migration up and down, and the constraints the schema promises.
+      - run: npm run test:db

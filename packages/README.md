@@ -6,6 +6,7 @@ Shared libraries, consumed as TypeScript source by the apps and services.
 | --------------- | ---------------------------------------------------------- | ------------------------------------ |
 | `domain/`       | Date state machine and invariants; no I/O                  | seeded by `ser-p01-01`; `ser-p04-01` |
 | `consent/`      | Principal, purpose, scope; `authorize()` denies by default | `ser-p01-05`                         |
+| `db/`           | Runs `infra/migrations`; the database test suites          | `ser-p01-03`                         |
 | `schemas/`      | Zod / JSON schemas and API types                           | first task that needs them           |
 | `ai-adapters/`  | Voice, vision and LLM provider adapters                    | `ser-p02-01`, `ser-p02-07`           |
 | `a2a-protocol/` | `a2a-match/0.1` messages and the deterministic verifier    | `ser-p03-04`, `ser-p03-07`           |

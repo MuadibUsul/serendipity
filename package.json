@@ -23,13 +23,19 @@
     "format:check": "prettier --check .",
     "lint": "eslint --max-warnings=0 .",
     "typecheck": "tsc -p tsconfig.json && npm run typecheck --workspaces --if-present",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:db": "vitest run --config vitest.db.config.ts",
+    "db:migrate": "node-pg-migrate up -m infra/migrations --migrations-schema public --migrations-table schema_migrations",
+    "db:rollback": "node-pg-migrate down -m infra/migrations --migrations-schema public --migrations-table schema_migrations"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@types/node": "22.20.5",
+    "@types/pg": "8.23.1",
     "eslint": "10.13.0",
     "fast-check": "4.10.2",
+    "node-pg-migrate": "9.0.0",
+    "pg": "8.23.1",
     "prettier": "3.9.10",
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.0",
