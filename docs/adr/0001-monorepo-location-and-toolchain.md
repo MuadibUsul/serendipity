@@ -1,6 +1,7 @@
 # ADR-0001: Monorepo location and toolchain
 
-- **Status:** accepted for the prototype phase; the owner can revisit the location at any time
+- **Status:** accepted; decisions 1 (location) and 2 (one CI) superseded by
+  [ADR-0002](0002-dedicated-repository.md) — the toolchain decisions (3–5) still hold
 - **Date:** 2026-11-05
 - **Task:** `ser-p01-01` (PLAN-001 P01-01)
 

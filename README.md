@@ -11,8 +11,7 @@ Veynod workspace, namespace `serendipity` (see [docs/](docs/README.md)).
 ## Status
 
 Prototype phase, no money flow: gate G0 (PLAN-001 §4) has not passed, so nothing here touches real
-payments, real photos or real users. The first deliverable is this repository skeleton
-(`ser-p01-01`).
+payments, real photos or real users. Done so far: the repository skeleton (`ser-p01-01`).
 
 ## Layout
 
@@ -32,8 +31,6 @@ npm ci
 npm run check   # format check + lint + typecheck + tests (what CI runs)
 ```
 
-From the repository root, `scripts/test_all.sh serendipity` runs the same suite.
-
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before the first change, and
-[ADR-0001](docs/adr/0001-monorepo-location-and-toolchain.md) for why the code lives here and how it
-moves to its own repository.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before the first change. Toolchain choices are in
+[ADR-0001](docs/adr/0001-monorepo-location-and-toolchain.md); why this repository exists is in
+[ADR-0002](docs/adr/0002-dedicated-repository.md).

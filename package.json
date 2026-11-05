@@ -3,6 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "description": "不期 Serendipity — AI-native blind-date app (monorepo).",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MuadibUsul/serendipity.git"
+  },
   "type": "module",
   "engines": {
     "node": ">=22.12.0",

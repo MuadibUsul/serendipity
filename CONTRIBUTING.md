@@ -11,8 +11,7 @@ npm ci
 npm run check      # format check, lint, typecheck, tests — the same command CI runs
 ```
 
-`npm run format` fixes formatting. Every script runs from `serendipity/`; nothing here needs the
-rest of the Veynod repository.
+`npm run format` fixes formatting. Every script runs from the repository root.
 
 ## Where work comes from
 
@@ -42,7 +41,7 @@ rest of the Veynod repository.
 
 A pull request merges only when all of these hold; none of them is skipped to go faster:
 
-1. The `node (serendipity)` CI job is green (`npm run check`).
+1. The `check` CI job is green (`npm run check`).
 2. At least one reviewer who did not write the change approved it.
 3. Every acceptance item of the task has evidence in the PR.
 4. Nobody merges automatically and nothing deploys from an unreviewed branch.
@@ -74,8 +73,6 @@ instead. When the owner provides the GitHub handles, these paths go into the rep
 - Let a private photo URL, raw voice, a transcript or a private answer reach another user or
   another user's agent.
 - Write voice, photo or ID content, or secrets, into logs, traces, crash reports or analytics.
-- Change Veynod's own code (`AgentGraph/`, `agent_runtime/`, `veynod_kernel/`, `contracts/`) from
-  a Serendipity task.
 
 ## Code conventions
 
