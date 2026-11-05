@@ -29,6 +29,9 @@ docs/       ADRs, runbooks, compliance notes         → docs/README.md
 ```bash
 npm ci
 npm run check   # format check + lint + typecheck + tests (what CI runs)
+
+# Database suites: PostgreSQL 17 + PostGIS + pgvector (sudo infra/postgres/install-ubuntu.sh)
+DATABASE_URL=postgresql://serendipity:serendipity@127.0.0.1:5432/postgres npm run test:db
 ```
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) before the first change. Toolchain choices are in
