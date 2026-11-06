@@ -14,6 +14,7 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@serendipity/consent": "0.0.0",
     "@serendipity/domain": "0.0.0"
   }
 }
