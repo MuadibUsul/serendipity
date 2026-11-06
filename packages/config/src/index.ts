@@ -5,6 +5,7 @@ export {
   FEATURE_FLAGS,
   LOG_LEVELS,
   databaseNameFor,
+  formatProblems,
   loadConfig,
   requireConfig,
 } from "./config.js";

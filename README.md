@@ -34,6 +34,9 @@ npm run check   # format check + lint + typecheck + tests (what CI runs)
 npm run dev:up        # DATABASE_URL=postgresql://serendipity:serendipity@127.0.0.1:55432/serendipity_dev
 npm run dev:down
 
+# The API from source against it (health, readiness, metrics on :4000)
+APP_ENV=dev DATABASE_URL=postgresql://serendipity:serendipity@127.0.0.1:55432/serendipity_dev npm run dev:api
+
 # Database suites: PostgreSQL 17 + PostGIS + pgvector (sudo infra/postgres/install-ubuntu.sh)
 DATABASE_URL=postgresql://serendipity:serendipity@127.0.0.1:5432/postgres npm run test:db
 

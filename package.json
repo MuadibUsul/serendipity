@@ -25,10 +25,12 @@
     "typecheck": "tsc -p tsconfig.json && npm run typecheck --workspaces --if-present",
     "test": "vitest run",
     "test:db": "vitest run --config vitest.db.config.ts",
+    "build": "npm run build --workspaces --if-present",
     "db:migrate": "node-pg-migrate up -m infra/migrations --migrations-schema public --migrations-table schema_migrations",
     "db:rollback": "node-pg-migrate down -m infra/migrations --migrations-schema public --migrations-table schema_migrations",
     "dev:up": "docker compose -f infra/docker/compose.dev.yml up --build --detach --wait postgres && docker compose -f infra/docker/compose.dev.yml run --rm migrate",
     "dev:down": "docker compose -f infra/docker/compose.dev.yml down",
+    "dev:api": "npm run dev --workspace @serendipity/api",
     "db:seed": "tsx packages/db/src/seed-cli.ts"
   },
   "devDependencies": {

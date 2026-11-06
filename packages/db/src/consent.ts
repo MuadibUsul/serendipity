@@ -1,13 +1,6 @@
 import type { AuditRecord, AuditSink, ConsentGrant, GrantSource } from "@serendipity/consent";
-import type pg from "pg";
 
-/** A pool, a pooled client or a client. */
-export interface Queryable {
-  query<Row extends pg.QueryResultRow>(
-    text: string,
-    values?: unknown[],
-  ): Promise<pg.QueryResult<Row>>;
-}
+import type { Queryable } from "./queryable.js";
 
 interface GrantRow {
   id: string;
