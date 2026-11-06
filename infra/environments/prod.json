@@ -1,0 +1,20 @@
+{
+  "env": "prod",
+  "purpose": "Real users. Gated by G0/G1/G3/G4 (PLAN-001 §4) before any real payment, photo or person.",
+  "runs_on": null,
+  "runs_on_note": "Decided with the hosting choice (ser-p00-02) and set up by ser-p01-02b.",
+  "database": {
+    "name": "serendipity_prod",
+    "host": null,
+    "port": 5432,
+    "sslmode": "verify-full"
+  },
+  "secret_store": "secret-store://serendipity-prod",
+  "features": {
+    "visualMatching": false,
+    "a2aNegotiation": false,
+    "paidBooking": false,
+    "liveChat": false
+  },
+  "health_checks": ["database", "api /healthz and /readyz (ser-p01-09)"]
+}

@@ -30,6 +30,10 @@ docs/       ADRs, runbooks, compliance notes         → docs/README.md
 npm ci
 npm run check   # format check + lint + typecheck + tests (what CI runs)
 
+# Dev database in Docker (PostgreSQL 17 + PostGIS + pgvector, all migrations applied)
+npm run dev:up        # DATABASE_URL=postgresql://serendipity:serendipity@127.0.0.1:55432/serendipity_dev
+npm run dev:down
+
 # Database suites: PostgreSQL 17 + PostGIS + pgvector (sudo infra/postgres/install-ubuntu.sh)
 DATABASE_URL=postgresql://serendipity:serendipity@127.0.0.1:5432/postgres npm run test:db
 ```

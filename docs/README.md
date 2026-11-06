@@ -13,6 +13,6 @@ Work is tracked as the Veynod task tree `serendipity-mvp` (EPIC-00 … EPIC-06, 
 
 This directory holds what belongs next to the code:
 
-- `adr/` — architecture decision records for this codebase ([ADR-0001](adr/0001-monorepo-location-and-toolchain.md) toolchain, [ADR-0002](adr/0002-dedicated-repository.md) this repository, [ADR-0003](adr/0003-database-schema-and-migrations.md) database schema and migrations).
+- `adr/` — architecture decision records for this codebase ([ADR-0001](adr/0001-monorepo-location-and-toolchain.md) toolchain, [ADR-0002](adr/0002-dedicated-repository.md) this repository, [ADR-0003](adr/0003-database-schema-and-migrations.md) database schema and migrations, [ADR-0004](adr/0004-environments-and-configuration.md) environments and configuration).
 - `runbooks/` — incident runbooks from PLAN-001 §12.2 (`ser-p05-05`).
 - `compliance/` — engineering notes for the privacy data ledger (`ser-p00-07`).

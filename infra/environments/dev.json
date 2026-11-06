@@ -1,0 +1,19 @@
+{
+  "env": "dev",
+  "purpose": "A developer machine: fixture data only (npm run db:seed).",
+  "runs_on": "infra/docker/compose.dev.yml",
+  "database": {
+    "name": "serendipity_dev",
+    "host": "127.0.0.1",
+    "port": 55432,
+    "sslmode": null
+  },
+  "secret_store": "env://local",
+  "features": {
+    "visualMatching": false,
+    "a2aNegotiation": false,
+    "paidBooking": false,
+    "liveChat": false
+  },
+  "health_checks": ["database: pg_isready (Compose healthcheck)"]
+}

@@ -1,0 +1,19 @@
+{
+  "env": "test",
+  "purpose": "Automated tests: every suite creates and drops its own serendipity_test_* database.",
+  "runs_on": "CI job `db` (infra/postgres/install-ubuntu.sh)",
+  "database": {
+    "name": "serendipity_test",
+    "host": "127.0.0.1",
+    "port": 5432,
+    "sslmode": null
+  },
+  "secret_store": "env://local",
+  "features": {
+    "visualMatching": false,
+    "a2aNegotiation": false,
+    "paidBooking": false,
+    "liveChat": false
+  },
+  "health_checks": ["database: pg_lsclusters / connection in the test setup"]
+}
