@@ -51,7 +51,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       # The dev environment exactly as a developer starts it (infra/environments/dev.json):
-      # the database reports healthy, then the migrate service applies every migration.
+      # the database reports healthy, then the migrate service applies every migration,
+      # then the API image starts against it.
       - run: npm run dev:up
       - name: Every migration is applied
         run: |
@@ -60,5 +61,25 @@ jobs:
           expected="$(ls infra/migrations/*.sql | wc -l)"
           echo "applied $applied of $expected"
           test "$applied" = "$expected"
+      # The API image (services/api/Dockerfile) against that database: `--wait`
+      # returns only once the image's own health check passes.
+      - run: docker compose -f infra/docker/compose.dev.yml up --build --detach --wait api
+      - name: The API is ready and exposes metrics
+        run: |
+          curl -fsS http://127.0.0.1:4000/readyz
+          curl -fsS http://127.0.0.1:4000/metrics | grep '^serendipity_api_info{env="dev"} 1'
+      - name: The image refuses a configuration made for another environment
+        run: |
+          if docker run --rm -e APP_ENV=prod \
+            -e DATABASE_URL=postgresql://serendipity:serendipity@postgres:5432/serendipity_dev \
+            serendipity-api:dev; then
+            echo "the image started with a dev database in prod"; exit 1
+          fi
+      - name: The API stops cleanly on SIGTERM
+        run: |
+          docker compose -f infra/docker/compose.dev.yml stop api
+          test "$(docker compose -f infra/docker/compose.dev.yml ps -a --format '{{.ExitCode}}' api)" = 0
+      - if: failure()
+        run: docker compose -f infra/docker/compose.dev.yml logs
       - if: always()
         run: npm run dev:down -- --volumes

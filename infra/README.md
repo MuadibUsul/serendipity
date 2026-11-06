@@ -1,13 +1,13 @@
 # infra/
 
-| Directory       | What                                                                                  | Created by    |
-| --------------- | ------------------------------------------------------------------------------------- | ------------- |
-| `docker/`       | Dev Compose stack (`npm run dev:up`) and the PostgreSQL 17 + PostGIS + pgvector image | `ser-p01-02a` |
-| `environments/` | dev, test, staging and prod definitions (no secret values)                            | `ser-p01-02a` |
-| `migrations/`   | PostgreSQL + PostGIS + pgvector migrations (up and down)                              | `ser-p01-03`  |
-| `postgres/`     | `install-ubuntu.sh`: PostgreSQL 17 + PostGIS + pgvector for local tests and CI        | `ser-p01-03`  |
-| `monitoring/`   | OpenTelemetry, dashboards, alerts                                                     | `ser-p01-07`  |
-| `terraform/`    | Only if managed infrastructure needs it later                                         | —             |
+| Directory       | What                                                                                                 | Created by                  |
+| --------------- | ---------------------------------------------------------------------------------------------------- | --------------------------- |
+| `docker/`       | Dev Compose stack (`npm run dev:up`, the API image) and the PostgreSQL 17 + PostGIS + pgvector image | `ser-p01-02a`, `ser-p01-09` |
+| `environments/` | dev, test, staging and prod definitions (no secret values)                                           | `ser-p01-02a`               |
+| `migrations/`   | PostgreSQL + PostGIS + pgvector migrations (up and down)                                             | `ser-p01-03`                |
+| `postgres/`     | `install-ubuntu.sh`: PostgreSQL 17 + PostGIS + pgvector for local tests and CI                       | `ser-p01-03`                |
+| `monitoring/`   | OpenTelemetry, dashboards, alerts                                                                    | `ser-p01-07`                |
+| `terraform/`    | Only if managed infrastructure needs it later                                                        | —                           |
 
 Environments never share a database or secrets (PLAN-001 P01-02): `@serendipity/config` refuses to
 start a process whose database or secret store belongs to another environment

@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    // NestJS decorators. Injection is by explicit token (`@Inject(TOKEN)`), so
+    // nothing relies on emitDecoratorMetadata, which esbuild, tsx and Vitest
+    // do not emit (ADR-0005).
+    "experimentalDecorators": true
+  },
+  "include": ["src"]
+}

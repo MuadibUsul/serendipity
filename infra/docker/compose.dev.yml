@@ -1,9 +1,10 @@
 # The dev environment (infra/environments/dev.json): one command starts the
-# database and applies every migration.
+# database and applies every migration; the API image runs against it.
 #
-#   docker compose -f infra/docker/compose.dev.yml up --build --wait
+#   npm run dev:up                                  # database + migrations
 #   DATABASE_URL=postgresql://serendipity:serendipity@127.0.0.1:55432/serendipity_dev npm run db:seed
-#   docker compose -f infra/docker/compose.dev.yml down        # add -v to drop the data
+#   docker compose -f infra/docker/compose.dev.yml up --build --wait api   # the API image on :4000
+#   npm run dev:down                                # add -- -v to drop the data
 #
 # Development credentials only. Nothing here may run where real data lives.
 name: serendipity-dev
@@ -41,6 +42,25 @@ services:
       postgres:
         condition: service_healthy
     restart: "no"
+
+  # The API as its image runs anywhere (services/api/Dockerfile). `--wait`
+  # returns once the image's own health check passes.
+  api:
+    build:
+      context: ../..
+      dockerfile: services/api/Dockerfile
+    image: serendipity-api:dev
+    environment:
+      APP_ENV: dev
+      DATABASE_URL: postgresql://serendipity:serendipity@postgres:5432/serendipity_dev
+      LOG_LEVEL: info
+    ports:
+      - "127.0.0.1:4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
 volumes:
   pgdata:

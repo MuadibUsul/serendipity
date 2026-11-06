@@ -240,10 +240,15 @@ export function loadConfig(source: Source): ConfigResult {
   return { ok: true, config: { env, database, secretStore, features, logLevel } };
 }
 
+/** The message a refused start-up prints: one line per problem. */
+export function formatProblems(problems: readonly ConfigProblem[]): string {
+  const lines = problems.map((problem) => `  ${problem.variable}: ${problem.message}`);
+  return `invalid configuration:\n${lines.join("\n")}`;
+}
+
 /** `loadConfig`, throwing one error that lists every problem. For process start-up. */
 export function requireConfig(source: Source): AppConfig {
   const result = loadConfig(source);
   if (result.ok) return result.config;
-  const lines = result.problems.map((problem) => `  ${problem.variable}: ${problem.message}`);
-  throw new Error(`invalid configuration:\n${lines.join("\n")}`);
+  throw new Error(formatProblems(result.problems));
 }

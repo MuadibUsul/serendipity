@@ -23,6 +23,13 @@ export default tseslint.config(
     },
   },
   {
+    // Nest modules are classes that exist to carry a decorator.
+    files: ["services/**/*.ts", "apps/**/*.ts"],
+    rules: {
+      "@typescript-eslint/no-extraneous-class": ["error", { allowWithDecorator: true }],
+    },
+  },
+  {
     files: ["**/*.js"],
     ...tseslint.configs.disableTypeChecked,
   },

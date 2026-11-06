@@ -45,7 +45,7 @@ prod connection string, or a laptop pointed at a deployed secret store.
 ## Consequences
 
 - A service only needs `requireConfig(process.env)` at start-up to get all of these guarantees.
-  The API skeleton (`ser-p01-09`) is the first to use it.
+  The API skeleton (`ser-p01-09`, [ADR-0005](0005-api-service-skeleton.md)) is the first to use it.
 - The secret-store URIs in the staging and prod definitions are placeholders for the provider
   chosen in `ser-p00-02`. When that provider is known, its scheme replaces `secret-store://` and the
   name rule stays the same.

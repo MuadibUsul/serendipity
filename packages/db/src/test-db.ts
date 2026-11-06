@@ -1,4 +1,4 @@
-// Throwaway databases for the *.db.test.ts suites; not exported from the package.
+// Throwaway databases for the *.db.test.ts suites (`@serendipity/db/test-db`); for tests only.
 import { randomUUID } from "node:crypto";
 
 import pg from "pg";
