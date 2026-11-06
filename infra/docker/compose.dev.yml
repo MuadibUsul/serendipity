@@ -1,0 +1,47 @@
+# The dev environment (infra/environments/dev.json): one command starts the
+# database and applies every migration.
+#
+#   docker compose -f infra/docker/compose.dev.yml up --build --wait
+#   DATABASE_URL=postgresql://serendipity:serendipity@127.0.0.1:55432/serendipity_dev npm run db:seed
+#   docker compose -f infra/docker/compose.dev.yml down        # add -v to drop the data
+#
+# Development credentials only. Nothing here may run where real data lives.
+name: serendipity-dev
+
+services:
+  postgres:
+    build: ./postgres
+    image: serendipity-postgres:17-dev
+    environment:
+      POSTGRES_USER: serendipity
+      POSTGRES_PASSWORD: serendipity
+      POSTGRES_DB: serendipity_dev
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U serendipity -d serendipity_dev"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  # Applies pending migrations, then exits. `up --wait` succeeds only if it exits 0.
+  migrate:
+    image: node:22.23.4-bookworm-slim
+    working_dir: /repo
+    volumes:
+      - ../..:/repo
+      - node_modules:/repo/node_modules
+    environment:
+      APP_ENV: dev
+      DATABASE_URL: postgresql://serendipity:serendipity@postgres:5432/serendipity_dev
+    command: ["sh", "-c", "npm ci --no-audit --no-fund --ignore-scripts && npm run db:migrate"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+volumes:
+  pgdata:
+  node_modules:

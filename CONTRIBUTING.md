@@ -45,7 +45,8 @@ DATABASE_URL=postgresql://serendipity:serendipity@127.0.0.1:5432/postgres npm ru
 
 A pull request merges only when all of these hold; none of them is skipped to go faster:
 
-1. The `check` and `db` CI jobs are green (`npm run check`, `npm run test:db`).
+1. The `check`, `db` and `dev-stack` CI jobs are green (`npm run check`, `npm run test:db`,
+   `npm run dev:up`).
 2. At least one reviewer who did not write the change approved it.
 3. Every acceptance item of the task has evidence in the PR.
 4. Nobody merges automatically and nothing deploys from an unreviewed branch.

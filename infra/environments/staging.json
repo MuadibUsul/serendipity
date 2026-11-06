@@ -1,0 +1,20 @@
+{
+  "env": "staging",
+  "purpose": "Release rehearsal with fixture or consenting test users; never a copy of prod data.",
+  "runs_on": null,
+  "runs_on_note": "Decided with the hosting choice (ser-p00-02) and set up by ser-p01-02b.",
+  "database": {
+    "name": "serendipity_staging",
+    "host": null,
+    "port": 5432,
+    "sslmode": "verify-full"
+  },
+  "secret_store": "secret-store://serendipity-staging",
+  "features": {
+    "visualMatching": false,
+    "a2aNegotiation": false,
+    "paidBooking": false,
+    "liveChat": false
+  },
+  "health_checks": ["database", "api /healthz and /readyz (ser-p01-09)"]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@serendipity/config",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Runtime configuration: parsed, validated, and refusing cross-environment mistakes at start-up.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

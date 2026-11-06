@@ -44,3 +44,21 @@ jobs:
       - run: npm ci
       # Every migration up and down, and the constraints the schema promises.
       - run: npm run test:db
+
+  dev-stack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      # The dev environment exactly as a developer starts it (infra/environments/dev.json):
+      # the database reports healthy, then the migrate service applies every migration.
+      - run: npm run dev:up
+      - name: Every migration is applied
+        run: |
+          applied="$(docker compose -f infra/docker/compose.dev.yml exec -T postgres \
+            psql -U serendipity -d serendipity_dev -Atc 'SELECT count(*) FROM public.schema_migrations')"
+          expected="$(ls infra/migrations/*.sql | wc -l)"
+          echo "applied $applied of $expected"
+          test "$applied" = "$expected"
+      - if: always()
+        run: npm run dev:down -- --volumes
