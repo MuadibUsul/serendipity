@@ -1,0 +1,19 @@
+{
+  "name": "@serendipity/fixtures",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Deterministic, fully fictional test data: users, venues, dates, payments and the G3 anomaly scenarios. Tests and dev seeding only.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@serendipity/domain": "0.0.0"
+  }
+}

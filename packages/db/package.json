@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@serendipity/consent": "0.0.0",
-    "@serendipity/domain": "0.0.0"
+    "@serendipity/domain": "0.0.0",
+    "@serendipity/fixtures": "0.0.0"
   }
 }
