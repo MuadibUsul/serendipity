@@ -26,6 +26,7 @@
     "@serendipity/domain": "0.0.0",
     "@serendipity/fixtures": "0.0.0",
     "@serendipity/media": "0.0.0",
+    "@serendipity/privacy": "0.0.0",
     "@serendipity/vision": "0.0.0"
   }
 }

@@ -1,0 +1,16 @@
+{
+  "name": "@serendipity/privacy",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Self-service personal export and resumable account deletion orchestration.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

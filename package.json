@@ -32,7 +32,8 @@
     "dev:down": "docker compose -f infra/docker/compose.dev.yml down",
     "dev:api": "npm run dev --workspace @serendipity/api",
     "db:seed": "tsx packages/db/src/seed-cli.ts",
-    "media:cleanup": "tsx services/api/src/media-cleanup.ts"
+    "media:cleanup": "tsx services/api/src/media-cleanup.ts",
+    "privacy:cleanup": "tsx services/api/src/privacy-cleanup.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
