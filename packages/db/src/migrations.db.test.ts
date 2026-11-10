@@ -112,6 +112,7 @@ describe("schema contents", () => {
         "users",
         "venue_slots",
         "venues",
+        "visual_feature_snapshots",
       ].sort(),
     );
   });

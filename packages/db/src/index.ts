@@ -8,5 +8,6 @@ export {
 export type { MigrationStatus } from "./migration-status.js";
 export { pgAuditSink, pgGrantSource } from "./consent.js";
 export { pgMediaRepository } from "./media.js";
+export { pgVisionRepository } from "./vision.js";
 export type { Queryable } from "./queryable.js";
 export { insertWebhookEvent, seedDataset, webhookRow } from "./seed.js";
