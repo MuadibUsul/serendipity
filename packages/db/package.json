@@ -17,6 +17,10 @@
       "types": "./src/consent.ts",
       "default": "./src/consent.ts"
     },
+    "./profile": {
+      "types": "./src/profile.ts",
+      "default": "./src/profile.ts"
+    },
     "./migration-status": {
       "types": "./src/migration-status.ts",
       "default": "./src/migration-status.ts"
@@ -34,6 +38,7 @@
     "@serendipity/domain": "0.0.0",
     "@serendipity/fixtures": "0.0.0",
     "@serendipity/media": "0.0.0",
+    "@serendipity/profile": "0.0.0",
     "@serendipity/redact": "0.0.0"
   }
 }

@@ -1,0 +1,16 @@
+{
+  "name": "@serendipity/profile",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Profile facts: the catalog, provenance (explicit / confirmed / inferred / outdated) and the rules that keep model guesses out of hard rules.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}
