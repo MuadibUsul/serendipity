@@ -1,0 +1,16 @@
+{
+  "name": "@serendipity/redact",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Defence in depth for logs and audit metadata: removes personal data and secrets before anything is written.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

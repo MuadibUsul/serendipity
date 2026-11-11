@@ -23,10 +23,16 @@ export interface Metrics {
   readonly contentType: string;
   render(): Promise<string>;
   observeRequest(request: ObservedRequest): void;
+  /** An exception no handler expected: a bug. Its route is in the log line. */
+  observeUnhandledError(): void;
 }
 
-/** A registry of its own per service instance: Node.js process metrics plus HTTP request metrics. */
-export function createMetrics(env: Environment): Metrics {
+/**
+ * A registry of its own per service instance: Node.js process metrics, HTTP
+ * request metrics, and readiness, which `isReady` computes at every scrape so
+ * the gauge never depends on someone polling /readyz.
+ */
+export function createMetrics(env: Environment, isReady: () => Promise<boolean>): Metrics {
   const registry = new Registry();
   collectDefaultMetrics({ register: registry });
 
@@ -42,6 +48,21 @@ export function createMetrics(env: Environment): Metrics {
     help: "HTTP request duration by method, route template and status code.",
     labelNames,
     buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
+    registers: [registry],
+  });
+  new Gauge({
+    name: "serendipity_ready",
+    help: "1 if the service is ready (the /readyz checks pass), 0 if not; checked at each scrape.",
+    registers: [registry],
+    async collect() {
+      this.set((await isReady().catch(() => false)) ? 1 : 0);
+    },
+  });
+  // No labels, so the series exists at 0 from the start and Prometheus's
+  // increase() sees the first error.
+  const unhandled = new Counter({
+    name: "serendipity_unhandled_errors_total",
+    help: "Exceptions no handler expected (bugs); the log line names the route.",
     registers: [registry],
   });
   new Gauge({
@@ -62,6 +83,9 @@ export function createMetrics(env: Environment): Metrics {
       };
       requests.inc(labels);
       duration.observe(labels, seconds);
+    },
+    observeUnhandledError() {
+      unhandled.inc();
     },
   };
 }

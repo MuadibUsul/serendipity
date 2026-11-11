@@ -1,0 +1,64 @@
+# Alert rules for the API (ser-p01-07a, ADR-0006). They expect the scrape job
+# to be named serendipity-api. The monitoring stack that loads them and routes
+# the alerts arrives with hosting (ser-p01-07, after ser-p01-02b). Tested with
+# promtool: npm run test:alerts (alerts.test.yml).
+groups:
+  - name: serendipity-api
+    rules:
+      - alert: ApiDown
+        expr: up{job="serendipity-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: API instance {{ $labels.instance }} cannot be scraped
+          description: Prometheus has not reached /metrics on this instance for 2 minutes.
+
+      - alert: ApiNotReady
+        expr: serendipity_ready{job="serendipity-api"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: API instance {{ $labels.instance }} is not ready
+          description: /readyz has failed for 5 minutes (database unreachable or migrations behind).
+
+      # Probe routes are left out: /readyz answers 503 by design while not
+      # ready, which ApiNotReady already reports. Quiet traffic (under 6
+      # requests a minute) is left out too: two failures out of three is noise.
+      - alert: ApiHighErrorRate
+        expr: |
+          (
+            sum by (job) (rate(serendipity_http_requests_total{job="serendipity-api", route!~"/healthz|/readyz|/metrics", status=~"5.."}[5m]))
+            /
+            sum by (job) (rate(serendipity_http_requests_total{job="serendipity-api", route!~"/healthz|/readyz|/metrics"}[5m]))
+          ) > 0.05
+          and
+          sum by (job) (rate(serendipity_http_requests_total{job="serendipity-api", route!~"/healthz|/readyz|/metrics"}[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: Over 5% of API requests fail with a server error
+          description: More than 5% of requests answered 5xx for 5 minutes.
+
+      - alert: ApiUnhandledErrors
+        expr: increase(serendipity_unhandled_errors_total{job="serendipity-api"}[10m]) > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: API instance {{ $labels.instance }} hit an unhandled error
+          description: An exception no handler expected (a bug); its log line, found by trace id, names the route.
+
+      # ARCH-001 §1.2: API P95 at most 400 ms, probes excluded.
+      - alert: ApiSlowRequests
+        expr: |
+          histogram_quantile(0.95,
+            sum by (job, le) (rate(serendipity_http_request_duration_seconds_bucket{job="serendipity-api", route!~"/healthz|/readyz|/metrics"}[5m]))
+          ) > 0.4
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: API P95 latency is over 400 ms
+          description: The 95th percentile of request duration has exceeded the 400 ms target for 10 minutes.

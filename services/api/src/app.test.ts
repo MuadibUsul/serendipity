@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 
 import type { Api } from "./app.js";
+import { ApiError } from "./errors.js";
 import type { Readiness, ReadinessResult } from "./readiness.js";
 import { READY, fixedReadiness, testApi } from "./test-support.js";
 import type { LogLine } from "./test-support.js";
@@ -75,6 +76,8 @@ describe("GET /readyz (readiness)", () => {
   it.each(cases)("%s → %i", async (_name, result, status) => {
     const { app } = await start(fixedReadiness(result));
     const response = await app.inject({ method: "GET", url: "/readyz" });
+    const metrics = (await app.inject({ method: "GET", url: "/metrics" })).body;
+    expect(metrics).toContain(`serendipity_ready ${status === 200 ? "1" : "0"}`);
     expect(response.statusCode).toBe(status);
     expect(response.headers["cache-control"]).toBe("no-store");
     expect(response.json()).toEqual({
@@ -130,6 +133,20 @@ describe("GET /metrics", () => {
     expect(response.body).toContain("process_cpu_seconds_total");
   });
 
+  it("reports readiness at each scrape, 0 once draining, and starts the bug counter at 0", async () => {
+    const readiness = fixedReadiness(READY);
+    const { app, lifecycle } = await start(readiness);
+    const first = (await app.inject({ method: "GET", url: "/metrics" })).body;
+    expect(first).toContain("serendipity_ready 1");
+    expect(first).toContain("serendipity_unhandled_errors_total 0");
+    expect(readiness.calls).toBe(1);
+
+    lifecycle.drain();
+    expect((await app.inject({ method: "GET", url: "/metrics" })).body).toContain(
+      "serendipity_ready 0",
+    );
+  });
+
   it("labels a request that matched no route 'unmatched', never by its path", async () => {
     const { app } = await start(fixedReadiness(READY));
     const notFound = await app.inject({ method: "GET", url: "/users/alice@example.com/photos" });
@@ -180,9 +197,16 @@ describe("request logs", () => {
     const kept = await app.inject({
       method: "GET",
       url: "/healthz",
-      headers: { "x-request-id": "trace-0123456789" },
+      headers: { "x-request-id": "trace-abc-12345" },
     });
-    expect(kept.headers["x-request-id"]).toBe("trace-0123456789");
+    expect(kept.headers["x-request-id"]).toBe("trace-abc-12345");
+
+    const smuggled = await app.inject({
+      method: "GET",
+      url: "/healthz",
+      headers: { "x-request-id": "call-13800138000" },
+    });
+    expect(smuggled.headers["x-request-id"]).toMatch(/^[0-9a-f-]{36}$/);
 
     const replaced = await app.inject({
       method: "GET",
@@ -191,13 +215,14 @@ describe("request logs", () => {
     });
     expect(replaced.headers["x-request-id"]).toMatch(/^[0-9a-f-]{36}$/);
     expect(requestLines(lines).map((line) => line["req_id"])).toEqual([
-      "trace-0123456789",
+      "trace-abc-12345",
+      smuggled.headers["x-request-id"],
       replaced.headers["x-request-id"],
     ]);
   });
 });
 
-describe("unexpected errors", () => {
+describe("errors", () => {
   const failing: Readiness = {
     check: () =>
       Promise.reject(
@@ -207,31 +232,109 @@ describe("unexpected errors", () => {
       ),
   };
 
-  it("answer a bare 500 and, where real data lives, log only the error's type and code", async () => {
+  it("answer a bug with a bare 500 problem; where real data lives, log only its type and code", async () => {
     const { app, lines, text } = await start(failing, "prod");
     const response = await app.inject({ method: "GET", url: "/readyz" });
     expect(response.statusCode).toBe(500);
-    expect(response.json()).toEqual({ statusCode: 500, message: "Internal Server Error" });
+    expect(response.headers["content-type"]).toMatch(/^application\/problem\+json/);
+    const traceId = response.headers["x-trace-id"];
+    expect(response.json()).toEqual({
+      type: "about:blank",
+      title: "Internal error",
+      status: 500,
+      code: "internal",
+      trace_id: traceId,
+    });
     const logged = lines.find((line) => line["msg"] === "unhandled error");
-    expect(logged).toMatchObject({ route: "/readyz", err: { type: "Error", code: "23505" } });
+    expect(logged).toMatchObject({
+      route: "/readyz",
+      trace_id: traceId,
+      err: { type: "Error", code: "23505" },
+    });
     expect(text()).not.toContain("alice");
+    const metrics = (await app.inject({ method: "GET", url: "/metrics" })).body;
+    expect(metrics).toContain("serendipity_unhandled_errors_total 1");
   });
 
-  it("include the message in test logs, never in the response", async () => {
+  it("log a bug's message in test, still redacted, and never send it", async () => {
     const { app, lines } = await start(failing, "test");
     const response = await app.inject({ method: "GET", url: "/readyz" });
     expect(response.body).not.toContain("alice");
+    expect(response.body).not.toContain("Key (email)");
     const logged = lines.find((line) => line["msg"] === "unhandled error");
     expect(logged).toMatchObject({
-      err: { message: "Key (email)=(alice@example.com) already exists" },
+      err: { message: "Key (email)=([redacted]) already exists" },
     });
   });
 
-  it("leave HTTP errors as Nest answers them", async () => {
-    const { app, lines } = await start(fixedReadiness(READY));
-    const response = await app.inject({ method: "POST", url: "/healthz" });
-    expect(response.statusCode).toBe(404);
-    expect(response.json()).toMatchObject({ statusCode: 404 });
+  it("answer an ApiError with its code and client-facing detail", async () => {
+    const unavailable: Readiness = {
+      check: () =>
+        Promise.reject(
+          new ApiError("unavailable", "Try again in a minute.", {
+            cause: new Error("connect ECONNREFUSED 10.0.0.7:5432"),
+          }),
+        ),
+    };
+    const { app, lines, text } = await start(unavailable, "prod");
+    const response = await app.inject({ method: "GET", url: "/readyz" });
+    expect(response.statusCode).toBe(503);
+    expect(response.json()).toMatchObject({
+      code: "unavailable",
+      title: "Temporarily unavailable",
+      detail: "Try again in a minute.",
+    });
+    expect(lines.find((line) => line["msg"] === "request failed")).toMatchObject({
+      code: "unavailable",
+      err: { type: "Error" },
+    });
+    expect(text()).not.toContain("10.0.0.7");
     expect(lines.some((line) => line["msg"] === "unhandled error")).toBe(false);
+  });
+
+  it("do not log client errors", async () => {
+    const forbidden: Readiness = { check: () => Promise.reject(new ApiError("forbidden")) };
+    const { app, lines } = await start(forbidden);
+    const response = await app.inject({ method: "GET", url: "/readyz" });
+    expect(response.statusCode).toBe(403);
+    expect(response.json()).toMatchObject({ code: "forbidden", title: "Not allowed" });
+    expect(response.json()).not.toHaveProperty("detail");
+    expect(lines.some((line) => line["level"] === "error" || line["level"] === "warn")).toBe(false);
+  });
+
+  it("answer routing errors as problems without echoing the path", async () => {
+    const { app, lines } = await start(fixedReadiness(READY));
+    const response = await app.inject({ method: "POST", url: "/users/alice@example.com" });
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toMatchObject({ code: "not_found", status: 404 });
+    expect(response.body).not.toContain("alice");
+    expect(lines.some((line) => line["msg"] === "unhandled error")).toBe(false);
+  });
+});
+
+describe("tracing", () => {
+  it("continues a caller's trace across the response, the request line and the logs", async () => {
+    const { app, lines } = await start(fixedReadiness(READY));
+    const traceparent = "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01";
+    const response = await app.inject({ method: "GET", url: "/readyz", headers: { traceparent } });
+    expect(response.headers["x-trace-id"]).toBe("4bf92f3577b34da6a3ce929d0e0e4736");
+    const ready = lines.find((line) => line["msg"] === "ready");
+    const request = requestLines(lines)[0];
+    expect(ready?.["trace_id"]).toBe("4bf92f3577b34da6a3ce929d0e0e4736");
+    expect(request?.["trace_id"]).toBe("4bf92f3577b34da6a3ce929d0e0e4736");
+    expect(request?.["span_id"]).toBe(ready?.["span_id"]);
+  });
+
+  it("starts a new trace for each request without one", async () => {
+    const { app } = await start(fixedReadiness(READY));
+    const a = await app.inject({ method: "GET", url: "/healthz" });
+    const b = await app.inject({
+      method: "GET",
+      url: "/healthz",
+      headers: { traceparent: "garbage" },
+    });
+    expect(a.headers["x-trace-id"]).toMatch(/^[0-9a-f]{32}$/);
+    expect(b.headers["x-trace-id"]).toMatch(/^[0-9a-f]{32}$/);
+    expect(a.headers["x-trace-id"]).not.toBe(b.headers["x-trace-id"]);
   });
 });

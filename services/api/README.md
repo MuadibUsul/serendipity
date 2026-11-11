@@ -33,6 +33,23 @@ Everything in [`@serendipity/config`](../../packages/config/README.md), plus:
 The process exits 1, listing every problem, if any setting is refused, for example a dev database
 in prod.
 
+## Tracing, errors and audit
+
+[ADR-0006](../../docs/adr/0006-audit-tracing-redaction-and-alerts.md).
+
+- **Tracing:** every request has a W3C trace (a valid incoming `traceparent` is continued). Its
+  id is returned as `x-trace-id` and is on every log line of the request (`trace_id`, `span_id`).
+- **Errors:** responses are `application/problem+json`, for example
+  `{ "type": "about:blank", "title": "Not found", "status": 404, "code": "not_found", "trace_id": "…" }`.
+  Throw `ApiError(code, detail?)` from domain code; `detail` is shown to the client.
+- **Audit:** every key write goes through `auditedTransaction(pool, async (tx) => { …; await tx.audit(event) })`,
+  so the write and its audit row, which carries the trace id, commit together or not at all. The
+  consent engine audits through `consentAuditSink`.
+- **Logs:** every field and message is redacted (`@serendipity/redact`) as defence in depth.
+- **Alerts:** `infra/monitoring/alerts.yml` watches `serendipity_ready`,
+  `serendipity_http_requests_total`, `serendipity_http_request_duration_seconds` and
+  `serendipity_unhandled_errors_total`.
+
 ## Rules for code here
 
 - Inject by token: `@Inject(TOKEN)` on every constructor parameter (`src/tokens.ts`). Nothing may
@@ -40,3 +57,5 @@ in prod.
 - Never log a request, header, query, body, row or error message wholesale. Log the fields you
   chose; log errors with `safeError`.
 - Label metrics with route templates, never raw paths.
+- Write key data only through `auditedTransaction`; answer errors with `ApiError`, never with
+  internal messages.

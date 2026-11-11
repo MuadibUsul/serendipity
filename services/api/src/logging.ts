@@ -1,7 +1,10 @@
 import type { LoggerService } from "@nestjs/common";
 import type { Environment, LogLevel } from "@serendipity/config";
+import { redactFields, redactText } from "@serendipity/redact";
 import { pino } from "pino";
-import type { DestinationStream, Logger } from "pino";
+import type { DestinationStream, LogFn, Logger, LoggerOptions } from "pino";
+
+import { currentTrace } from "./tracing.js";
 
 export type { Logger };
 
@@ -11,14 +14,31 @@ export type { Logger };
  * Personal data stays out of logs by construction: nothing is logged
  * wholesale (no request, header, query, body or row objects). Callers pass
  * the fields they chose, and requests are logged by route template, never by
- * URL (ADR-0005).
+ * URL (ADR-0005). As defence in depth, every field and every message is then
+ * redacted (@serendipity/redact, ADR-0006).
+ *
+ * A line written while a request runs carries its `trace_id` and `span_id`.
  */
 export function createLogger(level: LogLevel, destination?: DestinationStream): Logger {
-  const options = {
+  const options: LoggerOptions = {
     level,
     base: { service: "api" },
     timestamp: pino.stdTimeFunctions.isoTime,
-    formatters: { level: (label: string) => ({ level: label }) },
+    mixin: () => {
+      const trace = currentTrace();
+      return trace === undefined ? {} : { trace_id: trace.traceId, span_id: trace.spanId };
+    },
+    formatters: {
+      level: (label: string) => ({ level: label }),
+      log: (fields) => redactFields(fields),
+    },
+    hooks: {
+      // Messages are redacted too: the fields above never see them.
+      logMethod(args, method) {
+        const safe = args.map((arg: unknown) => (typeof arg === "string" ? redactText(arg) : arg));
+        method.apply(this, safe as Parameters<LogFn>);
+      },
+    },
   };
   return destination === undefined ? pino(options) : pino(options, destination);
 }

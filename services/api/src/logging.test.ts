@@ -38,6 +38,22 @@ describe("safeError", () => {
   });
 });
 
+describe("createLogger", () => {
+  it("redacts every field and every message, as defence in depth", () => {
+    const { logger, lines, text } = captureLogs();
+    logger.info(
+      { user: { email: "alice@example.com" }, detail: "from 203.0.113.9" },
+      "call 13800138000",
+    );
+    expect(lines[0]).toMatchObject({
+      user: { email: "[redacted]" },
+      detail: "from [redacted]",
+      msg: "call [redacted]",
+    });
+    expect(text()).not.toMatch(/alice|203\.0\.113|13800138000/);
+  });
+});
+
 describe("NestLogger", () => {
   it("sends Nest's messages through the logger with their context", () => {
     const { logger, lines } = captureLogs();

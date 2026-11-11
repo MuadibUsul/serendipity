@@ -1,0 +1,158 @@
+# promtool unit tests for alerts.yml: npm run test:alerts
+rule_files:
+  - alerts.yml
+
+evaluation_interval: 1m
+
+tests:
+  # An instance that stops answering scrapes alerts after 2 minutes, not before.
+  - interval: 1m
+    input_series:
+      - series: 'up{job="serendipity-api", instance="api-1"}'
+        values: "1 1 0 0 0 0"
+      - series: 'up{job="serendipity-api", instance="api-2"}'
+        values: "1 1 1 1 1 1"
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: ApiDown
+        exp_alerts: []
+      - eval_time: 5m
+        alertname: ApiDown
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: serendipity-api
+              instance: api-1
+            exp_annotations:
+              summary: API instance api-1 cannot be scraped
+              description: Prometheus has not reached /metrics on this instance for 2 minutes.
+
+  # Not ready for 5 minutes alerts; a short blip does not.
+  - interval: 1m
+    input_series:
+      - series: 'serendipity_ready{job="serendipity-api", instance="api-1"}'
+        values: "1 1 0 0 0 0 0 0 0 0"
+      - series: 'serendipity_ready{job="serendipity-api", instance="api-2"}'
+        values: "1 0 0 1 1 1 1 1 1 1"
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: ApiNotReady
+        exp_alerts: []
+      - eval_time: 8m
+        alertname: ApiNotReady
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: serendipity-api
+              instance: api-1
+            exp_annotations:
+              summary: API instance api-1 is not ready
+              description: /readyz has failed for 5 minutes (database unreachable or migrations behind).
+
+  # 1 request in 6 failing (about 17%) alerts once it has lasted 5 minutes.
+  - interval: 1m
+    input_series:
+      - series: 'serendipity_http_requests_total{job="serendipity-api", method="GET", route="/v1/dates/upcoming", status="200"}'
+        values: "0+100x30"
+      - series: 'serendipity_http_requests_total{job="serendipity-api", method="GET", route="/v1/dates/upcoming", status="500"}'
+        values: "0x10 0+20x20"
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: ApiHighErrorRate
+        exp_alerts: []
+      - eval_time: 20m
+        alertname: ApiHighErrorRate
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: serendipity-api
+            exp_annotations:
+              summary: Over 5% of API requests fail with a server error
+              description: More than 5% of requests answered 5xx for 5 minutes.
+
+  # 1% failing does not alert; nor do 503s from /readyz; nor does a trickle of
+  # traffic that happens to fail.
+  - interval: 1m
+    input_series:
+      - series: 'serendipity_http_requests_total{job="serendipity-api", method="GET", route="/v1/dates/upcoming", status="200"}'
+        values: "0+99x30"
+      - series: 'serendipity_http_requests_total{job="serendipity-api", method="GET", route="/v1/dates/upcoming", status="500"}'
+        values: "0+1x30"
+      - series: 'serendipity_http_requests_total{job="serendipity-api", method="GET", route="/readyz", status="503"}'
+        values: "0+500x30"
+    alert_rule_test:
+      - eval_time: 25m
+        alertname: ApiHighErrorRate
+        exp_alerts: []
+  - interval: 1m
+    input_series:
+      - series: 'serendipity_http_requests_total{job="serendipity-api", method="POST", route="/v1/safety/reports", status="500"}'
+        values: "0+1x30"
+    alert_rule_test:
+      - eval_time: 25m
+        alertname: ApiHighErrorRate
+        exp_alerts: []
+
+  # One unhandled error alerts at once and clears 10 minutes later.
+  - interval: 1m
+    input_series:
+      - series: 'serendipity_unhandled_errors_total{job="serendipity-api", instance="api-1"}'
+        values: "0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: ApiUnhandledErrors
+        exp_alerts: []
+      - eval_time: 4m
+        alertname: ApiUnhandledErrors
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: serendipity-api
+              instance: api-1
+            exp_annotations:
+              summary: API instance api-1 hit an unhandled error
+              description: An exception no handler expected (a bug); its log line, found by trace id, names the route.
+      - eval_time: 16m
+        alertname: ApiUnhandledErrors
+        exp_alerts: []
+
+  # Every request between 0.5 s and 1 s: P95 near 1 s alerts after 10 minutes.
+  - interval: 1m
+    input_series:
+      - series: 'serendipity_http_request_duration_seconds_bucket{job="serendipity-api", method="GET", route="/v1/dates/upcoming", status="200", le="0.1"}'
+        values: "0x30"
+      - series: 'serendipity_http_request_duration_seconds_bucket{job="serendipity-api", method="GET", route="/v1/dates/upcoming", status="200", le="0.5"}'
+        values: "0x30"
+      - series: 'serendipity_http_request_duration_seconds_bucket{job="serendipity-api", method="GET", route="/v1/dates/upcoming", status="200", le="1"}'
+        values: "0+60x30"
+      - series: 'serendipity_http_request_duration_seconds_bucket{job="serendipity-api", method="GET", route="/v1/dates/upcoming", status="200", le="+Inf"}'
+        values: "0+60x30"
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: ApiSlowRequests
+        exp_alerts: []
+      - eval_time: 20m
+        alertname: ApiSlowRequests
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: serendipity-api
+            exp_annotations:
+              summary: API P95 latency is over 400 ms
+              description: The 95th percentile of request duration has exceeded the 400 ms target for 10 minutes.
+
+  # Fast requests do not alert, and slow probes do not count.
+  - interval: 1m
+    input_series:
+      - series: 'serendipity_http_request_duration_seconds_bucket{job="serendipity-api", method="GET", route="/v1/dates/upcoming", status="200", le="0.1"}'
+        values: "0+60x30"
+      - series: 'serendipity_http_request_duration_seconds_bucket{job="serendipity-api", method="GET", route="/v1/dates/upcoming", status="200", le="+Inf"}'
+        values: "0+60x30"
+      - series: 'serendipity_http_request_duration_seconds_bucket{job="serendipity-api", method="GET", route="/readyz", status="200", le="0.1"}'
+        values: "0x30"
+      - series: 'serendipity_http_request_duration_seconds_bucket{job="serendipity-api", method="GET", route="/readyz", status="200", le="+Inf"}'
+        values: "0+600x30"
+    alert_rule_test:
+      - eval_time: 25m
+        alertname: ApiSlowRequests
+        exp_alerts: []
