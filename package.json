@@ -32,7 +32,8 @@
     "dev:up": "docker compose -f infra/docker/compose.dev.yml up --build --detach --wait postgres && docker compose -f infra/docker/compose.dev.yml run --rm migrate",
     "dev:down": "docker compose -f infra/docker/compose.dev.yml down",
     "dev:api": "npm run dev --workspace @serendipity/api",
-    "db:seed": "tsx packages/db/src/seed-cli.ts"
+    "db:seed": "tsx packages/db/src/seed-cli.ts",
+    "media:cleanup": "tsx services/api/src/media-cleanup.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
