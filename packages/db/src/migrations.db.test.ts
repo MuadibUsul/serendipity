@@ -99,6 +99,7 @@ describe("schema contents", () => {
         "identity_attestations",
         "match_policies",
         "media_assets",
+        "media_derivatives",
         "negotiations",
         "notification_outbox",
         "payment_orders",
