@@ -1,0 +1,19 @@
+{
+  "name": "@serendipity/identity",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Identity and age verification: provider interface, deny-by-default eligibility, signed callbacks, a fake provider for dev and test.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@serendipity/config": "0.0.0"
+  }
+}
