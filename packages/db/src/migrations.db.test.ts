@@ -89,6 +89,7 @@ describe("schema contents", () => {
     );
     expect(rows.map((row) => row.table_name)).toEqual(
       [
+        "account_deletion_requests",
         "audit_events",
         "candidate_pairs",
         "checkins",
@@ -112,6 +113,7 @@ describe("schema contents", () => {
         "users",
         "venue_slots",
         "venues",
+        "visual_feature_snapshots",
       ].sort(),
     );
   });

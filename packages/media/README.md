@@ -11,7 +11,7 @@ For each upload, the service checks the current `visual_matching` grant and crea
 to one key, content type, maximum size (10 MiB), SSE-KMS and one KMS key. Completing the upload
 waits until the POST policy expires, then checks the object metadata and image signature before activation; the
 uploader cannot overwrite the verified object. Vision reads get a 60-second signed GET only after
-a fresh consent check. A previously issued GET may remain usable until its 60-second expiry.
+a fresh consent and owner check. A previously issued GET may remain usable until its 60-second expiry.
 
 The S3 bucket must have **Block Public Access** enabled, a private bucket policy, TLS-only access,
 versioning disabled or noncurrent-version expiry, and an IAM role limited to this bucket's

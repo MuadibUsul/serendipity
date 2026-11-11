@@ -198,11 +198,16 @@ describe("private photo lifecycle", () => {
       imageSignatureValid: true,
     });
     await ctx.service.completeUpload(ALICE, asset.id);
-    expect(await ctx.service.visionReadUrl(asset.id)).toContain("expires=60");
+    await expect(ctx.service.visionReadUrl(BOB, asset.id)).rejects.toMatchObject({
+      code: "not_found",
+    });
+    expect(await ctx.service.visionReadUrl(ALICE, asset.id)).toContain("expires=60");
     const firstGrant = ctx.grants[0];
     if (firstGrant === undefined) throw new Error("missing grant");
     ctx.grants[0] = { ...firstGrant, revokedAt: START };
-    await expect(ctx.service.visionReadUrl(asset.id)).rejects.toMatchObject({ code: "forbidden" });
+    await expect(ctx.service.visionReadUrl(ALICE, asset.id)).rejects.toMatchObject({
+      code: "forbidden",
+    });
   });
 
   it("removes revoked, expired and derived objects, and never lets another owner delete", async () => {
@@ -233,7 +238,7 @@ describe("private photo lifecycle", () => {
     expect(result).toMatchObject({ reviewed: 1, removed: 1, nextCursor: null });
     expect(ctx.deleted).toEqual(["derived/one", asset.objectKey]);
     expect(ctx.assets.get(asset.id)?.status).toBe("deleted");
-    await expect(ctx.service.visionReadUrl(asset.id)).rejects.toBeInstanceOf(MediaError);
+    await expect(ctx.service.visionReadUrl(ALICE, asset.id)).rejects.toBeInstanceOf(MediaError);
   });
 
   it("cleans uncompleted uploads after five minutes", async () => {
@@ -270,7 +275,9 @@ describe("private photo lifecycle", () => {
     ctx.advance(60_000);
     await ctx.service.completeUpload(ALICE, asset.id);
     ctx.advance(30 * 24 * 60 * 60 * 1000);
-    await expect(ctx.service.visionReadUrl(asset.id)).rejects.toMatchObject({ code: "not_found" });
+    await expect(ctx.service.visionReadUrl(ALICE, asset.id)).rejects.toMatchObject({
+      code: "not_found",
+    });
     expect((await ctx.service.cleanup()).removed).toBe(1);
     expect(ctx.assets.get(asset.id)?.status).toBe("deleted");
   });

@@ -51,7 +51,7 @@ export interface MediaService {
     bytes: number;
   }): Promise<UploadIntent>;
   completeUpload(ownerUserId: string, assetId: string): Promise<void>;
-  visionReadUrl(assetId: string): Promise<string>;
+  visionReadUrl(ownerUserId: string, assetId: string): Promise<string>;
   remove(ownerUserId: string, assetId: string): Promise<void>;
   /** Run repeatedly with nextCursor until null; the caller schedules this job. */
   cleanup(
@@ -153,10 +153,14 @@ export function createMediaService(deps: {
         throw new MediaError("invalid_upload");
       if (!(await deps.repository.activate(asset.id))) throw new MediaError("not_found");
     },
-    async visionReadUrl(assetId) {
+    async visionReadUrl(ownerUserId, assetId) {
       requireEnabled();
       const asset = await deps.repository.find(assetId);
-      if (asset?.status !== "active" || asset.retentionUntil <= now())
+      if (
+        asset?.ownerUserId !== ownerUserId ||
+        asset.status !== "active" ||
+        asset.retentionUntil <= now()
+      )
         throw new MediaError("not_found");
       await requireGrant(asset.ownerUserId);
       return deps.storage.readUrl(asset.objectKey, READ_SECONDS);

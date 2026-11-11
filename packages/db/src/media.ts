@@ -86,6 +86,7 @@ export function pgMediaRepository(db: Queryable): MediaRepository {
       return rows.map((row) => row.object_key);
     },
     async finishDeletion(id) {
+      await db.query(`DELETE FROM app.visual_feature_snapshots WHERE asset_id = $1`, [id]);
       await db.query(`DELETE FROM app.media_derivatives WHERE asset_id = $1`, [id]);
       await db.query(`UPDATE app.media_assets SET status = 'deleted' WHERE id = $1`, [id]);
     },
