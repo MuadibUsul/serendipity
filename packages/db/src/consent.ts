@@ -1,5 +1,6 @@
 import type { AuditRecord, AuditSink, ConsentGrant, GrantSource } from "@serendipity/consent";
 
+import { recordAudit } from "./audit.js";
 import type { Queryable } from "./queryable.js";
 
 interface GrantRow {
@@ -38,23 +39,27 @@ export function pgGrantSource(db: Queryable): GrantSource {
 }
 
 /** Writes each decision to the append-only `app.audit_events`. */
-export function pgAuditSink(db: Queryable): AuditSink {
+/**
+ * Stores every consent decision in `app.audit_events` (redacted, see
+ * `recordAudit`). `traceId` names the trace the decision ran in, so each
+ * decision can be found from the request that asked for it.
+ */
+export function pgAuditSink(
+  db: Queryable,
+  options: { readonly traceId?: () => string | undefined } = {},
+): AuditSink {
   return {
     async record(entry: AuditRecord) {
-      await db.query(
-        `INSERT INTO app.audit_events
-           (actor_type, actor_id, action, object_type, object_id, policy_version, metadata_redacted)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [
-          entry.actorType,
-          entry.actorId,
-          entry.action,
-          entry.objectType,
-          entry.objectId,
-          entry.policyVersion,
-          JSON.stringify(entry.metadata),
-        ],
-      );
+      await recordAudit(db, {
+        actorType: entry.actorType,
+        actorId: entry.actorId,
+        action: entry.action,
+        objectType: entry.objectType,
+        objectId: entry.objectId,
+        policyVersion: entry.policyVersion,
+        traceId: options.traceId?.(),
+        metadata: entry.metadata,
+      });
     },
   };
 }

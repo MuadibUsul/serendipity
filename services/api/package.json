@@ -2,7 +2,7 @@
   "name": "@serendipity/api",
   "version": "0.0.0",
   "private": true,
-  "description": "The modular business API (ARCH-001 §0): health, readiness, metrics; business modules arrive with their tasks.",
+  "description": "The modular business API (ARCH-001 \u00a70): health, readiness, metrics; business modules arrive with their tasks.",
   "type": "module",
   "scripts": {
     "build": "node build.js",
@@ -19,6 +19,7 @@
     "@serendipity/consent": "0.0.0",
     "@serendipity/db": "0.0.0",
     "@serendipity/media": "0.0.0",
+    "@serendipity/redact": "0.0.0",
     "fastify": "5.12.7",
     "pg": "8.23.1",
     "pino": "10.4.0",

@@ -6,7 +6,7 @@
 | `environments/` | dev, test, staging and prod definitions (no secret values)                                           | `ser-p01-02a`               |
 | `migrations/`   | PostgreSQL + PostGIS + pgvector migrations (up and down)                                             | `ser-p01-03`                |
 | `postgres/`     | `install-ubuntu.sh`: PostgreSQL 17 + PostGIS + pgvector for local tests and CI                       | `ser-p01-03`                |
-| `monitoring/`   | OpenTelemetry, dashboards, alerts                                                                    | `ser-p01-07`                |
+| `monitoring/`   | Alert rules and their promtool tests (`npm run test:alerts`); the stack itself comes with hosting    | `ser-p01-07a`, `ser-p01-07` |
 | `terraform/`    | Only if managed infrastructure needs it later                                                        | —                           |
 
 Environments never share a database or secrets (PLAN-001 P01-02): `@serendipity/config` refuses to

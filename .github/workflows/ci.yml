@@ -75,6 +75,8 @@ jobs:
             serendipity-api:dev; then
             echo "the image started with a dev database in prod"; exit 1
           fi
+      # The alert rules (infra/monitoring) fire on their conditions and only then.
+      - run: npm run test:alerts
       - name: The API stops cleanly on SIGTERM
         run: |
           docker compose -f infra/docker/compose.dev.yml stop api

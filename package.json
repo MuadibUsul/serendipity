@@ -25,6 +25,7 @@
     "typecheck": "tsc -p tsconfig.json && npm run typecheck --workspaces --if-present",
     "test": "vitest run",
     "test:db": "vitest run --config vitest.db.config.ts",
+    "test:alerts": "docker run --rm -v \"$PWD/infra/monitoring:/rules:ro\" -w /rules --entrypoint sh prom/prometheus:v3.15.1 -c \"promtool check rules alerts.yml && promtool test rules alerts.test.yml\"",
     "build": "npm run build --workspaces --if-present",
     "db:migrate": "node-pg-migrate up -m infra/migrations --migrations-schema public --migrations-table schema_migrations",
     "db:rollback": "node-pg-migrate down -m infra/migrations --migrations-schema public --migrations-table schema_migrations",
