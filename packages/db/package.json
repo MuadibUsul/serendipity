@@ -21,6 +21,10 @@
       "types": "./src/identity.ts",
       "default": "./src/identity.ts"
     },
+    "./profile": {
+      "types": "./src/profile.ts",
+      "default": "./src/profile.ts"
+    },
     "./migration-status": {
       "types": "./src/migration-status.ts",
       "default": "./src/migration-status.ts"
@@ -39,6 +43,7 @@
     "@serendipity/fixtures": "0.0.0",
     "@serendipity/identity": "0.0.0",
     "@serendipity/media": "0.0.0",
+    "@serendipity/profile": "0.0.0",
     "@serendipity/redact": "0.0.0"
   }
 }
