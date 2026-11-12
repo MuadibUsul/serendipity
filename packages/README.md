@@ -10,6 +10,7 @@ Shared libraries, consumed as TypeScript source by the apps and services.
 | `config/`       | Runtime configuration; refuses cross-environment mistakes                                       | `ser-p01-02a`                             |
 | `redact/`       | Removes personal data and secrets from log lines and audit metadata                             | `ser-p01-07a`                             |
 | `identity/`     | Age and real-person verification: provider interface, fail-closed eligibility, signed callbacks | `ser-p01-04a`                             |
+| `profile/`      | Profile fact catalog, provenance and the rules that keep guesses out of hard rules              | `ser-p02-04a`                             |
 | `fixtures/`     | Deterministic, fictional test data and the G3 scenarios                                         | `ser-p01-08`                              |
 | `schemas/`      | Zod / JSON schemas and API types                                                                | first task that needs them                |
 | `ai-adapters/`  | Voice, vision and LLM provider adapters                                                         | `ser-p02-01`, `ser-p02-07`                |
