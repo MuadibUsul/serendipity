@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "不期",
+    "slug": "serendipity",
+    "version": "0.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "dev.serendipity.app.placeholder"
+    },
+    "android": {
+      "package": "dev.serendipity.app.placeholder",
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": ["expo-notifications"]
+  }
+}
