@@ -12,11 +12,15 @@ npm run android --workspace @serendipity/mobile
 # Start in another account state: new (default) | matching | booked | in_relationship
 EXPO_PUBLIC_MOCK_STATE=booked npm run start --workspace @serendipity/mobile
 
+# Slow every mock answer down, to see the loading skeleton
+EXPO_PUBLIC_MOCK_LATENCY_MS=1500 npm run start --workspace @serendipity/mobile
+
 # A static web build (what the browser checks used)
 npm run export:web --workspace @serendipity/mobile
 ```
 
-Sign in with any 11-digit number starting with 1, then **获取验证码**, then the code `000000`.
+Sign in with any 11-digit number starting with 1 and **获取验证码**; the next step asks for the
+code, `000000`.
 
 ## Flow
 

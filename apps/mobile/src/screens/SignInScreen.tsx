@@ -8,6 +8,7 @@ import { APP_NAME, SIGN_IN } from "../copy";
 import type { Session } from "../shell/state";
 import { AppText } from "../ui/AppText";
 import { Button } from "../ui/Button";
+import { CodeInput } from "../ui/CodeInput";
 import { Glass } from "../ui/Glass";
 import { Screen } from "../ui/Screen";
 import { TextField } from "../ui/TextField";
@@ -122,13 +123,11 @@ export function SignInScreen({
             <AppText variant="subhead" color="textSecondary" live="polite">
               {SIGN_IN.sentTo(maskPhone(phone.trim()))}
             </AppText>
-            <TextField
+            <CodeInput
               label={SIGN_IN.codeLabel}
               value={code}
               onChangeText={setCode}
-              keyboardType="number-pad"
-              textContentType="oneTimeCode"
-              maxLength={6}
+              invalid={problem === "invalid_code"}
               autoFocus
             />
             {problem === null ? null : (

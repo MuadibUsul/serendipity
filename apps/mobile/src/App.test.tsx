@@ -90,6 +90,26 @@ describe("sign-in steps", () => {
     }
   });
 
+  it("takes a pasted code with spaces or dashes as its six digits", async () => {
+    renderApp();
+    type(SIGN_IN.phoneLabel, PHONE);
+    press(SIGN_IN.sendCode);
+    const field = await screen.findByRole<HTMLInputElement>("textbox", { name: SIGN_IN.codeLabel });
+    fireEvent.change(field, { target: { value: "12 34-5678" } });
+    expect(field.value).toBe("123456");
+  });
+
+  it("marks the cells when the code is wrong", async () => {
+    renderApp();
+    await signIn("123456");
+    expect(await screen.findByText(SIGN_IN.problems.invalid_code)).toBeTruthy();
+    const danger = "rgb(196, 38, 46)";
+    const cells = [...document.querySelectorAll<HTMLElement>("div")].filter(
+      (node) => node.style.borderTopColor === danger,
+    );
+    expect(cells).toHaveLength(6);
+  });
+
   it("goes back to change the number", async () => {
     renderApp();
     type(SIGN_IN.phoneLabel, PHONE);
@@ -244,6 +264,16 @@ describe("the four pages", () => {
       await Promise.resolve();
     });
     expect(await screen.findByText(AI_HEADLINES.new)).toBeTruthy();
+  });
+
+  it("shows the page's shape while it loads, marked busy", async () => {
+    const api = createMockApi({ latencyMs: 50 });
+    renderApp({ api, notifications: "granted" });
+    await signIn();
+    await screen.findByText(COMMON.loading);
+    expect(document.querySelector('[aria-busy="true"]')).not.toBeNull();
+    await screen.findByText(AI_HEADLINES.new);
+    expect(document.querySelector('[aria-busy="true"]')).toBeNull();
   });
 
   it("pauses and resumes matching from the Me page", async () => {

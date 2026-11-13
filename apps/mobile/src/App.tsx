@@ -18,6 +18,7 @@ import type { Session, Tab } from "./shell/state";
 import { AppText } from "./ui/AppText";
 import { Button } from "./ui/Button";
 import { Screen } from "./ui/Screen";
+import { PageSkeleton } from "./ui/Skeleton";
 import { TabBar } from "./ui/TabBar";
 import { ThemeProvider, usePalette } from "./ui/theme";
 
@@ -166,9 +167,12 @@ function Main({
       <View style={{ flex: 1 }}>
         {load.kind === "loading" ? (
           <Screen>
-            <AppText color="textSecondary" live="polite" heading>
-              {COMMON.loading}
-            </AppText>
+            <View aria-busy style={{ gap: 28 }}>
+              <AppText variant="footnote" color="textSecondary" live="polite" heading>
+                {COMMON.loading}
+              </AppText>
+              <PageSkeleton />
+            </View>
           </Screen>
         ) : load.kind === "failed" ? (
           <Screen>

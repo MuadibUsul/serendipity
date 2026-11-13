@@ -67,6 +67,11 @@ tokens, against a mock backend, with basic accessibility checked automatically a
      shows no person's photo (PRD-001 §5.3), and we hold no licensed images. Warmth comes from light,
      line drawings and words.
    - **Light only for now:** a dark Liquid Glass scheme is a later design decision.
+   - **Borrowed patterns, not styles:** the six-cell code input (one real field underneath for
+     typing, paste and SMS autofill) and the loading skeleton follow BoardUI's Input OTP and
+     Skeleton (MIT). They were rewritten for React Native in this design language; no code or
+     visual style was copied. Gallery sites such as recent.design carry no reuse terms and are
+     used for reference only.
 
 ## Consequences
 
