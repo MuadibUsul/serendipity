@@ -1,11 +1,11 @@
-import { TYPE } from "@serendipity/ui";
+import { TYPE, WEB_FONT_FAMILY } from "@serendipity/ui";
 import type { Palette, TextVariant } from "@serendipity/ui";
 import type { ReactNode } from "react";
-import { Text } from "react-native";
+import { Platform, Text } from "react-native";
 
 import { usePalette } from "./theme";
 
-type TextColor = "text" | "textMuted" | "accent" | "danger" | "onAccent" | "onDanger";
+type TextColor = "text" | "textSecondary" | "accentText" | "onInk" | "danger";
 
 export interface AppTextProps {
   readonly variant?: TextVariant;
@@ -14,19 +14,22 @@ export interface AppTextProps {
   readonly heading?: boolean;
   /** Announced when it appears (errors, confirmations). */
   readonly live?: "polite" | "assertive";
+  readonly align?: "left" | "center";
   readonly children: ReactNode;
 }
 
 /**
- * The only text component screens use. It always scales with the person's
- * text size: font scaling is never turned off and never capped, and no height
- * is fixed around it (dynamic type).
+ * The only text component screens use. On Apple devices the system font is SF
+ * Pro with PingFang SC; the web asks for the same. It always scales with the
+ * person's text size: font scaling is never off or capped, and no height is
+ * fixed around it (dynamic type).
  */
 export function AppText({
   variant = "body",
   color = "text",
   heading,
   live,
+  align = "left",
   children,
 }: AppTextProps) {
   const palette = usePalette();
@@ -34,7 +37,12 @@ export function AppText({
     <Text
       role={heading === true ? "heading" : undefined}
       aria-live={live}
-      style={{ ...TYPE[variant], color: palette[color] }}
+      style={{
+        ...TYPE[variant],
+        color: palette[color],
+        textAlign: align,
+        ...(Platform.OS === "web" ? { fontFamily: WEB_FONT_FAMILY } : {}),
+      }}
     >
       {children}
     </Text>

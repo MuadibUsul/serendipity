@@ -12,9 +12,13 @@ export default defineConfig({
     // (files marked `@vitest-environment jsdom`); a device runs the real thing.
     alias: {
       "react-native": "react-native-web",
-      // Its CommonJS build `require`s react-native past the alias; use the ES build.
+      // Their CommonJS builds `require` react-native past the alias; use the ES builds.
       "react-native-safe-area-context": fromRoot(
         "node_modules/react-native-safe-area-context/lib/module/index.js",
+      ),
+      "react-native-svg": fromRoot("node_modules/react-native-svg/lib/module/index.js"),
+      "@react-native/assets-registry/registry": fromRoot(
+        "apps/mobile/test-stubs/assets-registry.js",
       ),
     },
   },
@@ -26,7 +30,7 @@ export default defineConfig({
     passWithNoTests: false,
     server: {
       // Transformed by Vite, so the alias above reaches its `react-native` import.
-      deps: { inline: ["react-native-safe-area-context"] },
+      deps: { inline: ["react-native-safe-area-context", "react-native-svg"] },
     },
   },
 });

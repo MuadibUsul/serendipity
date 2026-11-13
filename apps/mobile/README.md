@@ -1,6 +1,6 @@
 # @serendipity/mobile
 
-The 不期 app: React Native + Expo SDK 58. It has sign-in, the notification-permission explainer and
+The 不期 app: React Native + Expo SDK 58, in the Apple White Liquid Glass style (ADR-0010 §9). It has sign-in, the notification-permission explainer and
 the four pages of PRD-001 §3.1, running against an on-device **mock backend**: no request leaves
 the device. [ADR-0010](../../docs/adr/0010-mobile-shell.md) records the decisions.
 
@@ -49,7 +49,8 @@ src/App.tsx           providers, shell, data loading
 src/shell/state.ts    the flow (pure)
 src/api/              types the app reads, and the mock backend
 src/platform/         notification permission: interface, Expo adapter, fake
-src/ui/               the only place that touches Text, TextInput, Pressable
+src/ui/               the only place that touches Text, TextInput, Pressable: glass
+                      (Glass.tsx native, Glass.web.tsx web), icons, drawings, motion
 src/screens/          one file per screen
 src/copy.ts           all product copy (Chinese) in one place
 ```
@@ -58,16 +59,17 @@ src/copy.ts           all product copy (Chinese) in one place
 
 - **Names:** every control's accessible name is its visible label, given with `role` and `aria-*`
   props, which React Native 0.71+ and react-native-web both understand.
-- **Contrast:** colours come from `@serendipity/ui`; every text/background pair meets WCAG AA in
-  light and dark.
+- **Contrast:** colours come from `@serendipity/ui`, and every text/background pair meets WCAG AA.
+  The brand coral is decorative only; a deeper coral carries text and state.
 - **Dynamic type:** font scaling is never turned off or capped. No height is fixed around text, and
   every page scrolls.
 - **Touch targets:** at least 44 pt on iOS and web, 48 dp on Android. Settings rows are pressable
   across their whole width.
+- **Motion:** the breathing voice orb stands still when the person asks for reduced motion.
 - **Headings:** every page, including the loading and error states, starts with a heading.
 
-`src/a11y.test.tsx` renders every screen in every account state, in both colour schemes, and checks
-names, headings, rendered contrast and fixed heights. `src/source-rules.test.ts` keeps raw text and
+`src/a11y.test.tsx` renders every screen in every account state, and checks names, headings,
+rendered contrast and fixed heights. `src/source-rules.test.ts` keeps raw text and
 pressables inside `src/ui`, and keeps font scaling on.
 
 ## Tests

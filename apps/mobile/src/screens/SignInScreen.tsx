@@ -4,11 +4,12 @@ import { View } from "react-native";
 
 import { MOCK_CODE } from "../api/mock";
 import type { Api, SignInProblem } from "../api/types";
-import { SIGN_IN } from "../copy";
+import { APP_NAME, SIGN_IN } from "../copy";
 import type { Session } from "../shell/state";
 import { AppText } from "../ui/AppText";
 import { Button } from "../ui/Button";
-import { Card, Screen } from "../ui/Screen";
+import { Glass } from "../ui/Glass";
+import { Screen } from "../ui/Screen";
 import { TextField } from "../ui/TextField";
 
 export function SignInScreen({
@@ -51,14 +52,17 @@ export function SignInScreen({
     });
 
   return (
-    <Screen>
-      <View style={{ gap: SPACE.sm }}>
-        <AppText variant="display" heading>
+    <Screen withTabBar={false}>
+      <View style={{ gap: SPACE.md, paddingTop: SPACE.xxxl }}>
+        <AppText variant="footnote" color="accentText">
+          {APP_NAME}
+        </AppText>
+        <AppText variant="largeTitle" heading>
           {SIGN_IN.title}
         </AppText>
-        <AppText color="textMuted">{SIGN_IN.intro}</AppText>
+        <AppText color="textSecondary">{SIGN_IN.intro}</AppText>
       </View>
-      <Card>
+      <Glass raised style={{ padding: SPACE.xl, gap: SPACE.xl }}>
         <TextField
           label={SIGN_IN.phoneLabel}
           hint={SIGN_IN.phoneHint}
@@ -68,17 +72,19 @@ export function SignInScreen({
           textContentType="telephoneNumber"
           maxLength={11}
         />
-        <Button
-          label={SIGN_IN.sendCode}
-          variant="secondary"
-          disabled={busy}
-          onPress={() => void sendCode()}
-        />
-        {codeSent ? (
-          <AppText variant="caption" color="textMuted" live="polite">
-            {SIGN_IN.codeSent}
-          </AppText>
-        ) : null}
+        <View style={{ gap: SPACE.sm }}>
+          <Button
+            label={SIGN_IN.sendCode}
+            variant="secondary"
+            disabled={busy}
+            onPress={() => void sendCode()}
+          />
+          {codeSent ? (
+            <AppText variant="footnote" color="textSecondary" live="polite" align="center">
+              {SIGN_IN.codeSent}
+            </AppText>
+          ) : null}
+        </View>
         <TextField
           label={SIGN_IN.codeLabel}
           value={code}
@@ -93,13 +99,15 @@ export function SignInScreen({
           </AppText>
         )}
         <Button label={SIGN_IN.submit} disabled={busy} onPress={() => void submit()} />
-      </Card>
-      <AppText variant="caption" color="textMuted">
-        {SIGN_IN.adultsOnly}
-      </AppText>
-      <AppText variant="caption" color="textMuted">
-        {SIGN_IN.mockNote(MOCK_CODE)}
-      </AppText>
+      </Glass>
+      <View style={{ gap: SPACE.sm, paddingHorizontal: SPACE.sm }}>
+        <AppText variant="footnote" color="textSecondary" align="center">
+          {SIGN_IN.adultsOnly}
+        </AppText>
+        <AppText variant="footnote" color="textSecondary" align="center">
+          {SIGN_IN.mockNote(MOCK_CODE)}
+        </AppText>
+      </View>
     </Screen>
   );
 }

@@ -32,7 +32,7 @@ export const SIGN_IN = {
 };
 
 export const PRIMER = {
-  title: "需要时提醒你",
+  title: "在需要的时候提醒你",
   body: "我们只在这些时候通知你：收到约会邀请、约会前一天和当天的提醒、退款进度，以及安全相关的消息。",
   privacy: "锁屏通知不会显示对方信息、你的偏好或关系状态。",
   allow: "开启通知",
@@ -56,13 +56,23 @@ export const AI_PAGE = {
   } satisfies Record<HomeState, string>,
   startVoice: "开始语音对话",
   voiceSoon: "语音对话将在后续版本开放。",
-  useText: "改用文字",
+  searching: "AI 在后台为你留意合适的时间与人",
+  seeDate: "约会的时间与地点在“约会”页。",
 };
 
 export const DATES_PAGE = {
   title: "约会",
-  empty: "还没有约会邀请。",
-  emptyHint: "有合适的约会时，你会先收到一份邀请，可以接受或拒绝。",
+  empty: "好的相遇，值得一点等待。",
+  emptyHint: "有合适的约会时，你会先收到一份邀请，可以接受，也可以拒绝。",
+  yourDate: "你的约会",
+  countdown: (days: number) =>
+    days > 1
+      ? `还有 ${String(days)} 天`
+      : days === 1
+        ? "明天见"
+        : days === 0
+          ? "就在今天"
+          : "已结束",
   when: "时间",
   where: "地点",
   pkg: "套餐",
@@ -74,14 +84,17 @@ export const DATES_PAGE = {
 
 export const RELATIONSHIPS_PAGE = {
   title: "关系",
-  empty: "见面后双方都愿意继续，才会出现在这里。",
-  metOn: (date: string) => `${date} 见面`,
+  empty: "故事，从见面之后开始。",
+  emptyHint: "见面后，如果你们都愿意继续，对方会出现在这里。",
+  metOn: (date: string) => `${date}见面`,
   chat: "聊天",
   block: "屏蔽或举报",
 };
 
 export const ME_PAGE = {
   title: "我",
+  account: "账号",
+  matching: "匹配",
   verification: "实名与成年核验",
   verificationStatus: {
     not_started: "未开始",
@@ -100,7 +113,7 @@ export const ME_PAGE = {
   pauseMatching: "暂停匹配",
   pauseHint: "暂停后不会收到新的约会邀请，账号和资料都会保留。",
   privacy: "隐私与授权",
-  privacySoon: "查看与撤回授权的页面即将开放。",
+  privacySoon: "即将开放",
   signOut: "退出登录",
 };
 

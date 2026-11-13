@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { AA_NON_TEXT, AA_TEXT, contrastRatio, luminance } from "./contrast.js";
 import {
   COLOR_SCHEMES,
+  MATERIALS,
   MIN_TOUCH_TARGET,
   NON_TEXT_PAIRS,
   PALETTES,
@@ -39,16 +40,29 @@ describe.each(COLOR_SCHEMES)("the %s palette", (scheme) => {
     expect(contrastRatio(palette[fg], palette[bg])).toBeGreaterThanOrEqual(AA_NON_TEXT);
   });
 
-  it("is made of #rrggbb colours only", () => {
+  it("is made of opaque #rrggbb colours only", () => {
     for (const value of Object.values(palette)) expect(value).toMatch(/^#[0-9a-f]{6}$/);
+  });
+
+  it("keeps the brand coral decorative: too light for text or state", () => {
+    expect(contrastRatio(palette.accent, palette.background)).toBeLessThan(AA_NON_TEXT);
+    expect(contrastRatio(palette.accentText, palette.background)).toBeGreaterThanOrEqual(AA_TEXT);
+  });
+
+  it("keeps glass clear and hairlines faint", () => {
+    const alpha = (rgba: string) => Number(/,\s*([\d.]+)\)$/.exec(rgba)?.[1]);
+    const materials = MATERIALS[scheme];
+    expect(alpha(materials.glass)).toBeLessThan(0.8);
+    expect(alpha(materials.glassRaised)).toBeLessThan(0.9);
+    expect(alpha(materials.separator)).toBeLessThanOrEqual(0.08);
   });
 });
 
 describe("sizes", () => {
-  it("never puts body-sized text below 14 pt or lines tighter than 1.25", () => {
+  it("never goes below Apple's footnote size (13 pt) or lines tighter than 1.14", () => {
     for (const style of Object.values(TYPE)) {
-      expect(style.fontSize).toBeGreaterThanOrEqual(14);
-      expect(style.lineHeight / style.fontSize).toBeGreaterThanOrEqual(1.25);
+      expect(style.fontSize).toBeGreaterThanOrEqual(13);
+      expect(style.lineHeight / style.fontSize).toBeGreaterThanOrEqual(1.14);
     }
   });
 

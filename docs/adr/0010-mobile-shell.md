@@ -45,12 +45,36 @@ tokens, against a mock backend, with basic accessibility checked automatically a
    meaning `x.ts`). `metro.config.js` resolves such imports to the TypeScript source, for the
    repository's own files only, never in `node_modules`.
 
+9. **Visual language: Apple White Liquid Glass**, from the owner's brief (2026-11-12): white
+   dominates, glass is clear and thin, and a soft coral (`#ff6b81`) appears only as an accent.
+   - **Glass:** iOS 26 draws Apple's own material (`expo-glass-effect`). Older iOS and Android use a
+     light blur (`expo-blur`). The web uses CSS `backdrop-filter`. All three put a hairline of light
+     on the edge and a soft, low-contrast shadow under it. A faint pearl and coral ambient light
+     sits behind the glass, drawn with `react-native-svg`.
+   - **Shape and type:** continuous (squircle) corners via `borderCurve`. Apple's type scale, in SF
+     Pro and PingFang SC; the web asks for the same fonts.
+   - **Layout:** grouped glass lists with hairlines instead of bordered cards; a floating glass tab
+     bar with thin line icons and a white pill for the selected page.
+   - **Moments:** the date is an invitation card, with the time large and light and a gentle "还有 N
+     天" rather than a ticking countdown. The voice entry is a breathing glass orb, still when the
+     person asks for reduced motion. Empty pages get a line drawing and one warm sentence.
+   - **Contrast came first:** where the brief's colours fall short of WCAG AA, they were adjusted.
+     - Secondary text `#747982` (4.38:1 on white) became `#6b7079` (4.98:1).
+     - The coral is 2.74:1, so it stays decorative. A deeper `#c9304a` carries coral text and
+       `#e8435e` carries state (toggle on, selected icon).
+     - The primary action is an ink capsule with white text.
+   - **No photography:** the brief asks for editorial photography, but before a date the product
+     shows no person's photo (PRD-001 §5.3), and we hold no licensed images. Warmth comes from light,
+     line drawings and words.
+   - **Light only for now:** a dark Liquid Glass scheme is a later design decision.
+
 ## Consequences
 
 - `npm ci` installs the Expo toolchain for every job, including the API image build: more download
   time, with no effect on the API image itself, which keeps only the API's runtime packages.
 - The simulator check (`pages`, MANUAL) still needs a person with Xcode or Android Studio. The web
-  build was driven in Chromium as a stand-in, with no errors and every control at least 44 pt.
+  build was driven in Chromium as a stand-in, with no errors and every control at least 44 pt. The
+  native glass (iOS 26 material, Android blur) has only been seen on the web fallback so far.
 - Sign-in by phone and code is a placeholder: the real method is decided with identity
   (`ser-p00-04`) and the API.
 - No session is persisted across launches yet. That needs secure storage and a real token, and

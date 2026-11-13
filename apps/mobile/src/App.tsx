@@ -28,18 +28,23 @@ export interface AppProps {
   readonly scheme?: ColorScheme;
   /** Safe-area metrics to start with (tests); measured on a device. */
   readonly safeAreaMetrics?: Metrics | null;
+  /** The clock (tests fix it); the device's otherwise. */
+  readonly now?: () => Date;
 }
+
+const deviceClock = () => new Date();
 
 export function App({
   api,
   notifications,
   scheme,
   safeAreaMetrics = initialWindowMetrics,
+  now = deviceClock,
 }: AppProps) {
   return (
     <SafeAreaProvider initialMetrics={safeAreaMetrics}>
       <ThemeProvider {...(scheme === undefined ? {} : { scheme })}>
-        <Shell api={api} notifications={notifications} />
+        <Shell api={api} notifications={notifications} now={now} />
       </ThemeProvider>
     </SafeAreaProvider>
   );
@@ -48,9 +53,11 @@ export function App({
 function Shell({
   api,
   notifications,
+  now,
 }: {
   readonly api: Api;
   readonly notifications: NotificationPermissions;
+  readonly now: () => Date;
 }) {
   const [state, dispatch] = useReducer(reduce, INITIAL);
   const [notificationStatus, setNotificationStatus] = useState<NotificationStatus>("unavailable");
@@ -81,6 +88,7 @@ function Shell({
       return (
         <Main
           api={api}
+          now={now}
           session={state.session}
           tab={state.tab}
           onTab={(tab) => {
@@ -134,6 +142,7 @@ function useHome(api: Api, session: Session) {
 
 function Main({
   api,
+  now,
   session,
   tab,
   onTab,
@@ -142,6 +151,7 @@ function Main({
   onSignOut,
 }: {
   readonly api: Api;
+  readonly now: () => Date;
   readonly session: Session;
   readonly tab: Tab;
   readonly onTab: (tab: Tab) => void;
@@ -155,17 +165,13 @@ function Main({
     <View style={{ flex: 1, backgroundColor: palette.background }}>
       <View style={{ flex: 1 }}>
         {load.kind === "loading" ? (
-          <Screen>
-            <AppText variant="title" heading>
-              {TAB_LABELS[tab]}
+          <Screen title={TAB_LABELS[tab]}>
+            <AppText color="textSecondary" live="polite">
+              {COMMON.loading}
             </AppText>
-            <AppText live="polite">{COMMON.loading}</AppText>
           </Screen>
         ) : load.kind === "failed" ? (
-          <Screen>
-            <AppText variant="title" heading>
-              {TAB_LABELS[tab]}
-            </AppText>
+          <Screen title={TAB_LABELS[tab]}>
             <AppText color="danger" live="assertive">
               {COMMON.loadFailed}
             </AppText>
@@ -175,6 +181,7 @@ function Main({
           <Page
             tab={tab}
             home={load.home}
+            now={now()}
             notificationStatus={notificationStatus}
             onEnableNotifications={onEnableNotifications}
             onPauseChange={(paused) => void api.setMatchingPaused(session, paused).then(setMe)}
@@ -190,6 +197,7 @@ function Main({
 function Page({
   tab,
   home,
+  now,
   notificationStatus,
   onEnableNotifications,
   onPauseChange,
@@ -197,6 +205,7 @@ function Page({
 }: {
   readonly tab: Tab;
   readonly home: Home;
+  readonly now: Date;
   readonly notificationStatus: NotificationStatus;
   readonly onEnableNotifications: () => void;
   readonly onPauseChange: (paused: boolean) => void;
@@ -206,7 +215,7 @@ function Page({
     case "ai":
       return <AiScreen home={home} />;
     case "dates":
-      return <DatesScreen home={home} />;
+      return <DatesScreen home={home} now={now} />;
     case "relationships":
       return <RelationshipsScreen home={home} />;
     case "me":

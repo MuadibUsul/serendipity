@@ -3,38 +3,53 @@ import { View } from "react-native";
 
 import type { Home } from "../api/types";
 import { RELATIONSHIPS_PAGE } from "../copy";
+import { formatDay } from "../format";
 import { AppText } from "../ui/AppText";
 import { Button } from "../ui/Button";
-import { Card, Screen } from "../ui/Screen";
+import { Glass } from "../ui/Glass";
+import { Illustration } from "../ui/Illustration";
+import { EmptyState, Screen } from "../ui/Screen";
 
 /** Only people both sides chose to continue with after meeting (PRD-001 §7). */
 export function RelationshipsScreen({ home }: { readonly home: Home }) {
   return (
-    <Screen>
-      <AppText variant="title" heading>
-        {RELATIONSHIPS_PAGE.title}
-      </AppText>
+    <Screen title={RELATIONSHIPS_PAGE.title}>
       {home.relationships.length === 0 ? (
-        <Card>
-          <AppText color="textMuted">{RELATIONSHIPS_PAGE.empty}</AppText>
-        </Card>
+        <EmptyState
+          art={<Illustration name="threads" />}
+          line={RELATIONSHIPS_PAGE.empty}
+          hint={RELATIONSHIPS_PAGE.emptyHint}
+        />
       ) : (
         home.relationships.map((relationship) => (
-          <Card key={relationship.id}>
-            <AppText variant="heading" heading>
-              {relationship.sharedName}
-            </AppText>
-            <AppText color="textMuted">{RELATIONSHIPS_PAGE.metOn(relationship.metOn)}</AppText>
-            <View style={{ gap: SPACE.sm }}>
-              {/* Chat arrives with ser-p05-02, safety with ser-p05-05. */}
-              <Button label={`${RELATIONSHIPS_PAGE.chat}：${relationship.sharedName}`} disabled />
-              <Button
-                label={`${RELATIONSHIPS_PAGE.block}：${relationship.sharedName}`}
-                variant="secondary"
-                disabled
-              />
+          <Glass key={relationship.id} style={{ padding: SPACE.xl, gap: SPACE.lg }}>
+            <View style={{ gap: SPACE.xs }}>
+              <AppText variant="title" heading>
+                {relationship.sharedName}
+              </AppText>
+              <AppText variant="subhead" color="textSecondary">
+                {RELATIONSHIPS_PAGE.metOn(formatDay(relationship.metOn))}
+              </AppText>
             </View>
-          </Card>
+            <View style={{ flexDirection: "row", gap: SPACE.sm, flexWrap: "wrap" }}>
+              {/* Chat arrives with ser-p05-02, safety with ser-p05-05. */}
+              <View style={{ flexGrow: 1 }}>
+                <Button
+                  label={RELATIONSHIPS_PAGE.chat}
+                  spokenLabel={`${RELATIONSHIPS_PAGE.chat}：${relationship.sharedName}`}
+                  disabled
+                />
+              </View>
+              <View style={{ flexGrow: 1 }}>
+                <Button
+                  label={RELATIONSHIPS_PAGE.block}
+                  spokenLabel={`${RELATIONSHIPS_PAGE.block}：${relationship.sharedName}`}
+                  variant="secondary"
+                  disabled
+                />
+              </View>
+            </View>
+          </Glass>
         ))
       )}
     </Screen>

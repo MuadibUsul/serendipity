@@ -4,11 +4,11 @@ import { View } from "react-native";
 import type { Me } from "../api/types";
 import { ME_PAGE } from "../copy";
 import type { NotificationStatus } from "../platform/notifications";
-import { AppText } from "../ui/AppText";
 import { Button } from "../ui/Button";
-import { Card, Field, Screen } from "../ui/Screen";
+import { Group, Row, Screen } from "../ui/Screen";
 import { SwitchRow } from "../ui/SwitchRow";
 
+/** Settings as two grouped glass lists (iOS style), not a stack of separate cards. */
 export function MeScreen({
   me,
   notificationStatus,
@@ -25,38 +25,31 @@ export function MeScreen({
   readonly onSignOut: () => void;
 }) {
   return (
-    <Screen>
-      <AppText variant="title" heading>
-        {ME_PAGE.title}
-      </AppText>
-      <Card>
-        <Field label={ME_PAGE.verification} value={ME_PAGE.verificationStatus[me.verification]} />
-      </Card>
-      <Card>
-        <Field
-          label={ME_PAGE.notifications}
-          value={ME_PAGE.notificationStatus[notificationStatus]}
-        />
+    <Screen title={ME_PAGE.title}>
+      <Group title={ME_PAGE.account}>
+        <Row label={ME_PAGE.verification} value={ME_PAGE.verificationStatus[me.verification]} />
+        <Row label={ME_PAGE.notifications} value={ME_PAGE.notificationStatus[notificationStatus]} />
         {notificationStatus === "undetermined" ? (
-          <Button label={ME_PAGE.enableNotifications} onPress={onEnableNotifications} />
+          <Button
+            label={ME_PAGE.enableNotifications}
+            variant="plain"
+            onPress={onEnableNotifications}
+          />
         ) : null}
         {notificationStatus === "denied" ? (
-          <Button label={ME_PAGE.openSettings} variant="secondary" onPress={onOpenSettings} />
+          <Button label={ME_PAGE.openSettings} variant="plain" onPress={onOpenSettings} />
         ) : null}
-      </Card>
-      <Card>
+        <Row label={ME_PAGE.privacy} value={ME_PAGE.privacySoon} />
+      </Group>
+      <Group title={ME_PAGE.matching} footer={ME_PAGE.pauseHint}>
         <SwitchRow
           label={ME_PAGE.pauseMatching}
-          hint={ME_PAGE.pauseHint}
           value={me.matchingPaused}
           onValueChange={onPauseChange}
         />
-      </Card>
-      <Card>
-        <Field label={ME_PAGE.privacy} value={ME_PAGE.privacySoon} />
-      </Card>
-      <View style={{ gap: SPACE.md }}>
-        <Button label={ME_PAGE.signOut} variant="secondary" onPress={onSignOut} />
+      </Group>
+      <View style={{ paddingTop: SPACE.sm }}>
+        <Button label={ME_PAGE.signOut} variant="danger" onPress={onSignOut} />
       </View>
     </Screen>
   );

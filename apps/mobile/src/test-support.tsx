@@ -12,6 +12,9 @@ import type { NotificationPermissions, NotificationStatus } from "./platform/not
 
 export const PHONE = "13800000000";
 
+/** A fixed "now" for tests: 2026-11-12 12:00 in Shanghai, nine days before the mock date. */
+export const NOW = new Date("2026-11-12T04:00:00Z");
+
 export const METRICS: Metrics = {
   frame: { x: 0, y: 0, width: 390, height: 844 },
   insets: { top: 0, left: 0, right: 0, bottom: 0 },
@@ -24,6 +27,7 @@ export function renderApp(
     readonly notifications?: NotificationStatus | NotificationPermissions;
     readonly answer?: "granted" | "denied";
     readonly scheme?: ColorScheme;
+    readonly now?: Date;
   } = {},
 ) {
   const notifications =
@@ -37,6 +41,7 @@ export function renderApp(
       notifications={notifications}
       scheme={options.scheme ?? "light"}
       safeAreaMetrics={METRICS}
+      now={() => options.now ?? NOW}
     />,
   );
   return { ...result, api, notifications };

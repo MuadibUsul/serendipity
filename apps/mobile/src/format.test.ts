@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatDateTime, formatMoney } from "./format";
+import { dateParts, daysUntil, formatDateTime, formatDay, formatMoney } from "./format";
 
 describe("formatMoney", () => {
   it.each([
@@ -23,5 +23,38 @@ describe("formatDateTime", () => {
 
   it("crosses midnight correctly", () => {
     expect(formatDateTime("2026-11-21T17:30:00Z", "Asia/Shanghai")).toContain("11月22日");
+  });
+});
+
+describe("dateParts", () => {
+  it("splits the local day from the time", () => {
+    expect(dateParts("2026-11-21T07:00:00Z", "Asia/Shanghai")).toEqual({
+      day: "11月21日 周六",
+      time: "15:00",
+    });
+  });
+});
+
+describe("daysUntil", () => {
+  const AT = "2026-11-21T07:00:00Z"; // 15:00 on 21 November in Shanghai
+
+  it.each([
+    ["2026-11-12T04:00:00Z", 9],
+    ["2026-11-20T15:59:00Z", 1], // 23:59 on the 20th in Shanghai
+    ["2026-11-20T16:00:00Z", 0], // 00:00 on the 21st in Shanghai
+    ["2026-11-21T10:00:00Z", 0],
+    ["2026-11-22T10:00:00Z", -1],
+  ])("from %s is %i", (now, days) => {
+    expect(daysUntil(AT, "Asia/Shanghai", new Date(now))).toBe(days);
+  });
+});
+
+describe("formatDay", () => {
+  it.each([
+    ["2026-11-08", "11月8日"],
+    ["2026-01-31", "1月31日"],
+    ["not a date", "not a date"],
+  ])("%s → %s", (date, text) => {
+    expect(formatDay(date)).toBe(text);
   });
 });

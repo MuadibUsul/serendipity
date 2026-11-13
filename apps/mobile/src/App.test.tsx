@@ -3,7 +3,16 @@ import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { MOCK_CODE, createMockApi } from "./api/mock";
-import { AI_HEADLINES, COMMON, ME_PAGE, PRIMER, SIGN_IN, TAB_LABELS } from "./copy";
+import {
+  AI_HEADLINES,
+  COMMON,
+  DATES_PAGE,
+  ME_PAGE,
+  PRIMER,
+  RELATIONSHIPS_PAGE,
+  SIGN_IN,
+  TAB_LABELS,
+} from "./copy";
 import { createFakePermissions } from "./platform/notifications";
 import { PHONE, renderApp } from "./test-support";
 
@@ -105,6 +114,41 @@ describe("notification permission", () => {
       expect(screen.queryByText(PRIMER.title)).toBeNull();
     },
   );
+});
+
+describe("the invitation", () => {
+  it("shows the date as an invitation, counting days gently, with nothing about the other person", async () => {
+    renderApp({ mock: { state: "booked" }, notifications: "granted" });
+    await signIn();
+    await screen.findByText(AI_HEADLINES.booked);
+    fireEvent.click(screen.getByRole("tab", { name: TAB_LABELS.dates }));
+    expect(await screen.findByText("15:00")).toBeTruthy();
+    expect(screen.getByText("11月21日 周六")).toBeTruthy();
+    expect(screen.getByText(DATES_PAGE.countdown(9))).toBeTruthy();
+    expect(screen.getByText("¥88.00")).toBeTruthy();
+    expect(screen.getByText(DATES_PAGE.hidden)).toBeTruthy();
+  });
+
+  it.each([
+    [2, "还有 2 天"],
+    [1, "明天见"],
+    [0, "就在今天"],
+    [-1, "已结束"],
+  ])("words %i days as %j", (days, text) => {
+    expect(DATES_PAGE.countdown(days)).toBe(text);
+  });
+});
+
+describe("empty pages", () => {
+  it("meet the person with a warm line instead of a blank page", async () => {
+    renderApp({ notifications: "granted" });
+    await signIn();
+    await screen.findByText(AI_HEADLINES.new);
+    fireEvent.click(screen.getByRole("tab", { name: TAB_LABELS.dates }));
+    expect(await screen.findByText(DATES_PAGE.empty)).toBeTruthy();
+    fireEvent.click(screen.getByRole("tab", { name: TAB_LABELS.relationships }));
+    expect(await screen.findByText(RELATIONSHIPS_PAGE.empty)).toBeTruthy();
+  });
 });
 
 describe("the four pages", () => {

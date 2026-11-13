@@ -1,24 +1,34 @@
-import { PALETTES } from "@serendipity/ui";
-import type { ColorScheme, Palette } from "@serendipity/ui";
+import { MATERIALS, PALETTES } from "@serendipity/ui";
+import type { ColorScheme, Materials, Palette } from "@serendipity/ui";
 import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
-import { useColorScheme } from "react-native";
 
-const ThemeContext = createContext<Palette>(PALETTES.light);
+interface Theme {
+  readonly palette: Palette;
+  readonly materials: Materials;
+}
 
-/** Follows the system's light or dark setting unless `scheme` is given (tests, previews). */
+const ThemeContext = createContext<Theme>({ palette: PALETTES.light, materials: MATERIALS.light });
+
+/** Apple White is the one scheme for now (packages/ui); `scheme` is kept for tests and later schemes. */
 export function ThemeProvider({
-  scheme,
+  scheme = "light",
   children,
 }: {
   readonly scheme?: ColorScheme;
   readonly children: ReactNode;
 }) {
-  const system = useColorScheme();
-  const chosen: ColorScheme = scheme ?? (system === "dark" ? "dark" : "light");
-  return <ThemeContext.Provider value={PALETTES[chosen]}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={{ palette: PALETTES[scheme], materials: MATERIALS[scheme] }}>
+      {children}
+    </ThemeContext.Provider>
+  );
 }
 
 export function usePalette(): Palette {
-  return useContext(ThemeContext);
+  return useContext(ThemeContext).palette;
+}
+
+export function useMaterials(): Materials {
+  return useContext(ThemeContext).materials;
 }
