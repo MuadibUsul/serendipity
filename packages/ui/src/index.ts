@@ -2,6 +2,7 @@ export { AA_LARGE_TEXT, AA_NON_TEXT, AA_TEXT, contrastRatio, luminance } from ".
 export {
   COLOR_SCHEMES,
   GLASS,
+  LOADED_FONTS,
   MATERIALS,
   MIN_FONT_SCALE_CAP,
   MIN_TOUCH_TARGET,

@@ -14,6 +14,7 @@ export const ICONS = [
   "bell",
   "lock",
   "shield",
+  "keyboard",
 ] as const;
 export type IconName = (typeof ICONS)[number];
 
@@ -77,6 +78,12 @@ export function Icon({
         <>
           <Path d={box(5, 10.5, 14, 10, 3)} {...line} />
           <Path d="M8.5 10.5V8a3.5 3.5 0 017 0v2.5" {...line} />
+        </>
+      ) : null}
+      {name === "keyboard" ? (
+        <>
+          <Path d={box(3, 6, 18, 12, 3)} {...line} />
+          <Path d="M7 10h.01M11 10h.01M15 10h.01M8 14h8" {...line} />
         </>
       ) : null}
       {name === "shield" ? (

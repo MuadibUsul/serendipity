@@ -14,17 +14,23 @@ export const TAB_LABELS: Readonly<Record<Tab, string>> = {
 };
 
 export const SIGN_IN = {
-  title: "欢迎来到不期",
-  intro: "让 AI 处理筛选与安排，把第一次见面的未知留给你们。",
+  title: "把第一次见面的\n未知，留给你们。",
+  intro: "AI 替你筛选与安排，你只需要赴约。",
+  /** PRD-001 §1: the three promises, floating on the sign-in page. */
+  promises: ["不看照片", "不先聊天", "见面再揭晓"] as const,
   phoneLabel: "手机号",
   phoneHint: "仅用于登录，不会展示给任何人。",
   codeLabel: "验证码",
   sendCode: "获取验证码",
   codeSent: "验证码已发送",
-  sentTo: (masked: string) => `验证码已发送至 ${masked}`,
+  codeTitle: "输入验证码",
+  sentTo: (masked: string) => `已发送至 ${masked}`,
   resendIn: (seconds: number) => `${String(seconds)} 秒后可重新发送`,
   resend: "重新发送",
-  changePhone: "更换手机号",
+  changePhone: "修改",
+  changePhoneSpoken: "修改手机号",
+  autoVerify: "输满 6 位自动验证",
+  verifying: "正在验证…",
   phonePrefix: "+86",
   submit: "登录",
   mockNote: (code: string) => `演示版本：不连接服务器，验证码为 ${code}。`,
@@ -54,13 +60,17 @@ export const AI_HEADLINES: Readonly<Record<HomeState, string>> = {
 
 export const AI_PAGE = {
   intro: {
-    new: "用十来分钟聊聊你的生活、期待和边界。可以随时打断、跳过或改用文字。",
+    new: "随时打断、跳过，或改用文字。",
     matching: "匹配在后台进行，有合适的约会会通知你。不会给你看候选人的照片或资料。",
     booked: "约会的时间、地点和你的金额在“约会”页。",
     in_relationship: "你已暂停匹配。想回来时，可以在“我”页面恢复。",
   } satisfies Record<HomeState, string>,
+  duration: "约 10 分钟",
   startVoice: "开始语音对话",
-  voiceSoon: "语音对话将在后续版本开放。",
+  useText: "改用文字",
+  voiceSoon: "语音对话即将开放",
+  firstLabel: "AI 会这样开始",
+  firstQuestion: "先说说，一个普通的周末，你会怎么过？",
   searching: "AI 在后台为你留意合适的时间与人",
   seeDate: "约会的时间与地点在“约会”页。",
 };
@@ -68,7 +78,8 @@ export const AI_PAGE = {
 export const DATES_PAGE = {
   empty: "好的相遇，值得一点等待。",
   emptyHint: "有合适的约会时，你会先收到一份邀请，可以接受，也可以拒绝。",
-  yourDate: "你的约会",
+  yourDate: "你的下一场约会",
+  cardLabel: "INVITATION",
   countdown: (days: number) =>
     days > 1
       ? `还有 ${String(days)} 天`
@@ -82,7 +93,7 @@ export const DATES_PAGE = {
   pkg: "套餐",
   yourShare: "你需支付",
   cancelRule: "取消规则",
-  hidden: "见面前不会显示对方的照片、姓名或资料。",
+  hidden: "见面之前，你们都不会看到彼此的照片与资料。",
   help: "需要帮助",
 };
 

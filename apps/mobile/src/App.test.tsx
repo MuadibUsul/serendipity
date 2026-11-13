@@ -62,7 +62,6 @@ describe("sign-in steps", () => {
   it("asks for the code only once it has been sent, to a masked number", async () => {
     renderApp();
     expect(screen.queryByRole("textbox", { name: SIGN_IN.codeLabel })).toBeNull();
-    expect(screen.queryByRole("button", { name: SIGN_IN.submit })).toBeNull();
     type(SIGN_IN.phoneLabel, PHONE);
     press(SIGN_IN.sendCode);
     await screen.findByRole("textbox", { name: SIGN_IN.codeLabel });
@@ -99,15 +98,29 @@ describe("sign-in steps", () => {
     expect(field.value).toBe("123456");
   });
 
-  it("marks the cells when the code is wrong", async () => {
+  it("clears a wrong code and says why, ready for the next try", async () => {
     renderApp();
     await signIn("123456");
     expect(await screen.findByText(SIGN_IN.problems.invalid_code)).toBeTruthy();
-    const danger = "rgb(196, 38, 46)";
-    const cells = [...document.querySelectorAll<HTMLElement>("div")].filter(
-      (node) => node.style.borderTopColor === danger,
-    );
-    expect(cells).toHaveLength(6);
+    const field = screen.getByRole<HTMLInputElement>("textbox", { name: SIGN_IN.codeLabel });
+    expect(field.value).toBe("");
+    // Typing again clears the message.
+    fireEvent.change(field, { target: { value: "1" } });
+    expect(screen.queryByText(SIGN_IN.problems.invalid_code)).toBeNull();
+  });
+
+  it("checks the code only once all six digits are in", async () => {
+    const api = createMockApi();
+    const signInCall = vi.spyOn(api, "signIn");
+    renderApp({ api });
+    type(SIGN_IN.phoneLabel, PHONE);
+    press(SIGN_IN.sendCode);
+    const field = await screen.findByRole("textbox", { name: SIGN_IN.codeLabel });
+    fireEvent.change(field, { target: { value: "00000" } });
+    expect(signInCall).not.toHaveBeenCalled();
+    fireEvent.change(field, { target: { value: "000000" } });
+    await screen.findByText(PRIMER.title);
+    expect(signInCall).toHaveBeenCalledTimes(1);
   });
 
   it("goes back to change the number", async () => {
@@ -115,7 +128,7 @@ describe("sign-in steps", () => {
     type(SIGN_IN.phoneLabel, PHONE);
     press(SIGN_IN.sendCode);
     await screen.findByRole("textbox", { name: SIGN_IN.codeLabel });
-    press(SIGN_IN.changePhone);
+    press(SIGN_IN.changePhoneSpoken);
     expect(await screen.findByRole("textbox", { name: SIGN_IN.phoneLabel })).toBeTruthy();
     expect(screen.queryByRole("textbox", { name: SIGN_IN.codeLabel })).toBeNull();
   });
@@ -186,7 +199,7 @@ describe("the invitation", () => {
     await screen.findByText(AI_HEADLINES.booked);
     fireEvent.click(screen.getByRole("tab", { name: TAB_LABELS.dates }));
     expect(await screen.findByText("15:00")).toBeTruthy();
-    expect(screen.getByText("11月21日 周六")).toBeTruthy();
+    expect(screen.getByText("11月21日 · 周六")).toBeTruthy();
     expect(screen.getByText(DATES_PAGE.countdown(9))).toBeTruthy();
     expect(screen.getByText("¥88.00")).toBeTruthy();
     expect(screen.getByText(DATES_PAGE.hidden)).toBeTruthy();
@@ -300,7 +313,7 @@ describe("the four pages", () => {
     await screen.findByText(AI_HEADLINES.new);
     fireEvent.click(screen.getByRole("tab", { name: TAB_LABELS.me }));
     press(ME_PAGE.signOut);
-    expect(await screen.findByText(SIGN_IN.title)).toBeTruthy();
+    expect(await screen.findByRole("textbox", { name: SIGN_IN.phoneLabel })).toBeTruthy();
     expect(screen.queryByRole("tablist")).toBeNull();
   });
 });

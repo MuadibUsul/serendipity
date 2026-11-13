@@ -29,7 +29,7 @@ describe("formatDateTime", () => {
 describe("dateParts", () => {
   it("splits the local day from the time", () => {
     expect(dateParts("2026-11-21T07:00:00Z", "Asia/Shanghai")).toEqual({
-      day: "11月21日 周六",
+      day: "11月21日 · 周六",
       time: "15:00",
     });
   });

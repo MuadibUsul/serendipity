@@ -67,6 +67,21 @@ tokens, against a mock backend, with basic accessibility checked automatically a
      shows no person's photo (PRD-001 §5.3), and we hold no licensed images. Warmth comes from light,
      line drawings and words.
    - **Light only for now:** a dark Liquid Glass scheme is a later design decision.
+   - **The 柔光 (soft light) design, 克制版, chosen by the owner on 2026-11-13** after a
+     high-fidelity board of two intensities, inspired by the pastel world of Black Mirror's
+     "Nosedive" (its look only: no ratings, scores or photos, which the PRD forbids):
+     - white pages with faint fields of blush, mint, peach and powder blue behind the glass;
+     - the coral orb as the brand mark;
+     - the sign-in line and three floating promise pills;
+     - the voice orb with rings of light;
+     - the invitation card with an 84 pt Outfit ExtraLight time and a coral halo.
+
+     Outfit (OFL) is loaded for numerals and Latin labels; Chinese stays in the system font.
+     The arrival ("见面揭晓") screen waits for check-in (`ser-p04-08`).
+
+   - **The code step:** six cells that verify on the sixth digit (no button); a wrong code
+     shakes, clears and says why; the number with an inline "修改"; one resend control that counts
+     down.
    - **Borrowed patterns, not styles:** the six-cell code input (one real field underneath for
      typing, paste and SMS autofill) and the loading skeleton follow BoardUI's Input OTP and
      Skeleton (MIT). They were rewritten for React Native in this design language; no code or

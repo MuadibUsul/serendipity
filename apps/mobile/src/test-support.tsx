@@ -48,13 +48,13 @@ export function renderApp(
   return { ...result, api, notifications };
 }
 
-/** Both sign-in steps: the number and "获取验证码", then the code and "登录". */
+/** Both sign-in steps: the number and "获取验证码", then the six digits. */
 export async function signIn(code = MOCK_CODE, phone = PHONE) {
   fireEvent.change(screen.getByRole("textbox", { name: SIGN_IN.phoneLabel }), {
     target: { value: phone },
   });
   fireEvent.click(screen.getByRole("button", { name: SIGN_IN.sendCode }));
   const field = await screen.findByRole("textbox", { name: SIGN_IN.codeLabel });
+  // The sixth digit submits by itself.
   fireEvent.change(field, { target: { value: code } });
-  fireEvent.click(screen.getByRole("button", { name: SIGN_IN.submit }));
 }

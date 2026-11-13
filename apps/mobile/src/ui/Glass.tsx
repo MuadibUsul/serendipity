@@ -17,11 +17,23 @@ const liquid = (() => {
   }
 })();
 
-export function Glass({ raised = false, radius = RADIUS.lg, style, children }: GlassProps) {
+export function Glass({
+  raised = false,
+  halo = false,
+  radius = RADIUS.lg,
+  style,
+  children,
+}: GlassProps) {
   const materials = useMaterials();
   const shape = { borderRadius: radius, borderCurve: "continuous" as const };
   return (
-    <View style={[shape, { boxShadow: raised ? SHADOW.float : SHADOW.soft }, style]}>
+    <View
+      style={[
+        shape,
+        { boxShadow: halo ? SHADOW.halo : raised ? SHADOW.float : SHADOW.soft },
+        style,
+      ]}
+    >
       <View style={[StyleSheet.absoluteFill, shape, { overflow: "hidden" }]}>
         {liquid ? (
           <GlassView

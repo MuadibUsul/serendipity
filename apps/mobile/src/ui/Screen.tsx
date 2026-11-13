@@ -5,6 +5,7 @@ import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Ambient } from "./Ambient";
+import type { AmbientLayout } from "./Ambient";
 import { AppText } from "./AppText";
 import { Glass } from "./Glass";
 import { useMaterials, usePalette } from "./theme";
@@ -19,18 +20,25 @@ export const TAB_BAR_CLEARANCE = 112;
  */
 export function Screen({
   withTabBar = true,
+  ambient = "default",
+  fill = false,
   children,
 }: {
   readonly withTabBar?: boolean;
+  /** Where the soft light sits behind this page. */
+  readonly ambient?: AmbientLayout;
+  /** Content fills the screen's height, so a child with `marginTop: "auto"` sits at the bottom. */
+  readonly fill?: boolean;
   readonly children: ReactNode;
 }) {
   const palette = usePalette();
   return (
     <View style={{ flex: 1, backgroundColor: palette.background }}>
-      <Ambient />
+      <Ambient layout={ambient} />
       <SafeAreaView edges={["top", "left", "right"]} style={{ flex: 1 }}>
         <ScrollView
           contentContainerStyle={{
+            ...(fill ? { flexGrow: 1 } : {}),
             paddingHorizontal: SPACE.xl,
             paddingTop: SPACE.xxl,
             paddingBottom: withTabBar ? TAB_BAR_CLEARANCE : SPACE.xxxl,

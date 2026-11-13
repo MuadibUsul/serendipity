@@ -68,7 +68,7 @@ export function Button({
         minHeight: variant === "plain" || variant === "danger" ? 44 : 52,
         justifyContent: "center",
         alignItems: "center",
-        paddingHorizontal: SPACE.xl,
+        paddingHorizontal: filled ? SPACE.xl : SPACE.xs,
         paddingVertical: SPACE.md,
         borderRadius: RADIUS.pill,
         backgroundColor: fill,

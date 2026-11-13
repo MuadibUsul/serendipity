@@ -1,5 +1,5 @@
 import { TYPE, WEB_FONT_FAMILY } from "@serendipity/ui";
-import type { Palette, TextVariant } from "@serendipity/ui";
+import type { Palette, TextStyleToken, TextVariant } from "@serendipity/ui";
 import type { ReactNode } from "react";
 import { Platform, Text } from "react-native";
 
@@ -16,6 +16,18 @@ export interface AppTextProps {
   readonly live?: "polite" | "assertive";
   readonly align?: "left" | "center";
   readonly children: ReactNode;
+}
+
+/** Outfit where the type scale names it; the system font (SF Pro / PingFang SC) otherwise. */
+function fontFor(variant: TextVariant): { fontFamily?: string } {
+  const style: TextStyleToken = TYPE[variant];
+  if (style.fontFamily !== undefined) {
+    return {
+      fontFamily:
+        Platform.OS === "web" ? `${style.fontFamily}, ${WEB_FONT_FAMILY}` : style.fontFamily,
+    };
+  }
+  return Platform.OS === "web" ? { fontFamily: WEB_FONT_FAMILY } : {};
 }
 
 /**
@@ -41,7 +53,7 @@ export function AppText({
         ...TYPE[variant],
         color: palette[color],
         textAlign: align,
-        ...(Platform.OS === "web" ? { fontFamily: WEB_FONT_FAMILY } : {}),
+        ...fontFor(variant),
       }}
     >
       {children}

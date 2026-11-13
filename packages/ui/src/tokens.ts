@@ -73,21 +73,35 @@ export interface Materials {
   readonly fill: string;
   /** A toggle that is off. */
   readonly toggleOff: string;
-  /** Ambient light behind the glass: pearl and a trace of coral. */
-  readonly glowPearl: string;
+  /**
+   * Ambient light behind the glass (the "柔光" design, 2026-11-13): soft
+   * fields of blush, mint, peach and powder blue on white, drawn as radial
+   * fades at low opacity, so the glass has something to catch.
+   */
+  readonly glowBlush: string;
+  readonly glowMint: string;
+  readonly glowPeach: string;
+  readonly glowPowder: string;
+  /** The brand coral as light: the voice orb's glow, the invitation's halo. */
   readonly glowCoral: string;
+  /** How strong the ambient fields are at their centre (0–1). */
+  readonly glowStrength: number;
 }
 
 export const MATERIALS: Readonly<Record<ColorScheme, Materials>> = {
   light: {
-    glass: "rgba(255,255,255,0.65)",
-    glassRaised: "rgba(255,255,255,0.82)",
-    glassHighlight: "rgba(255,255,255,0.95)",
+    glass: "rgba(255,255,255,0.62)",
+    glassRaised: "rgba(255,255,255,0.8)",
+    glassHighlight: "rgba(255,255,255,0.85)",
     separator: "rgba(20,25,35,0.06)",
     fill: "rgba(118,122,135,0.09)",
     toggleOff: "rgba(118,122,135,0.20)",
-    glowPearl: "#eef1f7",
+    glowBlush: "#ffbeca",
+    glowMint: "#c8eede",
+    glowPeach: "#ffdac4",
+    glowPowder: "#d6e2ff",
     glowCoral: "#ff6b81",
+    glowStrength: 0.55,
   },
 };
 
@@ -122,9 +136,13 @@ export const RADIUS = { sm: 12, md: 18, lg: 24, xl: 30, pill: 999 } as const;
 /** Soft, diffuse, low-contrast shadows: lift without darkness. */
 export const SHADOW = {
   /** Glass resting on the page. */
-  soft: "0px 1px 2px rgba(23,25,29,0.04), 0px 8px 24px rgba(23,25,29,0.05)",
-  /** Floating glass: the tab bar, the invitation card. */
-  float: "0px 2px 6px rgba(23,25,29,0.05), 0px 16px 40px rgba(23,25,29,0.08)",
+  soft: "0px 18px 44px rgba(40,24,40,0.07)",
+  /** Floating glass: the tab bar, the sign-in sheet. */
+  float: "0px 18px 44px rgba(40,24,40,0.09)",
+  /** The invitation: a faint coral halo under the glass. */
+  halo: "0px 30px 70px rgba(255,107,129,0.16), 0px 12px 30px rgba(40,24,40,0.06)",
+  /** The voice orb. */
+  orb: "0px 30px 70px rgba(255,107,129,0.32)",
   /** A white thumb or pill on glass. */
   thumb: "0px 2px 6px rgba(23,25,29,0.12)",
 } as const;
@@ -153,8 +171,10 @@ export const MIN_TOUCH_TARGET = { ios: 44, android: 48, web: 44 } as const;
 export interface TextStyleToken {
   readonly fontSize: number;
   readonly lineHeight: number;
-  readonly fontWeight: "300" | "400" | "500" | "600" | "700";
+  readonly fontWeight: "200" | "300" | "400" | "500" | "600" | "700";
   readonly letterSpacing?: number;
+  /** A loaded font (Outfit, for numerals and Latin labels); the system font otherwise. */
+  readonly fontFamily?: string;
 }
 
 /**
@@ -163,16 +183,44 @@ export interface TextStyleToken {
  * font scaling off, so every step grows with the person's text size.
  */
 export const TYPE = {
-  /** Big numerals: the time of a date. Light weight, tight tracking. */
-  numeral: { fontSize: 56, lineHeight: 64, fontWeight: "300", letterSpacing: -1 },
+  /** Big numerals: the time of a date. Outfit ExtraLight, tight tracking. */
+  numeral: {
+    fontSize: 84,
+    lineHeight: 96,
+    fontWeight: "200",
+    letterSpacing: -2,
+    fontFamily: "Outfit_200ExtraLight",
+  },
+  /** The sign-in line: large, medium weight, airy. */
+  hero: { fontSize: 32, lineHeight: 44, fontWeight: "500", letterSpacing: 0.5 },
   largeTitle: { fontSize: 34, lineHeight: 41, fontWeight: "700", letterSpacing: 0.2 },
-  title: { fontSize: 22, lineHeight: 28, fontWeight: "600" },
+  title: { fontSize: 24, lineHeight: 32, fontWeight: "600" },
+  subtitle: { fontSize: 20, lineHeight: 28, fontWeight: "600" },
   headline: { fontSize: 17, lineHeight: 22, fontWeight: "600" },
   body: { fontSize: 17, lineHeight: 24, fontWeight: "400" },
   label: { fontSize: 16, lineHeight: 21, fontWeight: "500" },
   subhead: { fontSize: 15, lineHeight: 21, fontWeight: "400" },
   footnote: { fontSize: 13, lineHeight: 18, fontWeight: "400" },
+  /** Small Latin labels ("INVITATION", "Serendipity"): Outfit Light, spaced. */
+  latin: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "300",
+    letterSpacing: 2,
+    fontFamily: "Outfit_300Light",
+  },
+  /** One digit of a one-time code: Outfit Light. */
+  digit: { fontSize: 28, lineHeight: 34, fontWeight: "300", fontFamily: "Outfit_300Light" },
+  /** Amounts: Outfit Medium. */
+  amount: { fontSize: 20, lineHeight: 26, fontWeight: "500", fontFamily: "Outfit_500Medium" },
 } as const satisfies Record<string, TextStyleToken>;
+
+/** The Outfit faces the apps load (expo-font), by the family names TYPE uses. */
+export const LOADED_FONTS = [
+  "Outfit_200ExtraLight",
+  "Outfit_300Light",
+  "Outfit_500Medium",
+] as const;
 
 export type TextVariant = keyof typeof TYPE;
 

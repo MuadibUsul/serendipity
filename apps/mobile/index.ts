@@ -1,5 +1,11 @@
 // The app's entry point. Everything below App is testable without a device;
 // this file only picks the real platform pieces.
+import {
+  Outfit_200ExtraLight,
+  Outfit_300Light,
+  Outfit_500Medium,
+  useFonts,
+} from "@expo-google-fonts/outfit";
 import { registerRootComponent } from "expo";
 import { createElement } from "react";
 
@@ -16,9 +22,15 @@ const state = HOME_STATES.find((name) => name === requested) ?? "new";
 // EXPO_PUBLIC_MOCK_LATENCY_MS=1500 slows every answer, to see loading states.
 const latencyMs = Number(process.env.EXPO_PUBLIC_MOCK_LATENCY_MS ?? "0") || 0;
 
-registerRootComponent(() =>
-  createElement(App, {
-    api: createMockApi({ state, verification: "verified", latencyMs }),
-    notifications: expoNotificationPermissions,
-  }),
-);
+const api = createMockApi({ state, verification: "verified", latencyMs });
+
+/**
+ * Loads the Outfit faces the type scale names (packages/ui LOADED_FONTS).
+ * The app renders at once; text uses the system font until they arrive.
+ */
+function Root() {
+  useFonts({ Outfit_200ExtraLight, Outfit_300Light, Outfit_500Medium });
+  return createElement(App, { api, notifications: expoNotificationPermissions });
+}
+
+registerRootComponent(Root);

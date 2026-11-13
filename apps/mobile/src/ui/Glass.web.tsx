@@ -6,7 +6,16 @@ import { View } from "react-native";
 import type { GlassProps } from "./glass-props";
 import { useMaterials } from "./theme";
 
-export function Glass({ raised = false, radius = RADIUS.lg, style, children }: GlassProps) {
+/** The thin light catching the glass's top edge. */
+const EDGE_LIGHT = "inset 0px 1px 0px rgba(255,255,255,0.95)";
+
+export function Glass({
+  raised = false,
+  halo = false,
+  radius = RADIUS.lg,
+  style,
+  children,
+}: GlassProps) {
   const materials = useMaterials();
   return (
     <View
@@ -16,7 +25,7 @@ export function Glass({ raised = false, radius = RADIUS.lg, style, children }: G
           backgroundColor: raised ? materials.glassRaised : materials.glass,
           borderWidth: 1,
           borderColor: materials.glassHighlight,
-          boxShadow: raised ? SHADOW.float : SHADOW.soft,
+          boxShadow: `${EDGE_LIGHT}, ${halo ? SHADOW.halo : raised ? SHADOW.float : SHADOW.soft}`,
           // react-native-web passes this through to CSS.
           backdropFilter: GLASS.webBackdrop,
         } as object,

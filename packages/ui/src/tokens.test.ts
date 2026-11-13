@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { AA_NON_TEXT, AA_TEXT, contrastRatio, luminance } from "./contrast.js";
 import {
   COLOR_SCHEMES,
+  LOADED_FONTS,
   MATERIALS,
   MIN_TOUCH_TARGET,
   NON_TEXT_PAIRS,
@@ -55,10 +56,18 @@ describe.each(COLOR_SCHEMES)("the %s palette", (scheme) => {
     expect(alpha(materials.glass)).toBeLessThan(0.8);
     expect(alpha(materials.glassRaised)).toBeLessThan(0.9);
     expect(alpha(materials.separator)).toBeLessThanOrEqual(0.08);
+    // Ambient light stays a whisper: white dominates (the 克制版 brief).
+    expect(materials.glowStrength).toBeLessThanOrEqual(0.6);
   });
 });
 
 describe("sizes", () => {
+  it("only names fonts the apps load", () => {
+    for (const style of Object.values(TYPE)) {
+      if ("fontFamily" in style) expect(LOADED_FONTS).toContain(style.fontFamily);
+    }
+  });
+
   it("never goes below Apple's footnote size (13 pt) or lines tighter than 1.14", () => {
     for (const style of Object.values(TYPE)) {
       expect(style.fontSize).toBeGreaterThanOrEqual(13);

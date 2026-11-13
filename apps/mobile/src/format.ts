@@ -14,7 +14,7 @@ export function formatDateTime(isoUtc: string, timeZone: string): string {
   return `${day} ${time}`;
 }
 
-/** The local day ("11月21日 周六") and time ("15:00") of a UTC instant in `timeZone`. */
+/** The local day ("11月21日 · 周六") and time ("15:00") of a UTC instant in `timeZone`. */
 export function dateParts(isoUtc: string, timeZone: string): { day: string; time: string } {
   const at = new Date(isoUtc);
   const day = new Intl.DateTimeFormat("zh-CN", {
@@ -29,7 +29,7 @@ export function dateParts(isoUtc: string, timeZone: string): { day: string; time
     minute: "2-digit",
     hourCycle: "h23",
   }).format(at);
-  return { day: day.replace(/(日)(?=\S)/, "$1 "), time };
+  return { day: day.replace(/(日)\s*(?=\S)/, "$1 · "), time };
 }
 
 /** The local calendar date (YYYY-MM-DD) of an instant in `timeZone`. */
