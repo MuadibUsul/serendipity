@@ -1,0 +1,16 @@
+{
+  "name": "@serendipity/ui",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Design tokens (colour, type, spacing, touch targets) with WCAG contrast checks; no React, no I/O.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}
