@@ -10,13 +10,13 @@ import type { ColorScheme } from "@serendipity/ui";
 import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { MOCK_CODE, createMockApi } from "./api/mock";
+import { createMockApi } from "./api/mock";
 import { HOME_STATES } from "./api/types";
 import type { HomeState } from "./api/types";
 import { AI_HEADLINES, COMMON, PRIMER, SIGN_IN, TAB_LABELS } from "./copy";
 import type { NotificationStatus } from "./platform/notifications";
 import { TABS } from "./shell/state";
-import { PHONE, renderApp } from "./test-support";
+import { renderApp, signIn } from "./test-support";
 
 afterEach(cleanup);
 
@@ -79,13 +79,7 @@ function assertAccessible(where: string) {
 
 async function reachMain(scheme: ColorScheme, state: HomeState, notifications: NotificationStatus) {
   renderApp({ scheme, mock: { state, verification: "verified" }, notifications });
-  fireEvent.change(screen.getByRole("textbox", { name: SIGN_IN.phoneLabel }), {
-    target: { value: PHONE },
-  });
-  fireEvent.change(screen.getByRole("textbox", { name: SIGN_IN.codeLabel }), {
-    target: { value: MOCK_CODE },
-  });
-  fireEvent.click(screen.getByRole("button", { name: SIGN_IN.submit }));
+  await signIn();
   await screen.findByText(AI_HEADLINES[state]);
 }
 
@@ -98,15 +92,19 @@ describe.each(COLOR_SCHEMES)("%s scheme", (scheme) => {
     assertAccessible("sign-in error");
   });
 
+  it("sign-in, code step", async () => {
+    renderApp({ scheme });
+    fireEvent.change(screen.getByRole("textbox", { name: SIGN_IN.phoneLabel }), {
+      target: { value: "13800000000" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: SIGN_IN.sendCode }));
+    await screen.findByRole("textbox", { name: SIGN_IN.codeLabel });
+    assertAccessible("sign-in code step");
+  });
+
   it("notification explainer", async () => {
     renderApp({ scheme, notifications: "undetermined" });
-    fireEvent.change(screen.getByRole("textbox", { name: SIGN_IN.phoneLabel }), {
-      target: { value: PHONE },
-    });
-    fireEvent.change(screen.getByRole("textbox", { name: SIGN_IN.codeLabel }), {
-      target: { value: MOCK_CODE },
-    });
-    fireEvent.click(screen.getByRole("button", { name: SIGN_IN.submit }));
+    await signIn();
     await screen.findByText(PRIMER.title);
     assertAccessible("explainer");
   });
@@ -123,13 +121,7 @@ describe.each(COLOR_SCHEMES)("%s scheme", (scheme) => {
     const api = createMockApi();
     vi.spyOn(api, "home").mockRejectedValue(new Error("offline"));
     renderApp({ scheme, api, notifications: "granted" });
-    fireEvent.change(screen.getByRole("textbox", { name: SIGN_IN.phoneLabel }), {
-      target: { value: PHONE },
-    });
-    fireEvent.change(screen.getByRole("textbox", { name: SIGN_IN.codeLabel }), {
-      target: { value: MOCK_CODE },
-    });
-    fireEvent.click(screen.getByRole("button", { name: SIGN_IN.submit }));
+    await signIn();
     await screen.findByText(COMMON.loadFailed);
     assertAccessible("failed");
   });

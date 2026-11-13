@@ -25,7 +25,7 @@ export function MeScreen({
   readonly onSignOut: () => void;
 }) {
   return (
-    <Screen title={ME_PAGE.title}>
+    <Screen>
       <Group title={ME_PAGE.account}>
         <Row label={ME_PAGE.verification} value={ME_PAGE.verificationStatus[me.verification]} />
         <Row label={ME_PAGE.notifications} value={ME_PAGE.notificationStatus[notificationStatus]} />

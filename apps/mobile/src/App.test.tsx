@@ -2,7 +2,7 @@
 import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { MOCK_CODE, createMockApi } from "./api/mock";
+import { createMockApi } from "./api/mock";
 import {
   AI_HEADLINES,
   COMMON,
@@ -14,7 +14,8 @@ import {
   TAB_LABELS,
 } from "./copy";
 import { createFakePermissions } from "./platform/notifications";
-import { PHONE, renderApp } from "./test-support";
+import { RESEND_AFTER_S, maskPhone } from "./screens/SignInScreen";
+import { PHONE, renderApp, signIn } from "./test-support";
 
 afterEach(cleanup);
 
@@ -24,14 +25,6 @@ const type = (label: string, value: string) => {
 const press = (name: string) => {
   fireEvent.click(screen.getByRole("button", { name }));
 };
-
-async function signIn(code = MOCK_CODE) {
-  type(SIGN_IN.phoneLabel, PHONE);
-  press(SIGN_IN.sendCode);
-  await screen.findByText(SIGN_IN.codeSent);
-  type(SIGN_IN.codeLabel, code);
-  press(SIGN_IN.submit);
-}
 
 const heading = () => screen.getAllByRole("heading")[0]?.textContent;
 
@@ -62,6 +55,56 @@ describe("sign-in", () => {
     renderApp({ api });
     await signIn();
     expect(await screen.findByText(SIGN_IN.problems.unavailable)).toBeTruthy();
+  });
+});
+
+describe("sign-in steps", () => {
+  it("asks for the code only once it has been sent, to a masked number", async () => {
+    renderApp();
+    expect(screen.queryByRole("textbox", { name: SIGN_IN.codeLabel })).toBeNull();
+    expect(screen.queryByRole("button", { name: SIGN_IN.submit })).toBeNull();
+    type(SIGN_IN.phoneLabel, PHONE);
+    press(SIGN_IN.sendCode);
+    await screen.findByRole("textbox", { name: SIGN_IN.codeLabel });
+    expect(screen.getByText(SIGN_IN.sentTo("138****0000"))).toBeTruthy();
+    expect(screen.queryByRole("textbox", { name: SIGN_IN.phoneLabel })).toBeNull();
+    expect(screen.getByText(SIGN_IN.resendIn(RESEND_AFTER_S))).toBeTruthy();
+    expect(screen.queryByRole("button", { name: SIGN_IN.resend })).toBeNull();
+  });
+
+  it("offers a new code only after the wait", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      renderApp();
+      type(SIGN_IN.phoneLabel, PHONE);
+      press(SIGN_IN.sendCode);
+      await screen.findByRole("textbox", { name: SIGN_IN.codeLabel });
+      for (let second = 0; second < RESEND_AFTER_S; second += 1) {
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(1000);
+        });
+      }
+      expect(screen.getByRole("button", { name: SIGN_IN.resend })).toBeTruthy();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("goes back to change the number", async () => {
+    renderApp();
+    type(SIGN_IN.phoneLabel, PHONE);
+    press(SIGN_IN.sendCode);
+    await screen.findByRole("textbox", { name: SIGN_IN.codeLabel });
+    press(SIGN_IN.changePhone);
+    expect(await screen.findByRole("textbox", { name: SIGN_IN.phoneLabel })).toBeTruthy();
+    expect(screen.queryByRole("textbox", { name: SIGN_IN.codeLabel })).toBeNull();
+  });
+
+  it.each([
+    ["13800000000", "138****0000"],
+    ["123", "123"],
+  ])("masks %s as %s", (phone, masked) => {
+    expect(maskPhone(phone)).toBe(masked);
   });
 });
 

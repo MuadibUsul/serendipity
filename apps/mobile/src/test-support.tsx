@@ -1,12 +1,13 @@
 // Rendering the app in tests (jsdom + react-native-web). Fictional data only.
 import type { ColorScheme } from "@serendipity/ui";
-import { render } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import type { Metrics } from "react-native-safe-area-context";
 
-import { createMockApi } from "./api/mock";
+import { MOCK_CODE, createMockApi } from "./api/mock";
 import type { MockOptions } from "./api/mock";
 import type { Api } from "./api/types";
 import { App } from "./App";
+import { SIGN_IN } from "./copy";
 import { createFakePermissions } from "./platform/notifications";
 import type { NotificationPermissions, NotificationStatus } from "./platform/notifications";
 
@@ -45,4 +46,15 @@ export function renderApp(
     />,
   );
   return { ...result, api, notifications };
+}
+
+/** Both sign-in steps: the number and "获取验证码", then the code and "登录". */
+export async function signIn(code = MOCK_CODE, phone = PHONE) {
+  fireEvent.change(screen.getByRole("textbox", { name: SIGN_IN.phoneLabel }), {
+    target: { value: phone },
+  });
+  fireEvent.click(screen.getByRole("button", { name: SIGN_IN.sendCode }));
+  const field = await screen.findByRole("textbox", { name: SIGN_IN.codeLabel });
+  fireEvent.change(field, { target: { value: code } });
+  fireEvent.click(screen.getByRole("button", { name: SIGN_IN.submit }));
 }

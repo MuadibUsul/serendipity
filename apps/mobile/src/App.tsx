@@ -5,7 +5,7 @@ import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-c
 import type { Metrics } from "react-native-safe-area-context";
 
 import type { Api, Home, Me } from "./api/types";
-import { COMMON, TAB_LABELS } from "./copy";
+import { COMMON } from "./copy";
 import type { NotificationPermissions, NotificationStatus } from "./platform/notifications";
 import { AiScreen } from "./screens/AiScreen";
 import { DatesScreen } from "./screens/DatesScreen";
@@ -165,14 +165,14 @@ function Main({
     <View style={{ flex: 1, backgroundColor: palette.background }}>
       <View style={{ flex: 1 }}>
         {load.kind === "loading" ? (
-          <Screen title={TAB_LABELS[tab]}>
-            <AppText color="textSecondary" live="polite">
+          <Screen>
+            <AppText color="textSecondary" live="polite" heading>
               {COMMON.loading}
             </AppText>
           </Screen>
         ) : load.kind === "failed" ? (
-          <Screen title={TAB_LABELS[tab]}>
-            <AppText color="danger" live="assertive">
+          <Screen>
+            <AppText color="danger" live="assertive" heading>
               {COMMON.loadFailed}
             </AppText>
             <Button label={COMMON.retry} onPress={retry} />

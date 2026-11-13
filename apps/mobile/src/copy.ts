@@ -21,6 +21,11 @@ export const SIGN_IN = {
   codeLabel: "验证码",
   sendCode: "获取验证码",
   codeSent: "验证码已发送",
+  sentTo: (masked: string) => `验证码已发送至 ${masked}`,
+  resendIn: (seconds: number) => `${String(seconds)} 秒后可重新发送`,
+  resend: "重新发送",
+  changePhone: "更换手机号",
+  phonePrefix: "+86",
   submit: "登录",
   mockNote: (code: string) => `演示版本：不连接服务器，验证码为 ${code}。`,
   adultsOnly: "仅限年满 18 周岁并完成实名核验的成年人使用。",
@@ -61,7 +66,6 @@ export const AI_PAGE = {
 };
 
 export const DATES_PAGE = {
-  title: "约会",
   empty: "好的相遇，值得一点等待。",
   emptyHint: "有合适的约会时，你会先收到一份邀请，可以接受，也可以拒绝。",
   yourDate: "你的约会",
@@ -83,7 +87,6 @@ export const DATES_PAGE = {
 };
 
 export const RELATIONSHIPS_PAGE = {
-  title: "关系",
   empty: "故事，从见面之后开始。",
   emptyHint: "见面后，如果你们都愿意继续，对方会出现在这里。",
   metOn: (date: string) => `${date}见面`,
@@ -92,7 +95,6 @@ export const RELATIONSHIPS_PAGE = {
 };
 
 export const ME_PAGE = {
-  title: "我",
   account: "账号",
   matching: "匹配",
   verification: "实名与成年核验",

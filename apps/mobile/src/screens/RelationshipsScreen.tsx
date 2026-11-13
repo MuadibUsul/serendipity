@@ -13,7 +13,7 @@ import { EmptyState, Screen } from "../ui/Screen";
 /** Only people both sides chose to continue with after meeting (PRD-001 §7). */
 export function RelationshipsScreen({ home }: { readonly home: Home }) {
   return (
-    <Screen title={RELATIONSHIPS_PAGE.title}>
+    <Screen>
       {home.relationships.length === 0 ? (
         <EmptyState
           art={<Illustration name="threads" />}

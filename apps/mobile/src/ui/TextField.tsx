@@ -16,6 +16,9 @@ export interface TextFieldProps {
   readonly keyboardType?: KeyboardTypeOptions;
   readonly textContentType?: "telephoneNumber" | "oneTimeCode";
   readonly maxLength?: number;
+  /** Fixed text before the value, inside the field (e.g. "+86"). Not part of the value. */
+  readonly prefix?: string;
+  readonly autoFocus?: boolean;
 }
 
 /**
@@ -30,37 +33,25 @@ export function TextField({
   keyboardType,
   textContentType,
   maxLength,
+  prefix,
+  autoFocus,
 }: TextFieldProps) {
   const palette = usePalette();
   const materials = useMaterials();
   const [focused, setFocused] = useState(false);
+  const font = Platform.OS === "web" ? { fontFamily: WEB_FONT_FAMILY } : {};
   return (
     <View style={{ gap: SPACE.sm }}>
       <AppText variant="footnote" color="textSecondary">
         {label}
       </AppText>
-      <TextInput
-        aria-label={label}
-        accessibilityHint={hint}
-        value={value}
-        onChangeText={onChangeText}
-        onFocus={() => {
-          setFocused(true);
-        }}
-        onBlur={() => {
-          setFocused(false);
-        }}
-        keyboardType={keyboardType}
-        textContentType={textContentType}
-        maxLength={maxLength}
-        autoCorrect={false}
-        selectionColor={palette.accentStrong}
+      <View
         style={{
-          ...TYPE.body,
           ...touchTarget(),
-          ...(Platform.OS === "web" ? { fontFamily: WEB_FONT_FAMILY } : {}),
           minHeight: 52,
-          color: palette.text,
+          flexDirection: "row",
+          alignItems: "center",
+          gap: SPACE.md,
           backgroundColor: materials.fill,
           borderRadius: RADIUS.md,
           borderCurve: "continuous",
@@ -68,7 +59,41 @@ export function TextField({
           borderColor: focused ? palette.focus : "transparent",
           paddingHorizontal: SPACE.lg,
         }}
-      />
+      >
+        {prefix === undefined ? null : (
+          <View aria-hidden>
+            <AppText>{prefix}</AppText>
+          </View>
+        )}
+        <TextInput
+          aria-label={label}
+          accessibilityHint={hint}
+          value={value}
+          onChangeText={onChangeText}
+          onFocus={() => {
+            setFocused(true);
+          }}
+          onBlur={() => {
+            setFocused(false);
+          }}
+          keyboardType={keyboardType}
+          textContentType={textContentType}
+          maxLength={maxLength}
+          autoFocus={autoFocus}
+          autoCorrect={false}
+          selectionColor={palette.accentStrong}
+          style={{
+            ...TYPE.body,
+            ...font,
+            flex: 1,
+            alignSelf: "stretch",
+            color: palette.text,
+            // The box above draws the field; the input itself stays clear.
+            // react-native-web passes this to CSS: no browser focus box inside the coral ring.
+            ...(Platform.OS === "web" ? ({ outlineStyle: "none", outlineWidth: 0 } as object) : {}),
+          }}
+        />
+      </View>
       {hint === undefined ? null : (
         <AppText variant="footnote" color="textSecondary">
           {hint}

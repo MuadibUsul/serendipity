@@ -13,16 +13,14 @@ import { useMaterials, usePalette } from "./theme";
 export const TAB_BAR_CLEARANCE = 112;
 
 /**
- * A page: white with ambient light, a large title, then content that scrolls,
- * so nothing is cut off at a large text size.
+ * A page: white with ambient light, then content that scrolls, so nothing is
+ * cut off at a large text size. No page-name title: the tab bar already says
+ * where the person is, so each page's heading is its own first content.
  */
 export function Screen({
-  title,
   withTabBar = true,
   children,
 }: {
-  /** The page's large title, read as its heading. */
-  readonly title?: string;
   readonly withTabBar?: boolean;
   readonly children: ReactNode;
 }) {
@@ -39,11 +37,6 @@ export function Screen({
             gap: SPACE.xxl,
           }}
         >
-          {title === undefined ? null : (
-            <AppText variant="largeTitle" heading>
-              {title}
-            </AppText>
-          )}
           {children}
         </ScrollView>
       </SafeAreaView>
@@ -67,7 +60,7 @@ export function Group({
     <View style={{ gap: SPACE.sm }}>
       {title === undefined ? null : (
         <View style={{ paddingHorizontal: SPACE.lg }}>
-          <AppText variant="footnote" color="textSecondary">
+          <AppText variant="footnote" color="textSecondary" heading>
             {title}
           </AppText>
         </View>
@@ -129,7 +122,7 @@ export function EmptyState({
   return (
     <View style={{ alignItems: "center", gap: SPACE.lg, paddingVertical: SPACE.xxxl }}>
       {art}
-      <AppText variant="title" align="center">
+      <AppText variant="title" align="center" heading>
         {line}
       </AppText>
       <View style={{ maxWidth: 300 }}>

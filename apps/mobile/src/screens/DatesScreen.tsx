@@ -29,7 +29,7 @@ function Invitation({ date, now }: { readonly date: UpcomingDate; readonly now: 
             aria-hidden
             style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: palette.accent }}
           />
-          <AppText variant="footnote" color="textSecondary">
+          <AppText variant="footnote" color="textSecondary" heading>
             {DATES_PAGE.yourDate}
           </AppText>
         </View>
@@ -100,7 +100,7 @@ function Invitation({ date, now }: { readonly date: UpcomingDate; readonly now: 
 export function DatesScreen({ home, now }: { readonly home: Home; readonly now: Date }) {
   const date = home.upcoming;
   return (
-    <Screen title={DATES_PAGE.title}>
+    <Screen>
       {date === null ? (
         <EmptyState
           art={<Illustration name="cups" />}
