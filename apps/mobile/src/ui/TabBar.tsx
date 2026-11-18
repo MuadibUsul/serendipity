@@ -64,8 +64,8 @@ export function TabBar({
                   gap: 2,
                   paddingVertical: SPACE.sm,
                   borderRadius: RADIUS.pill,
-                  backgroundColor: selected ? materials.glassRaised : "transparent",
-                  boxShadow: selected ? SHADOW.thumb : "none",
+                  backgroundColor: selected ? materials.glassSelected : "transparent",
+                  boxShadow: selected ? SHADOW.selected : "none",
                 }}
               >
                 <Icon

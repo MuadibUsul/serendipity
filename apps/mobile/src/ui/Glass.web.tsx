@@ -12,6 +12,7 @@ const EDGE_LIGHT = "inset 0px 1px 0px rgba(255,255,255,0.95)";
 export function Glass({
   raised = false,
   halo = false,
+  tint,
   radius = RADIUS.lg,
   style,
   children,
@@ -22,7 +23,7 @@ export function Glass({
       style={[
         {
           borderRadius: radius,
-          backgroundColor: raised ? materials.glassRaised : materials.glass,
+          backgroundColor: tint ?? (raised ? materials.glassRaised : materials.glass),
           borderWidth: 1,
           borderColor: materials.glassHighlight,
           boxShadow: `${EDGE_LIGHT}, ${halo ? SHADOW.halo : raised ? SHADOW.float : SHADOW.soft}`,

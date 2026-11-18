@@ -3,10 +3,10 @@ import Svg, { Circle, Defs, RadialGradient, Stop } from "react-native-svg";
 
 import { useMaterials, usePalette } from "./theme";
 
-/** Where the soft light sits on each kind of page (from the 柔光 design, 390 × 844). */
+/** Where the light sits on each kind of page (from the 剧集版 drafts, 390 × 844). */
 export type AmbientLayout = "default" | "signIn" | "ai" | "invite";
 
-type Glow = "glowBlush" | "glowMint" | "glowPeach" | "glowPowder";
+type Glow = "glowBlush" | "glowMint" | "glowPeach" | "glowPowder" | "glowLavender";
 
 interface Field {
   readonly glow: Glow;
@@ -17,32 +17,37 @@ interface Field {
   readonly reach: number;
 }
 
+const SIGN_IN: readonly Field[] = [
+  { glow: "glowBlush", cx: 320, cy: 70, r: 240, reach: 0.66 },
+  { glow: "glowMint", cx: 0, cy: 470, r: 220, reach: 0.66 },
+  { glow: "glowLavender", cx: 380, cy: 340, r: 180, reach: 0.66 },
+  { glow: "glowPeach", cx: 290, cy: 794, r: 210, reach: 0.66 },
+  { glow: "glowPowder", cx: 30, cy: 794, r: 170, reach: 0.66 },
+];
+
 const LAYOUTS: Readonly<Record<AmbientLayout, readonly Field[]>> = {
-  default: [
-    { glow: "glowBlush", cx: 360, cy: 40, r: 220, reach: 0.68 },
-    { glow: "glowMint", cx: -20, cy: 520, r: 200, reach: 0.68 },
-    { glow: "glowPeach", cx: 330, cy: 820, r: 190, reach: 0.68 },
-  ],
-  signIn: [
-    { glow: "glowBlush", cx: 350, cy: 60, r: 230, reach: 0.68 },
-    { glow: "glowMint", cx: -20, cy: 510, r: 210, reach: 0.68 },
-    { glow: "glowPeach", cx: 320, cy: 804, r: 190, reach: 0.68 },
-  ],
+  default: SIGN_IN,
+  signIn: SIGN_IN,
   ai: [
-    { glow: "glowPowder", cx: 20, cy: 40, r: 180, reach: 0.68 },
-    { glow: "glowBlush", cx: 195, cy: 320, r: 240, reach: 0.66 },
-    { glow: "glowMint", cx: 130, cy: 774, r: 190, reach: 0.68 },
+    { glow: "glowBlush", cx: 195, cy: 320, r: 260, reach: 0.64 },
+    { glow: "glowPowder", cx: 20, cy: 40, r: 190, reach: 0.66 },
+    { glow: "glowLavender", cx: 370, cy: 60, r: 170, reach: 0.66 },
+    { glow: "glowMint", cx: 130, cy: 784, r: 210, reach: 0.66 },
+    { glow: "glowPeach", cx: 390, cy: 634, r: 150, reach: 0.66 },
   ],
   invite: [
-    { glow: "glowPeach", cx: 360, cy: 50, r: 170, reach: 0.68 },
-    { glow: "glowBlush", cx: 195, cy: 320, r: 260, reach: 0.64 },
-    { glow: "glowPowder", cx: 30, cy: 764, r: 180, reach: 0.68 },
+    { glow: "glowBlush", cx: 195, cy: 310, r: 280, reach: 0.62 },
+    { glow: "glowPeach", cx: 360, cy: 50, r: 180, reach: 0.66 },
+    { glow: "glowLavender", cx: 10, cy: 50, r: 170, reach: 0.66 },
+    { glow: "glowPowder", cx: 40, cy: 774, r: 200, reach: 0.66 },
+    { glow: "glowMint", cx: 350, cy: 784, r: 180, reach: 0.66 },
   ],
 };
 
 /**
- * The page behind the glass: white, with soft fields of blush, mint, peach
- * and powder blue, so the glass has something to catch. Decorative.
+ * The page behind the glass: blush white, lit by saturated fields of blush,
+ * mint, peach, powder blue and lavender, so the glass has something to
+ * catch. Decorative.
  */
 export function Ambient({ layout = "default" }: { readonly layout?: AmbientLayout }) {
   const palette = usePalette();

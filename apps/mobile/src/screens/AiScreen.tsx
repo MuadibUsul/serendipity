@@ -1,6 +1,6 @@
 import { RADIUS, SHADOW, SPACE } from "@serendipity/ui";
 import { View } from "react-native";
-import Svg, { Circle, Defs, Ellipse, RadialGradient, Stop } from "react-native-svg";
+import Svg, { Circle, Defs, LinearGradient, RadialGradient, Stop } from "react-native-svg";
 
 import type { Home } from "../api/types";
 import { AI_HEADLINES, AI_PAGE } from "../copy";
@@ -16,47 +16,54 @@ import { useMaterials, usePalette } from "../ui/theme";
 const ORB = 196;
 
 /**
- * The voice entry: a coral orb of light with a soft white rim, breathing, and
- * rings leaving it slowly. Decorative; still when motion is reduced.
+ * The voice entry: an orb of the page's own light (blush, peach, mint,
+ * powder blue, lavender) with a white shine and a soft white rim, breathing,
+ * and rings of light leaving it slowly. Decorative; still when motion is
+ * reduced.
  */
 function VoiceOrb() {
   const materials = useMaterials();
+  const spectrum = [
+    materials.glowBlush,
+    materials.glowPeach,
+    materials.glowMint,
+    materials.glowPowder,
+    materials.glowLavender,
+  ];
   return (
     <View aria-hidden style={{ height: 300, alignItems: "center", justifyContent: "center" }}>
       <Ripple size={250} />
       <Breathing>
         <View
           style={{
-            width: ORB + 20,
-            height: ORB + 20,
-            borderRadius: (ORB + 20) / 2,
-            padding: 10,
-            backgroundColor: "rgba(255,255,255,0.55)",
+            width: ORB + 24,
+            height: ORB + 24,
+            borderRadius: (ORB + 24) / 2,
+            padding: 12,
+            backgroundColor: "rgba(255,255,255,0.5)",
             boxShadow: SHADOW.orb,
           }}
         >
           <Svg width={ORB} height={ORB}>
             <Defs>
-              <RadialGradient id="voice-orb" cx="34%" cy="28%" r="80%" fx="34%" fy="28%">
-                <Stop offset="0" stopColor="#ffffff" />
-                <Stop offset="0.3" stopColor="#ffe6ea" />
-                <Stop offset="0.66" stopColor="#ffb3c0" />
-                <Stop offset="1" stopColor={materials.glowCoral} />
+              <LinearGradient id="voice-orb" x1="0.15" y1="0" x2="0.85" y2="1">
+                {spectrum.map((color, index) => (
+                  <Stop key={color} offset={index / (spectrum.length - 1)} stopColor={color} />
+                ))}
+              </LinearGradient>
+              <RadialGradient id="voice-orb-blush" cx="78%" cy="22%" r="55%">
+                <Stop offset="0" stopColor={materials.glowBlush} stopOpacity={0.9} />
+                <Stop offset="1" stopColor={materials.glowBlush} stopOpacity={0} />
               </RadialGradient>
-              <RadialGradient id="voice-orb-shine" cx="50%" cy="50%" r="50%">
-                <Stop offset="0" stopColor="#ffffff" stopOpacity={0.8} />
+              <RadialGradient id="voice-orb-shine" cx="34%" cy="28%" r="45%">
+                <Stop offset="0" stopColor="#ffffff" stopOpacity={0.95} />
+                <Stop offset="0.5" stopColor="#ffffff" stopOpacity={0.4} />
                 <Stop offset="1" stopColor="#ffffff" stopOpacity={0} />
               </RadialGradient>
             </Defs>
             <Circle cx={ORB / 2} cy={ORB / 2} r={ORB / 2} fill="url(#voice-orb)" />
-            <Ellipse
-              cx={ORB * 0.38}
-              cy={ORB * 0.24}
-              rx={ORB * 0.2}
-              ry={ORB * 0.1}
-              fill="url(#voice-orb-shine)"
-              transform={`rotate(-24 ${String(ORB * 0.38)} ${String(ORB * 0.24)})`}
-            />
+            <Circle cx={ORB / 2} cy={ORB / 2} r={ORB / 2} fill="url(#voice-orb-blush)" />
+            <Circle cx={ORB / 2} cy={ORB / 2} r={ORB / 2} fill="url(#voice-orb-shine)" />
           </Svg>
         </View>
       </Breathing>

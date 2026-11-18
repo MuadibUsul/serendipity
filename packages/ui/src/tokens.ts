@@ -1,12 +1,15 @@
 /**
- * Design tokens for every 不期 app: "Apple White Liquid Glass".
+ * Design tokens for every 不期 app: the 剧集版 (episode) soft light, chosen by
+ * the owner on 2026-11-18 over the restrained 克制版.
  *
- * White dominates; glass is clear and thin; a soft coral appears only as a
+ * A blush-white page lit by saturated fields of pink, peach, lavender, mint
+ * and powder blue, after the colour of Black Mirror's "Nosedive" (its colour
+ * only: no ratings, scores or photos). Glass is clear and thin; coral stays a
  * small accent. Plain values only, so they can be checked without a renderer.
  * Components live in the apps and take every colour, size and space from here.
  */
 
-/** One scheme for now: the brand is Apple White. A dark scheme is a later design decision. */
+/** One scheme for now. A dark scheme is a later design decision. */
 export const COLOR_SCHEMES = ["light"] as const;
 export type ColorScheme = (typeof COLOR_SCHEMES)[number];
 
@@ -18,8 +21,9 @@ export interface Palette {
   readonly backgroundSecondary: string;
   readonly text: string;
   /**
-   * Secondary text. The brief's #747982 is 4.38:1 on white, just under AA;
-   * #6B7079 looks the same and reaches 4.98:1.
+   * Secondary text: #4E525A. The 剧集版 draft's #5C616A falls to 3.84:1 where
+   * secondary text sits straight on the centre of the blush light (the AI
+   * page); #4E525A keeps 4.84:1 there and still reads as grey.
    */
   readonly textSecondary: string;
   /** The primary action's fill (Apple-style ink capsule) and its text. */
@@ -30,9 +34,9 @@ export interface Palette {
    * 2.74:1 on white it may carry neither text nor state.
    */
   readonly accent: string;
-  /** Coral that carries state (toggle on, selected icon): 3.89:1, enough for controls. */
+  /** Coral that carries state (toggle on, selected icon): enough for controls (3:1). */
   readonly accentStrong: string;
-  /** Coral for text and links: 5.24:1. */
+  /** Deep coral for text and links, and for text on the coral tint (`accentFill`). */
   readonly accentText: string;
   /** Errors and destructive actions, as text. */
   readonly danger: string;
@@ -42,15 +46,15 @@ export interface Palette {
 
 export const PALETTES: Readonly<Record<ColorScheme, Palette>> = {
   light: {
-    background: "#ffffff",
-    backgroundSecondary: "#f8f9fb",
+    background: "#fff7f8",
+    backgroundSecondary: "#fbeff2",
     text: "#17191d",
-    textSecondary: "#6b7079",
+    textSecondary: "#4e525a",
     ink: "#17191d",
     onInk: "#ffffff",
     accent: "#ff6b81",
     accentStrong: "#e8435e",
-    accentText: "#c9304a",
+    accentText: "#b12a42",
     danger: "#c4262e",
     focus: "#e8435e",
   },
@@ -63,8 +67,10 @@ export const PALETTES: Readonly<Record<ColorScheme, Palette>> = {
 export interface Materials {
   /** Glass surfaces: cards, grouped lists. */
   readonly glass: string;
-  /** Floating glass: the tab bar, sheets, the selected tab. */
+  /** Floating glass: the tab bar, sheets. */
   readonly glassRaised: string;
+  /** The selected tab: near-white, lifted by a coral glow. */
+  readonly glassSelected: string;
   /** The thin light catching a glass edge. */
   readonly glassHighlight: string;
   /** Hairline separators. */
@@ -73,15 +79,24 @@ export interface Materials {
   readonly fill: string;
   /** A toggle that is off. */
   readonly toggleOff: string;
+  /** A coral tint for small badges ("还有 N 天"); its text is `accentText`. */
+  readonly accentFill: string;
+  /** Rings of light leaving the voice orb. */
+  readonly ring: string;
+  /** Tinted glass for the sign-in promises: mint, peach and blush. */
+  readonly tintMint: string;
+  readonly tintPeach: string;
+  readonly tintBlush: string;
   /**
-   * Ambient light behind the glass (the "柔光" design, 2026-11-13): soft
-   * fields of blush, mint, peach and powder blue on white, drawn as radial
-   * fades at low opacity, so the glass has something to catch.
+   * Ambient light behind the glass (the 剧集版, 2026-11-18): saturated fields
+   * of blush, mint, peach, powder blue and lavender on a blush-white page,
+   * drawn as radial fades, so the glass has something to catch.
    */
   readonly glowBlush: string;
   readonly glowMint: string;
   readonly glowPeach: string;
   readonly glowPowder: string;
+  readonly glowLavender: string;
   /** The brand coral as light: the voice orb's glow, the invitation's halo. */
   readonly glowCoral: string;
   /** How strong the ambient fields are at their centre (0–1). */
@@ -90,18 +105,25 @@ export interface Materials {
 
 export const MATERIALS: Readonly<Record<ColorScheme, Materials>> = {
   light: {
-    glass: "rgba(255,255,255,0.62)",
-    glassRaised: "rgba(255,255,255,0.8)",
-    glassHighlight: "rgba(255,255,255,0.85)",
+    glass: "rgba(255,255,255,0.5)",
+    glassRaised: "rgba(255,255,255,0.62)",
+    glassSelected: "rgba(255,255,255,0.95)",
+    glassHighlight: "rgba(255,255,255,0.8)",
     separator: "rgba(20,25,35,0.06)",
     fill: "rgba(118,122,135,0.09)",
     toggleOff: "rgba(118,122,135,0.20)",
-    glowBlush: "#ffbeca",
-    glowMint: "#c8eede",
-    glowPeach: "#ffdac4",
-    glowPowder: "#d6e2ff",
+    accentFill: "rgba(255,214,222,0.9)",
+    ring: "rgba(255,255,255,0.95)",
+    tintMint: "rgba(214,244,232,0.65)",
+    tintPeach: "rgba(255,232,218,0.7)",
+    tintBlush: "rgba(255,226,232,0.7)",
+    glowBlush: "#ffaac0",
+    glowMint: "#b4ead4",
+    glowPeach: "#ffd0b2",
+    glowPowder: "#c4d6ff",
+    glowLavender: "#e1d0ff",
     glowCoral: "#ff6b81",
-    glowStrength: 0.55,
+    glowStrength: 0.82,
   },
 };
 
@@ -136,13 +158,15 @@ export const RADIUS = { sm: 12, md: 18, lg: 24, xl: 30, pill: 999 } as const;
 /** Soft, diffuse, low-contrast shadows: lift without darkness. */
 export const SHADOW = {
   /** Glass resting on the page. */
-  soft: "0px 18px 44px rgba(40,24,40,0.07)",
+  soft: "0px 18px 44px rgba(90,40,70,0.08)",
   /** Floating glass: the tab bar, the sign-in sheet. */
-  float: "0px 18px 44px rgba(40,24,40,0.09)",
-  /** The invitation: a faint coral halo under the glass. */
-  halo: "0px 30px 70px rgba(255,107,129,0.16), 0px 12px 30px rgba(40,24,40,0.06)",
+  float: "0px 18px 44px rgba(90,40,70,0.1)",
+  /** The invitation: a coral halo under the glass. */
+  halo: "0px 34px 80px rgba(255,107,129,0.24), 0px 12px 30px rgba(90,40,70,0.07)",
   /** The voice orb. */
-  orb: "0px 30px 70px rgba(255,107,129,0.32)",
+  orb: "0px 34px 80px rgba(255,120,150,0.38)",
+  /** The selected tab: a faint coral lift. */
+  selected: "0px 2px 10px rgba(255,107,129,0.18)",
   /** A white thumb or pill on glass. */
   thumb: "0px 2px 6px rgba(23,25,29,0.12)",
 } as const;
@@ -150,9 +174,9 @@ export const SHADOW = {
 /** Glass optics: thin and clear, never frosted plastic. */
 export const GLASS = {
   /** expo-blur intensity, 1–100. */
-  blurIntensity: 36,
+  blurIntensity: 40,
   /** The same on the web. */
-  webBackdrop: "blur(24px) saturate(180%)",
+  webBackdrop: "blur(30px) saturate(180%)",
 } as const;
 
 /** Motion: slow and calm. Off when the person asks for reduced motion. */
