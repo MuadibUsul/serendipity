@@ -10,6 +10,8 @@ export { ACTOR_TYPES, inAuditedTransaction, recordAudit } from "./audit.js";
 export type { ActorType, AuditEvent, AuditedTransaction, TransactionPool } from "./audit.js";
 export { pgAuditSink, pgGrantSource } from "./consent.js";
 export { pgAttestationStore } from "./identity.js";
+export { pgInvitationRepository } from "./invitations.js";
+export type { AnswerOutcome, InvitationRepository } from "./invitations.js";
 export { ProfileNotApprovable, ProfileVersionLocked, pgProfileRepository } from "./profile.js";
 export type { Actor, ProfileRepository, ProfileVersion, VersionState } from "./profile.js";
 export { pgMediaRepository } from "./media.js";

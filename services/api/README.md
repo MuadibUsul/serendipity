@@ -10,6 +10,24 @@ imported by `AppModule` as their tasks land.
 | `GET /readyz`  | Readiness: 200 when the database answers and has every migration this build ships with; 503 naming the failing check     |
 | `GET /metrics` | Prometheus text: process metrics and HTTP requests by method, route template and status. Keep it off the public internet |
 
+## Date invitations (`ser-p04-02`)
+
+[ADR-0011](../../docs/adr/0011-anonymous-invitations.md). Every response is the caller's own
+`InvitationView` (`@serendipity/invitations`): the time, the venue and where the invitation stands,
+never anything of the other person. A date that is not the caller's answers 404, like one that does
+not exist.
+
+| Endpoint                     | Answers                                                                            |
+| ---------------------------- | ---------------------------------------------------------------------------------- |
+| `GET /v1/dates/upcoming`     | `{ invitations: InvitationView[] }`, up to the reveal, newest first                |
+| `GET /v1/dates/:id`          | One `InvitationView`                                                               |
+| `POST /v1/dates/:id/accept`  | The view after accepting; 410 `gone` past the deadline, 409 `conflict` when closed |
+| `POST /v1/dates/:id/decline` | The view after declining; the same refusals                                        |
+
+**Who is calling:** real sign-in is not built yet. In `dev` and `test` the caller is the user id in
+the `x-dev-user-id` header; in `staging` and `prod` every one of these requests is 401 until sign-in
+replaces it. Expiry runs as a job, at least once a minute: `npm run invites:expire`.
+
 ## Run
 
 ```bash

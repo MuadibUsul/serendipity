@@ -3,6 +3,7 @@ import type { Environment } from "@serendipity/config";
 
 import { createApi } from "./app.js";
 import type { Api } from "./app.js";
+import type { InvitationsDeps } from "./app.module.js";
 import { createLogger } from "./logging.js";
 import type { ReadinessResult, Readiness } from "./readiness.js";
 
@@ -48,8 +49,14 @@ export function fixedReadiness(result: ReadinessResult): Readiness & { calls: nu
 export async function testApi(
   readiness: Readiness,
   env: Environment = "test",
+  invitations?: InvitationsDeps,
 ): Promise<Api & ReturnType<typeof captureLogs>> {
   const logs = captureLogs();
-  const api = await createApi({ env, logger: logs.logger, readiness });
+  const api = await createApi({
+    env,
+    logger: logs.logger,
+    readiness,
+    ...(invitations === undefined ? {} : { invitations }),
+  });
   return { ...api, ...logs };
 }
