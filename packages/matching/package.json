@@ -1,0 +1,19 @@
+{
+  "name": "@serendipity/matching",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Bilateral eligibility and hard filters for a candidate pair: deterministic, no I/O, no model.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@serendipity/profile": "0.0.0"
+  }
+}
