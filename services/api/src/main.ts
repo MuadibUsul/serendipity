@@ -6,7 +6,7 @@ import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
 import { formatProblems } from "@serendipity/config";
-import { pgInvitationRepository } from "@serendipity/db";
+import { pgInvitationRepository } from "@serendipity/db/invitations";
 import { knownMigrations } from "@serendipity/db/migration-status";
 import pg from "pg";
 

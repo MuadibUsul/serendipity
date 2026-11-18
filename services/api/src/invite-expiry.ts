@@ -4,7 +4,7 @@
  * between runs; this job moves the dates to EXPIRED and their pending
  * invitations to expired, each audited.
  */
-import { pgInvitationRepository } from "@serendipity/db";
+import { pgInvitationRepository } from "@serendipity/db/invitations";
 import pg from "pg";
 
 import { loadApiSettings } from "./settings.js";
