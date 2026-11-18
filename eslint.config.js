@@ -1,9 +1,10 @@
 // @ts-check
 import js from "@eslint/js";
+import reactHooks from "eslint-plugin-react-hooks";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["**/node_modules/", "**/dist/", "**/coverage/"] },
+  { ignores: ["**/node_modules/", "**/dist/", "**/coverage/", "**/.expo/"] },
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
@@ -30,7 +31,21 @@ export default tseslint.config(
     },
   },
   {
+    // The mobile app: hooks rules (react-hooks recommended, flat config).
+    files: ["apps/mobile/**/*.{ts,tsx}"],
+    ...reactHooks.configs.flat.recommended,
+  },
+  {
     files: ["**/*.js"],
     ...tseslint.configs.disableTypeChecked,
+  },
+  {
+    // Metro loads its config as CommonJS.
+    files: ["apps/mobile/metro.config.js"],
+    languageOptions: {
+      sourceType: "commonjs",
+      globals: { require: "readonly", module: "writable", __dirname: "readonly" },
+    },
+    rules: { "@typescript-eslint/no-require-imports": "off" },
   },
 );
