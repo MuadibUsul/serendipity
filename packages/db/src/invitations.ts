@@ -10,7 +10,12 @@
 // it; the date and the invitations change only through @serendipity/domain.
 import { createDate } from "@serendipity/domain";
 import type { DateRecord, DateState, Party } from "@serendipity/domain";
-import { decideAnswer, expireInvitations, openInvitations } from "@serendipity/invitations";
+import {
+  INVITE_LIFECYCLE,
+  decideAnswer,
+  expireInvitations,
+  openInvitations,
+} from "@serendipity/invitations";
 import type {
   Answer,
   AnswerRefusal,
@@ -204,6 +209,9 @@ export function pgInvitationRepository(pool: TransactionPool & Queryable): Invit
             await audit(tx, "date.invite.repeated", userId, dateId, { answer });
             return { kind: "answered", changed: false, record };
           }
+          // The same table the database guard enforces (migration 0009): a bad
+          // decision fails here, before anything is written.
+          INVITE_LIFECYCLE.assertCan(record.invite.status, decision.inviteStatus);
           await saveDate(tx.db, dateId, decision.date, record.date.revision);
           await tx.db.query(
             `UPDATE app.date_invites SET status = $3, responded_at = $4

@@ -47,3 +47,5 @@ export type {
 } from "./rules.js";
 export { sameValue, validateValue, valueKey } from "./values.js";
 export type { FactValue, ValueResult } from "./values.js";
+export { VERSION_LIFECYCLE, VERSION_STATES } from "./lifecycle.js";
+export type { VersionState } from "./lifecycle.js";

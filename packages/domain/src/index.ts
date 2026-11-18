@@ -1,5 +1,7 @@
 export { assertNever } from "./assert-never.js";
 export type { Brand } from "./brand.js";
+export { IllegalTransition, defineLifecycle } from "./lifecycle.js";
+export type { Lifecycle } from "./lifecycle.js";
 
 export {
   DATE_MACHINE_VERSION,
