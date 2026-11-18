@@ -11,6 +11,7 @@ Shared libraries, consumed as TypeScript source by the apps and services.
 | `redact/`       | Removes personal data and secrets from log lines and audit metadata                             | `ser-p01-07a`                             |
 | `identity/`     | Age and real-person verification: provider interface, fail-closed eligibility, signed callbacks | `ser-p01-04a`                             |
 | `profile/`      | Profile fact catalog, provenance and the rules that keep guesses out of hard rules              | `ser-p02-04a`                             |
+| `matching/`     | Bilateral eligibility and hard filters for a candidate pair; no I/O, no model                   | `ser-p03-01a`                             |
 | `invitations/`  | Anonymous date invitations: the allowlisted view, accept / decline / expiry rules               | `ser-p04-02`                              |
 | `fixtures/`     | Deterministic, fictional test data and the G3 scenarios                                         | `ser-p01-08`                              |
 | `schemas/`      | Zod / JSON schemas and API types                                                                | first task that needs them                |
