@@ -18,3 +18,5 @@ export type {
   VenueSlotRow,
   WebhookEventRow,
 } from "./dataset.js";
+export { CITY_IDENTITY_PROVIDER, buildCity } from "./city.js";
+export type { CityOptions, CityPerson } from "./city.js";

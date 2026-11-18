@@ -74,3 +74,16 @@ as one stretch. Windows are local time in the pair's shared region.
 They go to the audit trail and `candidate_pairs`, for tuning and appeals. **Never show one to a
 user or pass one to an agent**: `blocked_the_other` or `dealbreaker` would disclose the other
 person. A user only ever learns that there is no invitation yet.
+
+## Recall (`recall.ts`)
+
+Recall narrows a city to the people who could pass `decidePair` with someone, in PostgreSQL
+(`@serendipity/db` `pgRecallRepository`, [ADR-0012](../../docs/adr/0012-candidate-recall.md)). This
+package holds its rules in TypeScript: `recallEntryOf` builds a person's indexable entry from the same
+facts `decidePair` takes, and `mayRecall` is the prefilter the SQL runs. It is a **superset** of
+`decidePair`: it may keep a pair `decidePair` refuses, never the other way round. Property tests check
+that, and a database test checks that the SQL agrees with `mayRecall` on a synthetic city.
+
+Availability is kept as one bit per whole free quarter hour of the week. A shared stretch of _L_
+minutes always holds ⌈(_L_ − 28) / 15⌉ consecutive whole quarter hours, so asking for that many
+consecutive bits in both masks never loses a pair. Dates shorter than 30 minutes are refused.

@@ -33,6 +33,7 @@
     "dev:down": "docker compose -f infra/docker/compose.dev.yml down",
     "dev:api": "npm run dev --workspace @serendipity/api",
     "db:seed": "tsx packages/db/src/seed-cli.ts",
+    "bench:recall": "tsx packages/db/src/recall-bench.ts",
     "media:cleanup": "tsx services/api/src/media-cleanup.ts",
     "invites:expire": "tsx services/api/src/invite-expiry.ts"
   },
