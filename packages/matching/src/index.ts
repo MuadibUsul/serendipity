@@ -26,3 +26,21 @@ export type {
   Weekday,
   WeeklyWindow,
 } from "./rules.js";
+export {
+  AVAILABILITY_BITS,
+  MIN_DATE_MINUTES,
+  QUARTER_MINUTES,
+  affords,
+  availabilityMask,
+  mayRecall,
+  recallEntryOf,
+  requiredQuarters,
+  sharesRun,
+} from "./recall.js";
+export type {
+  EntryResult,
+  NoEntryReason,
+  RecallContext,
+  RecallEntry,
+  RecallSource,
+} from "./recall.js";

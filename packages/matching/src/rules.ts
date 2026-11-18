@@ -215,7 +215,10 @@ export function longestSharedMinutes(
 }
 
 /** One day's windows as disjoint stretches: overlapping or touching windows are joined. */
-function mergedDay(all: readonly WeeklyWindow[], day: Weekday): { from: number; to: number }[] {
+export function mergedDay(
+  all: readonly WeeklyWindow[],
+  day: Weekday,
+): { from: number; to: number }[] {
   const sorted = all
     .filter((window) => window.day === day)
     .map(({ from, to }) => ({ from, to }))

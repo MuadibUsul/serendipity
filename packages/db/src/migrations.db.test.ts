@@ -107,6 +107,7 @@ describe("schema contents", () => {
         "post_date_feedback",
         "profile_facts",
         "profile_versions",
+        "recall_entries",
         "refunds",
         "relationships",
         "users",

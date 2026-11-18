@@ -102,7 +102,7 @@ describe.each([
   it("serves its probes, then drains and stops on SIGTERM", async () => {
     const running = run(args, { ...VALID, SHUTDOWN_DELAY_MS: "1500" });
     const listening = await waitForLine(running, "listening");
-    expect(listening).toMatchObject({ env: "test", host: "127.0.0.1", migrations: 7 });
+    expect(listening).toMatchObject({ env: "test", host: "127.0.0.1", migrations: 8 });
     const base = `http://127.0.0.1:${String(listening["port"])}`;
 
     expect((await fetch(`${base}/healthz`)).status).toBe(200);

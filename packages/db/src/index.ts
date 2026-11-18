@@ -15,3 +15,11 @@ export type { Actor, ProfileRepository, ProfileVersion, VersionState } from "./p
 export { pgMediaRepository } from "./media.js";
 export type { Queryable } from "./queryable.js";
 export { insertWebhookEvent, seedDataset, webhookRow } from "./seed.js";
+export { EMBEDDING_DIMENSIONS, EmbeddingRefused, pgRecallRepository } from "./recall.js";
+export type {
+  EmbeddingOutcome,
+  RecallOptions,
+  RecallQuery,
+  RecallRepository,
+  RefreshOutcome,
+} from "./recall.js";
