@@ -4,3 +4,6 @@ export const READINESS = Symbol("Readiness");
 export const METRICS = Symbol("Metrics");
 export const LIFECYCLE = Symbol("Lifecycle");
 export const LOGGER = Symbol("Logger");
+export const INVITATIONS = Symbol("Invitations");
+export const CALLERS = Symbol("Callers");
+export const CLOCK = Symbol("Clock");

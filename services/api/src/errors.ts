@@ -10,6 +10,7 @@ export const PROBLEMS = {
   not_found: { status: 404, title: "Not found" },
   method_not_allowed: { status: 405, title: "Method not allowed" },
   conflict: { status: 409, title: "Conflict" },
+  gone: { status: 410, title: "Gone" },
   payload_too_large: { status: 413, title: "Payload too large" },
   unsupported_media_type: { status: 415, title: "Unsupported media type" },
   rate_limited: { status: 429, title: "Too many requests" },

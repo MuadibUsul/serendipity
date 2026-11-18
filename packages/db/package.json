@@ -21,6 +21,10 @@
       "types": "./src/identity.ts",
       "default": "./src/identity.ts"
     },
+    "./invitations": {
+      "types": "./src/invitations.ts",
+      "default": "./src/invitations.ts"
+    },
     "./profile": {
       "types": "./src/profile.ts",
       "default": "./src/profile.ts"
@@ -36,6 +40,10 @@
     "./test-db": {
       "types": "./src/test-db.ts",
       "default": "./src/test-db.ts"
+    },
+    "./test-invitations": {
+      "types": "./src/test-invitations.ts",
+      "default": "./src/test-invitations.ts"
     }
   },
   "scripts": {
@@ -46,6 +54,7 @@
     "@serendipity/domain": "0.0.0",
     "@serendipity/fixtures": "0.0.0",
     "@serendipity/identity": "0.0.0",
+    "@serendipity/invitations": "0.0.0",
     "@serendipity/matching": "0.0.0",
     "@serendipity/media": "0.0.0",
     "@serendipity/profile": "0.0.0",

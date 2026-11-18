@@ -34,13 +34,15 @@
     "dev:api": "npm run dev --workspace @serendipity/api",
     "db:seed": "tsx packages/db/src/seed-cli.ts",
     "bench:recall": "tsx packages/db/src/recall-bench.ts",
-    "media:cleanup": "tsx services/api/src/media-cleanup.ts"
+    "media:cleanup": "tsx services/api/src/media-cleanup.ts",
+    "invites:expire": "tsx services/api/src/invite-expiry.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@types/node": "22.20.5",
     "@types/pg": "8.23.1",
     "eslint": "10.13.0",
+    "eslint-plugin-react-hooks": "7.1.1",
     "fast-check": "4.10.2",
     "node-pg-migrate": "9.0.0",
     "pg": "8.23.1",

@@ -6,10 +6,12 @@ import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
 import { formatProblems } from "@serendipity/config";
+import { pgInvitationRepository } from "@serendipity/db/invitations";
 import { knownMigrations } from "@serendipity/db/migration-status";
 import pg from "pg";
 
 import { createApi } from "./app.js";
+import { devHeaderCallers } from "./callers.js";
 import { createLogger, revealsErrorMessages, safeError } from "./logging.js";
 import { databaseReadiness } from "./readiness.js";
 import { loadApiSettings } from "./settings.js";
@@ -51,7 +53,16 @@ async function main(): Promise<void> {
   const readiness = databaseReadiness(pool, known, (check, error) => {
     logger.debug({ check, err: safeError(error, withMessages) }, "readiness check failed");
   });
-  const api = await createApi({ env: config.env, logger, readiness });
+  const api = await createApi({
+    env: config.env,
+    logger,
+    readiness,
+    invitations: {
+      repository: pgInvitationRepository(pool),
+      // Until real sign-in exists, deployed environments refuse every caller.
+      callers: devHeaderCallers(config.env),
+    },
+  });
   await api.app.listen({ port, host });
   const address = api.app.getHttpAdapter().getInstance().addresses()[0];
   logger.info(

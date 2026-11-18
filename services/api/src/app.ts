@@ -11,6 +11,7 @@ import type { Environment } from "@serendipity/config";
 import { redactText } from "@serendipity/redact";
 
 import { AppModule } from "./app.module.js";
+import type { InvitationsDeps } from "./app.module.js";
 import { SafeExceptionFilter } from "./exception.filter.js";
 import { Lifecycle } from "./lifecycle.js";
 import { NestLogger, revealsErrorMessages } from "./logging.js";
@@ -42,6 +43,8 @@ export interface ApiOptions {
   readonly env: Environment;
   readonly logger: Logger;
   readonly readiness: Readiness;
+  /** The invitation endpoints; left out, only the probes are served. */
+  readonly invitations?: InvitationsDeps;
 }
 
 export interface Api {
@@ -51,7 +54,7 @@ export interface Api {
 }
 
 /** Builds the service, initialised but not listening (tests call `app.inject`-style). */
-export async function createApi({ env, logger, readiness }: ApiOptions): Promise<Api> {
+export async function createApi({ env, logger, readiness, invitations }: ApiOptions): Promise<Api> {
   const lifecycle = new Lifecycle();
   const metrics = createMetrics(
     env,
@@ -92,7 +95,13 @@ export async function createApi({ env, logger, readiness }: ApiOptions): Promise
   });
 
   const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule.with({ readiness, metrics, lifecycle, logger }),
+    AppModule.with({
+      readiness,
+      metrics,
+      lifecycle,
+      logger,
+      ...(invitations === undefined ? {} : { invitations }),
+    }),
     adapter,
     { logger: new NestLogger(logger), abortOnError: false },
   );
