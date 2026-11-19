@@ -84,6 +84,12 @@ describe("chat", () => {
     const { a, b, id } = await couple();
     await chat.close(a, id, "block", NOW);
     expect(await chat.send(b, id, "?", LATER)).toEqual({ kind: "refused", refusal: "blocked" });
+    // The block also keeps them from being matched again (ADR-0022).
+    const blocks = await admin.query(
+      "SELECT 1 FROM app.user_blocks WHERE blocker_id = $1 AND blocked_id = $2",
+      [a, b],
+    );
+    expect(blocks.rowCount).toBe(1);
   });
 
   it("stops new messages while either is paused, and resumes after", async () => {

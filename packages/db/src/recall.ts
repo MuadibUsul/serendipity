@@ -38,7 +38,8 @@ const MATCHING_GRANT = `
 /** Checked live for both people on every recall: what an entry cannot vouch for. */
 const live = (alias: string) => `
   (${alias}.eligible_until IS NULL OR ${alias}.eligible_until > $2)
-  AND EXISTS (SELECT 1 FROM app.users u WHERE u.id = ${alias}.user_id AND u.status = 'active')
+  AND EXISTS (SELECT 1 FROM app.users u WHERE u.id = ${alias}.user_id AND u.status = 'active'
+              AND u.match_hold_at IS NULL)
   AND EXISTS (SELECT 1 FROM app.profile_versions p
               WHERE p.id = ${alias}.profile_version_id AND p.approval_state = 'approved')
   AND ${MATCHING_GRANT.replace("%s", `${alias}.user_id`)}
@@ -76,6 +77,9 @@ function recallSql(run: number): string {
       AND NOT (c.dealbreakers && me.self_tags) AND NOT (me.dealbreakers && c.self_tags)
       AND bit_count(${runOf(run)}) > 0
       AND ${live("c")}
+      AND NOT EXISTS (SELECT 1 FROM app.user_blocks b
+                      WHERE (b.blocker_id = me.user_id AND b.blocked_id = c.user_id)
+                         OR (b.blocker_id = c.user_id AND b.blocked_id = me.user_id))
     ORDER BY
       CASE WHEN c.embedding_model = me.embedding_model THEN c.embedding <=> me.embedding END,
       md5($6 || c.user_id::text)

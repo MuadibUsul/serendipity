@@ -166,6 +166,21 @@ describe("recall", () => {
     }
   });
 
+  it("leaves out two people who blocked each other, and anyone held after a high-risk report", async () => {
+    const { me, them } = await town(3);
+    const [blockedOne, heldOne] = them as [string, string];
+    await admin.query("INSERT INTO app.user_blocks (blocker_id, blocked_id) VALUES ($1, $2)", [
+      blockedOne,
+      me,
+    ]);
+    await admin.query("UPDATE app.users SET match_hold_at = now() WHERE id = $1", [heldOne]);
+    const got = await recall.recall(me, QUERY);
+    expect(got).not.toContain(blockedOne);
+    expect(got).not.toContain(heldOne);
+    expect((await recall.recall(blockedOne, QUERY)).includes(me)).toBe(false);
+    expect(await recall.recall(heldOne, QUERY)).toEqual([]);
+  });
+
   it("never leaves out a pair decidePair passes", async () => {
     let passes = 0;
     for (const person of city.slice(0, 40)) {

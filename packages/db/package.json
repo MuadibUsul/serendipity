@@ -33,6 +33,10 @@
       "types": "./src/reveal.ts",
       "default": "./src/reveal.ts"
     },
+    "./safety": {
+      "types": "./src/safety.ts",
+      "default": "./src/safety.ts"
+    },
     "./relationships": {
       "types": "./src/relationships.ts",
       "default": "./src/relationships.ts"
@@ -77,6 +81,7 @@
     "@serendipity/feedback": "0.0.0",
     "@serendipity/identity": "0.0.0",
     "@serendipity/relationships": "0.0.0",
+    "@serendipity/safety": "0.0.0",
     "@serendipity/invitations": "0.0.0",
     "@serendipity/matching": "0.0.0",
     "@serendipity/media": "0.0.0",

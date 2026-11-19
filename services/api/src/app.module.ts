@@ -8,6 +8,7 @@ import type {
   InvitationRepository,
   RelationshipRepository,
   RevealRepository,
+  SafetyRepository,
 } from "@serendipity/db";
 
 import { AccountController } from "./account.controller.js";
@@ -18,6 +19,7 @@ import type { Callers } from "./callers.js";
 import { HealthController } from "./health.controller.js";
 import { InvitationsController } from "./invitations.controller.js";
 import { RelationshipsController } from "./relationships.controller.js";
+import { SafetyController } from "./safety.controller.js";
 import type { Lifecycle } from "./lifecycle.js";
 import type { Logger } from "./logging.js";
 import type { Metrics } from "./metrics.js";
@@ -35,6 +37,7 @@ import {
   READINESS,
   RELATIONSHIPS,
   REVEAL,
+  SAFETY,
 } from "./tokens.js";
 
 /** The signed-in person's endpoints and what they need: invitations (ser-p04-02), pause and resume (ser-p05-04). */
@@ -48,6 +51,8 @@ export interface InvitationsDeps {
   readonly relationships?: RelationshipRepository;
   /** Left out, the card endpoints are not served (ADR-0021). */
   readonly reveal?: RevealRepository;
+  /** Left out, the report endpoints are not served (ADR-0022). */
+  readonly safety?: SafetyRepository;
   readonly callers: Callers;
   readonly clock?: () => Date;
 }
@@ -83,6 +88,7 @@ export class AppModule {
         ...(deps.invitations?.feedback === undefined ? [] : [FeedbackController]),
         ...(deps.invitations?.relationships === undefined ? [] : [RelationshipsController]),
         ...(deps.invitations?.reveal === undefined ? [] : [CardsController]),
+        ...(deps.invitations?.safety === undefined ? [] : [SafetyController]),
         ...(deps.auth === undefined ? [] : [AuthController]),
       ],
       providers: [
@@ -109,6 +115,9 @@ export class AppModule {
               ...(deps.invitations.reveal === undefined
                 ? []
                 : [{ provide: REVEAL, useValue: deps.invitations.reveal }]),
+              ...(deps.invitations.safety === undefined
+                ? []
+                : [{ provide: SAFETY, useValue: deps.invitations.safety }]),
             ]),
       ],
     };

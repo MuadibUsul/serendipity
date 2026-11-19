@@ -10,6 +10,7 @@ import { INVITE_LIFECYCLE } from "@serendipity/invitations";
 import { MEDIA_LIFECYCLE } from "@serendipity/media";
 import { DELETION_LIFECYCLE } from "@serendipity/privacy";
 import { VERSION_LIFECYCLE } from "@serendipity/profile";
+import { REPORT_LIFECYCLE } from "@serendipity/safety";
 
 export const LIFECYCLES: readonly {
   readonly lifecycle: Lifecycle<string>;
@@ -22,6 +23,7 @@ export const LIFECYCLES: readonly {
   { lifecycle: MEDIA_LIFECYCLE, source: "packages/media/src/lifecycle.ts" },
   { lifecycle: CHALLENGE_LIFECYCLE, source: "packages/auth/src/lifecycle.ts" },
   { lifecycle: SESSION_LIFECYCLE, source: "packages/auth/src/lifecycle.ts" },
+  { lifecycle: REPORT_LIFECYCLE, source: "packages/safety/src/reports.ts" },
 ];
 
 export const GENERATED_START = "<!-- generated:lifecycles:start -->";

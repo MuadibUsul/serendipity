@@ -1,0 +1,19 @@
+{
+  "name": "@serendipity/safety",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Reports, risk tiers, staff decisions and appeals: who is held, who is told what. Pure.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@serendipity/domain": "0.0.0"
+  }
+}

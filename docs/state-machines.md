@@ -156,6 +156,21 @@ stateDiagram-v2
   revoked --> [*]
 ```
 
+### `app.safety_reports.status`
+
+Declared in `packages/safety/src/reports.ts`; the database enforces it with `app.guard_transition`.
+Starts as `open`; final: `dismissed`, `overturned`.
+
+```mermaid
+stateDiagram-v2
+  [*] --> open
+  open --> actioned
+  open --> dismissed
+  actioned --> overturned
+  dismissed --> [*]
+  overturned --> [*]
+```
+
 <!-- generated:lifecycles:end -->
 
 ## In the app
