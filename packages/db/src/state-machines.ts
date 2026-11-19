@@ -3,18 +3,25 @@
 // state-machines.test.ts fails when the file and the tables disagree, so the
 // map an agent or a person reads is always the one the code and the database
 // enforce.
+import { CHALLENGE_LIFECYCLE, SESSION_LIFECYCLE } from "@serendipity/auth";
 import type { Lifecycle } from "@serendipity/domain";
+import { ACCOUNT_LIFECYCLE } from "@serendipity/identity";
 import { INVITE_LIFECYCLE } from "@serendipity/invitations";
 import { MEDIA_LIFECYCLE } from "@serendipity/media";
+import { DELETION_LIFECYCLE } from "@serendipity/privacy";
 import { VERSION_LIFECYCLE } from "@serendipity/profile";
 
 export const LIFECYCLES: readonly {
   readonly lifecycle: Lifecycle<string>;
   readonly source: string;
 }[] = [
+  { lifecycle: ACCOUNT_LIFECYCLE, source: "packages/identity/src/account.ts" },
+  { lifecycle: DELETION_LIFECYCLE, source: "packages/privacy/src/lifecycle.ts" },
   { lifecycle: INVITE_LIFECYCLE, source: "packages/invitations/src/lifecycle.ts" },
   { lifecycle: VERSION_LIFECYCLE, source: "packages/profile/src/lifecycle.ts" },
   { lifecycle: MEDIA_LIFECYCLE, source: "packages/media/src/lifecycle.ts" },
+  { lifecycle: CHALLENGE_LIFECYCLE, source: "packages/auth/src/lifecycle.ts" },
+  { lifecycle: SESSION_LIFECYCLE, source: "packages/auth/src/lifecycle.ts" },
 ];
 
 export const GENERATED_START = "<!-- generated:lifecycles:start -->";
@@ -25,7 +32,7 @@ function render(lifecycle: Lifecycle<string>, source: string): string {
   return [
     `### \`${lifecycle.name}\``,
     "",
-    `Declared in \`${source}\`; enforced by \`app.guard_transition\` (migration 0009).`,
+    `Declared in \`${source}\`; the database enforces it with \`app.guard_transition\`.`,
     `Starts as \`${lifecycle.initial}\`; final: ${terminal.map((state) => `\`${state}\``).join(", ")}.`,
     "",
     "```mermaid",

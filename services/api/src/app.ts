@@ -7,6 +7,7 @@ import type { IncomingMessage } from "node:http";
 import { NestFactory } from "@nestjs/core";
 import { FastifyAdapter } from "@nestjs/platform-fastify";
 import type { NestFastifyApplication } from "@nestjs/platform-fastify";
+import type { AuthService } from "@serendipity/auth";
 import type { Environment } from "@serendipity/config";
 import { redactText } from "@serendipity/redact";
 
@@ -45,6 +46,8 @@ export interface ApiOptions {
   readonly readiness: Readiness;
   /** The invitation endpoints; left out, only the probes are served. */
   readonly invitations?: InvitationsDeps;
+  /** Sign-in; left out, not served; `null`, answered with 503. */
+  readonly auth?: AuthService | null;
 }
 
 export interface Api {
@@ -54,7 +57,13 @@ export interface Api {
 }
 
 /** Builds the service, initialised but not listening (tests call `app.inject`-style). */
-export async function createApi({ env, logger, readiness, invitations }: ApiOptions): Promise<Api> {
+export async function createApi({
+  env,
+  logger,
+  readiness,
+  invitations,
+  auth,
+}: ApiOptions): Promise<Api> {
   const lifecycle = new Lifecycle();
   const metrics = createMetrics(
     env,
@@ -101,6 +110,7 @@ export async function createApi({ env, logger, readiness, invitations }: ApiOpti
       lifecycle,
       logger,
       ...(invitations === undefined ? {} : { invitations }),
+      ...(auth === undefined ? {} : { auth }),
     }),
     adapter,
     { logger: new NestLogger(logger), abortOnError: false },

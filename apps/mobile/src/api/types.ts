@@ -49,7 +49,7 @@ export interface Home {
   readonly me: Me;
 }
 
-export type SignInProblem = "invalid_phone" | "invalid_code" | "unavailable";
+export type SignInProblem = "invalid_phone" | "invalid_code" | "rate_limited" | "unavailable";
 
 export type CodeResult =
   { readonly ok: true } | { readonly ok: false; readonly problem: SignInProblem };

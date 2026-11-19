@@ -15,6 +15,8 @@ export type { AnswerOutcome, InvitationRepository } from "./invitations.js";
 export { ProfileNotApprovable, ProfileVersionLocked, pgProfileRepository } from "./profile.js";
 export type { Actor, ProfileRepository, ProfileVersion, VersionState } from "./profile.js";
 export { pgMediaRepository } from "./media.js";
+export { pgVisionRepository } from "./vision.js";
+export { pgPrivacyRepository } from "./privacy.js";
 export type { Queryable } from "./queryable.js";
 export { insertWebhookEvent, seedDataset, webhookRow } from "./seed.js";
 export { EMBEDDING_DIMENSIONS, EmbeddingRefused, pgRecallRepository } from "./recall.js";
@@ -25,3 +27,4 @@ export type {
   RecallRepository,
   RefreshOutcome,
 } from "./recall.js";
+export { pgAuthRepository } from "./auth.js";

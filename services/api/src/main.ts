@@ -5,13 +5,17 @@ import "reflect-metadata";
 import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
+import { DEV_CODE, createAuthService, createFakeSms, createHasher } from "@serendipity/auth";
+import type { AuthService } from "@serendipity/auth";
 import { formatProblems } from "@serendipity/config";
+import type { Environment } from "@serendipity/config";
+import { pgAuthRepository } from "@serendipity/db/auth";
 import { pgInvitationRepository } from "@serendipity/db/invitations";
 import { knownMigrations } from "@serendipity/db/migration-status";
 import pg from "pg";
 
 import { createApi } from "./app.js";
-import { devHeaderCallers } from "./callers.js";
+import { sessionCallers } from "./callers.js";
 import { createLogger, revealsErrorMessages, safeError } from "./logging.js";
 import { databaseReadiness } from "./readiness.js";
 import { loadApiSettings } from "./settings.js";
@@ -25,13 +29,29 @@ const MIGRATIONS_DIR = fileURLToPath(new URL("../../../infra/migrations", import
 /** After this long past the drain delay, a shutdown that has not finished exits anyway. */
 const SHUTDOWN_TIMEOUT_MS = 10_000;
 
+/**
+ * Sign-in for this environment. Dev and test send nothing: the fake SMS
+ * keeps the code, which is always 000000 so a person can sign in by hand.
+ * Staging and prod have no SMS provider yet, so they have no sign-in (503)
+ * rather than ever the fake.
+ */
+function signIn(env: Environment, pool: pg.Pool, secret: string): AuthService | null {
+  if (env !== "dev" && env !== "test") return null;
+  return createAuthService({
+    repository: pgAuthRepository(pool),
+    sms: createFakeSms(),
+    hasher: createHasher(secret),
+    codes: () => DEV_CODE,
+  });
+}
+
 async function main(): Promise<void> {
   const loaded = loadApiSettings(process.env);
   if (!loaded.ok) {
     process.stderr.write(`${formatProblems(loaded.problems)}\n`);
     process.exit(1);
   }
-  const { app: config, port, host, shutdownDelayMs } = loaded.settings;
+  const { app: config, port, host, shutdownDelayMs, authSecret } = loaded.settings;
   const logger = createLogger(config.logLevel);
   const withMessages = revealsErrorMessages(config.env);
 
@@ -53,14 +73,15 @@ async function main(): Promise<void> {
   const readiness = databaseReadiness(pool, known, (check, error) => {
     logger.debug({ check, err: safeError(error, withMessages) }, "readiness check failed");
   });
+  const auth = signIn(config.env, pool, authSecret);
   const api = await createApi({
     env: config.env,
     logger,
     readiness,
+    auth,
     invitations: {
       repository: pgInvitationRepository(pool),
-      // Until real sign-in exists, deployed environments refuse every caller.
-      callers: devHeaderCallers(config.env),
+      callers: sessionCallers(config.env, auth),
     },
   });
   await api.app.listen({ port, host });

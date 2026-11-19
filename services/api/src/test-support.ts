@@ -1,4 +1,5 @@
 // Helpers for the API's test suites.
+import type { AuthService } from "@serendipity/auth";
 import type { Environment } from "@serendipity/config";
 
 import { createApi } from "./app.js";
@@ -50,6 +51,7 @@ export async function testApi(
   readiness: Readiness,
   env: Environment = "test",
   invitations?: InvitationsDeps,
+  auth?: AuthService | null,
 ): Promise<Api & ReturnType<typeof captureLogs>> {
   const logs = captureLogs();
   const api = await createApi({
@@ -57,6 +59,7 @@ export async function testApi(
     logger: logs.logger,
     readiness,
     ...(invitations === undefined ? {} : { invitations }),
+    ...(auth === undefined ? {} : { auth }),
   });
   return { ...api, ...logs };
 }

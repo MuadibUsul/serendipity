@@ -5,6 +5,8 @@
 
 export const PROBLEMS = {
   invalid_request: { status: 400, title: "Invalid request" },
+  /** Sign-in: the code is wrong, expired, spent or locked; which, is not said. */
+  invalid_code: { status: 400, title: "Wrong or expired code" },
   unauthenticated: { status: 401, title: "Authentication required" },
   forbidden: { status: 403, title: "Not allowed" },
   not_found: { status: 404, title: "Not found" },
@@ -52,9 +54,11 @@ export interface Problem {
   readonly trace_id?: string;
 }
 
-const BY_STATUS = new Map<number, ProblemCode>(
-  Object.entries(PROBLEMS).map(([code, { status }]) => [status, code as ProblemCode]),
-);
+/** The general code for each status: the first one listed, so `invalid_code` never stands in for 400. */
+const BY_STATUS = new Map<number, ProblemCode>();
+for (const [code, { status }] of Object.entries(PROBLEMS)) {
+  if (!BY_STATUS.has(status)) BY_STATUS.set(status, code as ProblemCode);
+}
 
 /** The code for an HTTP status raised outside our own errors (routing, body limits, Nest built-ins). */
 export function codeForStatus(status: number): ProblemCode {
