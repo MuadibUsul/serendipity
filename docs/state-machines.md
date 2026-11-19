@@ -103,6 +103,13 @@ stateDiagram-v2
 - **Home data** (`apps/mobile/src/App.tsx`, `useHome`): `loading` → `ready` | `failed`, and
   `failed` → `loading` on retry.
 
+## Between the agents
+
+The **A2A negotiation** (`packages/a2a-protocol/src/negotiation.ts`, `step`): a pure reducer over messages,
+model calls and clock ticks. At most three questions per side, one at a time; a side proposes
+once; both proposals decide the verdict; time or model calls running out is `NO_DECISION`.
+A refused event leaves the state unchanged and names why.
+
 ## Derived, not stored
 
 These are computed from other state each time and have no transitions of their own:
@@ -121,7 +128,10 @@ its lifecycle and adds it to the guard in the same change:
 - `app.users.status`
 - `app.venues.status`
 - `app.venue_slots.status`
-- `app.negotiations.status`
+- `app.negotiations.status`: its lifecycle is already declared as `NEGOTIATION_LIFECYCLE`
+  (`packages/a2a-protocol/src/negotiation.ts`; `RUNNING` → `PASS` | `REJECT` | `NEEDS_USER_CLARIFICATION`
+  | `NO_DECISION`, all final; a retry is a new attempt row). The negotiation worker (ser-p03-05)
+  adds its guard.
 - `app.payment_orders.state`
 - `app.refunds.state`
 
