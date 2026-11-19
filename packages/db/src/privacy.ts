@@ -103,6 +103,8 @@ export function pgPrivacyRepository(pool: pg.Pool): PrivacyRepository {
           feedback: await rows(`SELECT date_id AS "dateId", mutual_interest AS "mutualInterest",
             comfort_rating AS "comfortRating", safety_flag AS "safetyFlag"
             FROM app.post_date_feedback WHERE user_id = $1 ORDER BY created_at`),
+          sentMessages: await rows(`SELECT relationship_id AS "relationshipId", body,
+            created_at AS "sentAt" FROM app.chat_messages WHERE sender_id = $1 ORDER BY created_at`),
           auditHistory: await rows(`SELECT action, at FROM app.audit_events
             WHERE (actor_type = 'user' AND actor_id = $1)
               OR (object_type = 'user' AND object_id = $1) ORDER BY at`),
@@ -244,6 +246,12 @@ async function finalizeDeletion(pool: pg.Pool, userId: string): Promise<Deletion
         OR (aggregate_type = 'user' AND aggregate_id = $1)
         OR (aggregate_type = 'candidate_pair' AND aggregate_id IN
           (SELECT id FROM app.candidate_pairs WHERE user_a = $1 OR user_b = $1))`,
+      [userId],
+    );
+    // Both people's messages go with the relationship: it cannot outlive either of them.
+    await db.query(
+      `DELETE FROM app.chat_messages WHERE relationship_id IN
+       (SELECT id FROM app.relationships WHERE user_a = $1 OR user_b = $1)`,
       [userId],
     );
     await db.query(`DELETE FROM app.relationships WHERE user_a = $1 OR user_b = $1`, [userId]);

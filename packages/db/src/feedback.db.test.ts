@@ -53,7 +53,7 @@ async function date(status = "POST_DATE_FEEDBACK") {
 }
 
 describe("private feedback", () => {
-  it("opens a relationship only when both say yes, and never chat by itself", async () => {
+  it("opens a relationship, and its chat, only when both say yes", async () => {
     const { a, b, id } = await date();
     expect(await feedback.submit(a, id, yes, DURING)).toEqual({
       kind: "answered",
@@ -72,7 +72,7 @@ describe("private feedback", () => {
       "SELECT chat_open, mutual_opt_in_at IS NOT NULL AS opted FROM app.relationships WHERE date_id = $1",
       [id],
     );
-    expect(rows).toEqual([{ chat_open: false, opted: true }]);
+    expect(rows).toEqual([{ chat_open: true, opted: true }]);
   });
 
   it("keeps a 'no' indistinguishable from silence, and opens nothing", async () => {

@@ -133,8 +133,8 @@ export function pgFeedbackRepository(pool: TransactionPool & Queryable): Feedbac
           if (isMutual(next.mine, next.theirs)) {
             const [a, b] = state.users;
             await tx.db.query(
-              `INSERT INTO app.relationships (date_id, user_a, user_b, mutual_opt_in_at)
-               VALUES ($1, $2, $3, $4) ON CONFLICT (date_id) DO NOTHING`,
+              `INSERT INTO app.relationships (date_id, user_a, user_b, mutual_opt_in_at, chat_open)
+               VALUES ($1, $2, $3, $4, true) ON CONFLICT (date_id) DO NOTHING`,
               [dateId, a, b, now],
             );
             await audit(tx, "relationship.mutual_opt_in", null, dateId);
