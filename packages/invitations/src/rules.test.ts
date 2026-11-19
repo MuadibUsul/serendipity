@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { decideAnswer, expireInvitations, openInvitations } from "./rules.js";
+import { invitationView } from "./view.js";
 import { DEADLINE, NOW, invitedDate, record } from "./test-support.js";
 
 const LATER = new Date(DEADLINE.getTime() + 1);
@@ -94,11 +95,38 @@ describe("decideAnswer: decline", () => {
     });
   });
 
-  it("refuses after the deadline and once both accepted (cancelling is another flow)", () => {
+  it("refuses after the deadline while the invitation is still open", () => {
     expect(decideAnswer(record(), "decline", LATER)).toEqual({ ok: false, refusal: "expired" });
+  });
+});
+
+describe("decideAnswer: cancelling a date both accepted", () => {
+  const both = () => invitedDate(["A", "B"]);
+
+  it("cancels it with no money involved, whenever it is asked, and leaves the other invitation alone", () => {
+    const decision = decideAnswer(record({ status: "accepted", date: both() }), "decline", LATER);
+    expect(decision).toMatchObject({
+      ok: true,
+      changed: true,
+      inviteStatus: "declined",
+      withdrawOther: false,
+    });
+    expect(decision.ok && decision.date.state).toBe("CANCELLED_BEFORE_PAYMENT");
+  });
+
+  it("shows the other person only that the date is off", () => {
+    const decision = decideAnswer(record({ status: "accepted", date: both() }), "decline", NOW);
+    if (!decision.ok) throw new Error("refused");
+    const other = record({ party: "B", status: "accepted", date: decision.date });
+    expect(invitationView(other, NOW).status).toBe("closed");
+  });
+
+  it("treats a second cancel as the same request", () => {
+    const first = decideAnswer(record({ status: "accepted", date: both() }), "decline", NOW);
+    if (!first.ok) throw new Error("refused");
     expect(
-      decideAnswer(record({ status: "accepted", date: invitedDate(["A", "B"]) }), "decline", NOW),
-    ).toEqual({ ok: false, refusal: "closed" });
+      decideAnswer(record({ status: "declined", date: first.date }), "decline", NOW),
+    ).toMatchObject({ ok: true, changed: false });
   });
 });
 

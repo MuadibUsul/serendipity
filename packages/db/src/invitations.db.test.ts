@@ -115,6 +115,23 @@ describe("accept", () => {
     expect(await stateOf(f.dateId)).toEqual(before);
   });
 
+  it("cancels a date both accepted, after the deadline too, and frees both people's time", async () => {
+    const f = await invited();
+    await invitations.answer(f.userA, f.dateId, "accept", NOW);
+    await invitations.answer(f.userB, f.dateId, "accept", NOW);
+    const cancelled = await invitations.answer(f.userA, f.dateId, "decline", AFTER);
+    expect(cancelled).toMatchObject({ kind: "answered", changed: true });
+    expect((await stateOf(f.dateId))?.status).toBe("CANCELLED_BEFORE_PAYMENT");
+    expect(await invitesOf(f.dateId)).toEqual({ [f.userA]: "declined", [f.userB]: "accepted" });
+    const other = await invitations.forUserDate(f.userB, f.dateId);
+    expect(other?.date.state).toBe("CANCELLED_BEFORE_PAYMENT");
+    const { rows } = await admin.query<{ holds: boolean }>(
+      "SELECT bool_or(holds_time) AS holds FROM app.date_participants WHERE date_id = $1",
+      [f.dateId],
+    );
+    expect(rows[0]?.holds).toBe(false);
+  });
+
   it("takes two answers at the same moment one after the other", async () => {
     const f = await invited();
     const [a, b] = await Promise.all([
