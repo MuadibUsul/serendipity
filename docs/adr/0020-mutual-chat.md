@@ -31,3 +31,16 @@
   this.
 - A block here closes one relationship. It does not yet stop the two people being matched again.
   Feeding blocks into `decidePair`'s `blockedIds` belongs to report and ban (`ser-p05-05`).
+
+## Amendment (2026-11-19): swapping contact details (`ser-p05-03`)
+
+People are never kept inside the app, and their phone number or WeChat is never shown on its own
+initiative.
+
+- Either person may offer a contact card (WeChat, phone or other, one short line) while chat is
+  open. The phone number used to sign in is never used.
+- Each card is shown only once both have offered one, so nobody gives theirs and is left
+  waiting. An offer can be withdrawn until then. Cards already swapped stay swapped.
+- Leaving or blocking hides both cards.
+- Audits name the kind of card, never its value.
+- A person's data export lists the cards they offered. Deleting either account deletes both cards.

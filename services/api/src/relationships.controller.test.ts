@@ -33,6 +33,13 @@ async function start(outcome?: SendOutcome) {
         outcome ?? { kind: "sent", message: { id: "m2", mine: true, body: args[2], sentAt: NOW } },
       );
     },
+    contact: (userId, id) =>
+      Promise.resolve(userId === ME && id === REL ? { status: "invited" } : null),
+    offerContact: (...args) => {
+      calls.push(["offer", ...args.slice(0, 3)]);
+      return Promise.resolve({ status: "waiting", mine: args[2] });
+    },
+    withdrawContact: () => Promise.resolve("swapped"),
     close: (...args) => {
       calls.push(["close", ...args]);
       return Promise.resolve(args[1] === REL);
@@ -141,5 +148,29 @@ describe("chat endpoints", () => {
       headers: as,
     });
     expect(other.statusCode).toBe(404);
+  });
+
+  it("offers a contact card, refuses a malformed one, and will not take back a swapped card", async () => {
+    const { app, calls } = await start();
+    const url = `/v1/relationships/${REL}/contact`;
+    expect((await app.inject({ method: "GET", url, headers: as })).json()).toEqual({
+      status: "invited",
+    });
+    const bad = await app.inject({
+      method: "PUT",
+      url,
+      headers: as,
+      payload: { kind: "email", value: "x" },
+    });
+    expect(bad.statusCode).toBe(400);
+    const ok = await app.inject({
+      method: "PUT",
+      url,
+      headers: as,
+      payload: { kind: "wechat", value: " me " },
+    });
+    expect(ok.json()).toEqual({ status: "waiting", mine: { kind: "wechat", value: "me" } });
+    expect(calls[0]).toEqual(["offer", ME, REL, { kind: "wechat", value: "me" }]);
+    expect((await app.inject({ method: "DELETE", url, headers: as })).statusCode).toBe(409);
   });
 });

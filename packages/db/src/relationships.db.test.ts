@@ -158,6 +158,7 @@ describe("chat", () => {
     const { a, b, id } = await couple();
     await chat.send(a, id, "hi", NOW);
     await chat.send(b, id, "hello", LATER);
+    await chat.offerContact(a, id, { kind: "wechat", value: "a_wx" }, NOW);
     const privacy = pgPrivacyRepository(pool);
     await privacy.requestDeletion(b);
     expect(await privacy.claimDeletion(b)).toBe(true);
@@ -166,6 +167,51 @@ describe("chat", () => {
       id,
     ]);
     expect(left.rowCount).toBe(0);
+    const cards = await admin.query("SELECT 1 FROM app.contact_offers WHERE relationship_id = $1", [
+      id,
+    ]);
+    expect(cards.rowCount).toBe(0);
     expect(await chat.forUser(a)).toEqual([]);
+  });
+
+  it("swaps contact cards only once both offered, and hides them after leaving", async () => {
+    const { a, b, id } = await couple();
+    const wx = { kind: "wechat" as const, value: "a_wx" };
+    const phone = { kind: "phone" as const, value: "139 0000 0000" };
+    expect(await chat.offerContact(a, id, wx, NOW)).toEqual({ status: "waiting", mine: wx });
+    expect(await chat.contact(b, id)).toEqual({ status: "invited" });
+    expect(JSON.stringify(await chat.contact(b, id))).not.toContain("a_wx");
+    expect(await chat.offerContact(b, id, phone, NOW)).toEqual({
+      status: "swapped",
+      mine: phone,
+      theirs: wx,
+    });
+    expect(await chat.contact(a, id)).toEqual({ status: "swapped", mine: wx, theirs: phone });
+    expect(await chat.withdrawContact(a, id)).toBe("swapped");
+    expect(await chat.offerContact(a, id, wx, NOW)).toBe("swapped");
+    await chat.close(b, id, "leave", NOW);
+    expect(await chat.contact(a, id)).toEqual({ status: "closed" });
+  });
+
+  it("lets an offer be withdrawn before the swap, and refuses offers into a closed chat", async () => {
+    const { a, b, id } = await couple();
+    await chat.offerContact(a, id, { kind: "wechat", value: "a_wx" }, NOW);
+    expect(await chat.withdrawContact(a, id)).toEqual({ status: "none" });
+    expect(await chat.contact(b, id)).toEqual({ status: "none" });
+    await chat.close(a, id, "block", NOW);
+    expect(await chat.offerContact(b, id, { kind: "wechat", value: "b_wx" }, NOW)).toBe("closed");
+    const stranger = await couple();
+    expect(await chat.contact(stranger.a, id)).toBeNull();
+  });
+
+  it("never puts a contact value in the audit", async () => {
+    const { a, id } = await couple();
+    await chat.offerContact(a, id, { kind: "wechat", value: "secret_wx" }, NOW);
+    const { rows } = await admin.query(
+      "SELECT action, metadata_redacted FROM app.audit_events WHERE object_id = $1",
+      [id],
+    );
+    expect(JSON.stringify(rows)).toContain("relationship.contact.offered");
+    expect(JSON.stringify(rows)).not.toContain("secret_wx");
   });
 });

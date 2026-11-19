@@ -1,18 +1,20 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Header,
   HttpCode,
   Inject,
   Param,
   Post,
+  Put,
   Query,
   Req,
 } from "@nestjs/common";
 import type { ChatMessage, RelationshipRepository, RelationshipSummary } from "@serendipity/db";
-import { parseMessageBody } from "@serendipity/relationships";
-import type { ChatRefusal } from "@serendipity/relationships";
+import { parseContact, parseMessageBody } from "@serendipity/relationships";
+import type { ChatRefusal, ContactView } from "@serendipity/relationships";
 import type { FastifyRequest } from "fastify";
 
 import type { Callers } from "./callers.js";
@@ -127,6 +129,50 @@ export class RelationshipsController {
     if (outcome.kind === "sent") return messageBody(outcome.message);
     if (outcome.kind === "refused") throw REFUSED[outcome.refusal]();
     throw new ApiError("not_found");
+  }
+
+  /** The contact swap: each card is shown only once both have offered one. */
+  @Get(":id/contact")
+  @Header("cache-control", "no-store")
+  async contact(@Req() request: FastifyRequest, @Param("id") id: string): Promise<ContactView> {
+    const caller = await this.caller(request);
+    const view = isUuid(id) ? await this.relationships.contact(caller, id) : null;
+    if (view === null) throw new ApiError("not_found");
+    return view;
+  }
+
+  @Put(":id/contact")
+  @Header("cache-control", "no-store")
+  async offer(
+    @Req() request: FastifyRequest,
+    @Param("id") id: string,
+    @Body() body: unknown,
+  ): Promise<ContactView> {
+    const caller = await this.caller(request);
+    if (!isUuid(id)) throw new ApiError("not_found");
+    const read = (name: string) =>
+      typeof body === "object" && body !== null
+        ? (body as Record<string, unknown>)[name]
+        : undefined;
+    const parsed = parseContact(read("kind"), read("value"));
+    if (!parsed.ok)
+      throw new ApiError("invalid_request", "Choose wechat, phone or other, and one short line.");
+    const outcome = await this.relationships.offerContact(caller, id, parsed.card, this.clock());
+    if (outcome === null) throw new ApiError("not_found");
+    if (outcome === "closed") throw new ApiError("gone", "This chat has closed.");
+    if (outcome === "swapped") throw new ApiError("conflict", "You have already swapped cards.");
+    return outcome;
+  }
+
+  @Delete(":id/contact")
+  @Header("cache-control", "no-store")
+  async withdraw(@Req() request: FastifyRequest, @Param("id") id: string): Promise<ContactView> {
+    const caller = await this.caller(request);
+    const outcome = isUuid(id) ? await this.relationships.withdrawContact(caller, id) : null;
+    if (outcome === null) throw new ApiError("not_found");
+    if (outcome === "swapped")
+      throw new ApiError("conflict", "Cards already swapped cannot be taken back.");
+    return outcome;
   }
 
   @Post(":id/leave")

@@ -15,3 +15,11 @@ export {
   stillShown,
 } from "./reveal.js";
 export type { Card, Category, DeckSettings, FlipRefusal, FlipState } from "./reveal.js";
+export {
+  CONTACT_KINDS,
+  MAX_CONTACT_LENGTH,
+  contactView,
+  mayWithdraw,
+  parseContact,
+} from "./contact.js";
+export type { ContactCard, ContactKind, ContactView, ParsedContact } from "./contact.js";
