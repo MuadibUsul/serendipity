@@ -114,7 +114,6 @@ export function buildCity(options: CityOptions): CityPerson[] {
           "self.availability": availability(rng),
           "seeking.age_range": { min: lower, max: Math.max(lower, age + rng.int(2, 8)) },
           "seeking.relationship_goals": accepts,
-          "seeking.max_distance_km": rng.int(3, 20),
           "seeking.dealbreakers": rng.next() < 0.3 ? some(rng, ["smoker", "night_owl"], 1) : [],
           "date.budget_per_person": { currency: "CNY", max_minor: rng.int(6, 25) * 1_000 },
         },

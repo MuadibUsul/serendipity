@@ -98,7 +98,6 @@ const candidateArb = (id: string): fc.Arbitrary<Candidate> =>
         "self.availability": toRaw(p.windows),
         "seeking.age_range": { min: p.min, max: p.min + p.span },
         "seeking.relationship_goals": p.accepts,
-        "seeking.max_distance_km": 10,
         "seeking.dealbreakers": p.dealbreakers,
         "date.budget_per_person": { currency: p.currency, max_minor: p.budget },
       }),

@@ -63,8 +63,10 @@ way in.
 |                                                       | `no_package` (pair)                                 |
 | No dealbreaker among the other's confirmed self tags  | `dealbreaker`                                       |
 
-`side` names the person whose gate or rule refused. `seeking.max_distance_km` must be present, but
-distance is checked against a venue when one is chosen (`ser-p03-02`).
+`side` names the person whose gate or rule refused. Distance is not a rule about people (ADR-0017).
+Only the same city region is required. Travel is weighed when the venue is chosen
+(`fairVenues` in `@serendipity/venues`). An older snapshot that still holds the retired
+`seeking.max_distance_km` is read, and the key is ignored.
 
 Shared time is counted within one day; a person's touching windows (10:00–11:00, 11:00–12:00) count
 as one stretch. Windows are local time in the pair's shared region.

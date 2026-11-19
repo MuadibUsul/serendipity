@@ -29,8 +29,6 @@ export interface HardRules {
   readonly availability: readonly WeeklyWindow[];
   readonly seekingAgeRange: { readonly min: number; readonly max: number };
   readonly seekingRelationshipGoals: readonly string[];
-  /** Enforced when a venue is chosen (ser-p03-02); required here so a broken snapshot is refused. */
-  readonly seekingMaxDistanceKm: number;
   /** Optional in the catalog: empty when the person confirmed none. */
   readonly seekingDealbreakers: readonly string[];
   readonly budgetPerPerson: Money;
@@ -43,11 +41,18 @@ export const RULE_KEYS = {
   "self.availability": true,
   "seeking.age_range": true,
   "seeking.relationship_goals": true,
-  "seeking.max_distance_km": true,
   "seeking.dealbreakers": false,
   "date.budget_per_person": true,
 } as const;
 export type RuleKey = keyof typeof RULE_KEYS;
+
+/**
+ * Keys that used to be hard rules and no longer are (ADR-0017): an older
+ * approved snapshot may still hold them, and they are read past, not refused.
+ * Distance became a soft preference (home area and commute) used only when
+ * the venue is chosen.
+ */
+export const RETIRED_RULE_KEYS: readonly string[] = ["seeking.max_distance_km"];
 
 export const REQUIRED_RULE_KEYS = (Object.keys(RULE_KEYS) as RuleKey[]).filter(
   (key) => RULE_KEYS[key],
@@ -122,10 +127,6 @@ function money(value: unknown): Money | undefined {
   return { currency, minor };
 }
 
-function distance(value: unknown): number | undefined {
-  return isWholeNumber(value) && value >= 1 ? value : undefined;
-}
-
 /**
  * The typed hard rules of an approved profile snapshot, or every reason it
  * cannot be used. `null` or `undefined` means the person has no approved
@@ -144,7 +145,11 @@ export function readHardRules(snapshot: unknown): RulesResult {
   }
   const raw = snapshot["hard_rules"];
   const problems: ProfileProblem[] = [];
-  if (Object.keys(raw).some((key) => !Object.hasOwn(RULE_KEYS, key))) {
+  if (
+    Object.keys(raw).some(
+      (key) => !Object.hasOwn(RULE_KEYS, key) && !RETIRED_RULE_KEYS.includes(key),
+    )
+  ) {
     problems.push({ code: "profile_rule_unknown" });
   }
 
@@ -165,7 +170,6 @@ export function readHardRules(snapshot: unknown): RulesResult {
   const seekingRelationshipGoals = read("seeking.relationship_goals", (value) =>
     strings(value, false),
   );
-  const seekingMaxDistanceKm = read("seeking.max_distance_km", distance);
   const dealbreakers = read("seeking.dealbreakers", (value) => strings(value, true));
   const budgetPerPerson = read("date.budget_per_person", money);
 
@@ -176,7 +180,6 @@ export function readHardRules(snapshot: unknown): RulesResult {
     availability === undefined ||
     seekingAgeRange === undefined ||
     seekingRelationshipGoals === undefined ||
-    seekingMaxDistanceKm === undefined ||
     budgetPerPerson === undefined
   ) {
     return { ok: false, problems };
@@ -189,7 +192,6 @@ export function readHardRules(snapshot: unknown): RulesResult {
       availability,
       seekingAgeRange,
       seekingRelationshipGoals,
-      seekingMaxDistanceKm,
       seekingDealbreakers: dealbreakers ?? [],
       budgetPerPerson,
     },

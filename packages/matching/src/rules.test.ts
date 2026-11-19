@@ -23,7 +23,6 @@ describe("readHardRules", () => {
         ],
         seekingAgeRange: { min: 25, max: 35 },
         seekingRelationshipGoals: ["long_term", "open_to_long_term"],
-        seekingMaxDistanceKm: 15,
         seekingDealbreakers: [],
         budgetPerPerson: { currency: "CNY", minor: 12_000 },
       },
@@ -69,12 +68,22 @@ describe("readHardRules", () => {
     expect([...REQUIRED_RULE_KEYS].sort()).toEqual([
       "date.budget_per_person",
       "seeking.age_range",
-      "seeking.max_distance_km",
       "seeking.relationship_goals",
       "self.availability",
       "self.city_region",
       "self.relationship_goal",
     ]);
+  });
+
+  it("reads an older snapshot that still holds the retired distance rule, and ignores it", () => {
+    const old = readHardRules(snapshot({ ...BASE_RULES, "seeking.max_distance_km": 15 }));
+    const now = readHardRules(snapshot(BASE_RULES));
+    expect(old).toEqual(now);
+    expect(old.ok).toBe(true);
+    // Even a value the old rule would have refused no longer matters.
+    expect(readHardRules(snapshot({ ...BASE_RULES, "seeking.max_distance_km": "far" }))).toEqual(
+      now,
+    );
   });
 
   it("refuses a hard rule it cannot enforce instead of ignoring it", () => {
@@ -103,8 +112,6 @@ describe("readHardRules", () => {
     ["seeking.relationship_goals", []],
     ["seeking.relationship_goals", "long_term"],
     ["seeking.relationship_goals", ["long_term", 3]],
-    ["seeking.max_distance_km", 0],
-    ["seeking.max_distance_km", "15"],
     ["seeking.dealbreakers", "smoking"],
     ["seeking.dealbreakers", [""]],
     ["date.budget_per_person", 12_000],
@@ -121,7 +128,7 @@ describe("readHardRules", () => {
 
   it("reports every problem, not only the first", () => {
     const result = readHardRules(
-      snapshot({ "self.city_region": "", "seeking.max_distance_km": 5, extra: 1 }),
+      snapshot({ "self.city_region": "", "seeking.dealbreakers": [], extra: 1 }),
     );
     expect(result.ok).toBe(false);
     expect(!result.ok && result.problems.map((problem) => problem.code).sort()).toEqual([

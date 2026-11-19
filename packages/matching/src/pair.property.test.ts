@@ -52,7 +52,6 @@ const rulesArb: fc.Arbitrary<RawRules> = fc.record({
   "self.availability": fc.array(windowArb, { minLength: 1, maxLength: 4 }),
   "seeking.age_range": rangeArb,
   "seeking.relationship_goals": fc.subarray(GOALS, { minLength: 1 }),
-  "seeking.max_distance_km": fc.integer({ min: 1, max: 100 }),
   "seeking.dealbreakers": fc.subarray(TAGS, { maxLength: 2 }),
   "date.budget_per_person": fc.record({
     currency: fc.constantFrom("CNY", "CNY", "CNY", "USD"),
@@ -242,8 +241,6 @@ const fitArb: fc.Arbitrary<Fit> = fc
     otherWindowsB: fc.array(windowArb, { maxLength: 2 }),
     budgetA: fc.constantFrom(8_800, 12_000),
     budgetB: fc.constantFrom(8_800, 12_000),
-    distanceA: fc.integer({ min: 1, max: 100 }),
-    distanceB: fc.integer({ min: 1, max: 100 }),
     split: fc.integer({ min: 1, max: 3 }),
   })
   .map((g) => {
@@ -263,7 +260,6 @@ const fitArb: fc.Arbitrary<Fit> = fc
       slack: [number, number],
       windows: RawWindow[],
       budget: number,
-      distance: number,
       dealbreakers: string[],
     ): Required<RawRules> => ({
       "self.city_region": g.region,
@@ -271,7 +267,6 @@ const fitArb: fc.Arbitrary<Fit> = fc
       "self.availability": windows,
       "seeking.age_range": { min: Math.max(18, otherAge - slack[0]), max: otherAge + slack[1] },
       "seeking.relationship_goals": [...new Set([otherGoal, ...extraGoals])],
-      "seeking.max_distance_km": distance,
       "seeking.dealbreakers": dealbreakers,
       "date.budget_per_person": { currency: "CNY", max_minor: budget },
     });
@@ -284,7 +279,6 @@ const fitArb: fc.Arbitrary<Fit> = fc
         g.slackA,
         [shared(g.extraA), ...g.otherWindowsA],
         g.budgetA,
-        g.distanceA,
         tagsA.slice(0, 1),
       ),
       b: rulesFor(
@@ -295,7 +289,6 @@ const fitArb: fc.Arbitrary<Fit> = fc
         g.slackB,
         [shared(g.extraB), ...g.otherWindowsB],
         g.budgetB,
-        g.distanceB,
         tagsB.slice(0, 1),
       ),
     };

@@ -193,10 +193,29 @@ export const FACTS = {
   "seeking.max_distance_km": {
     subject: "seeking",
     value: { kind: "int", min: 1, max: 100, unit: "km" },
-    required: true,
-    hard: true,
-    visibilities: ["matching", "private"],
-    about: "How far the person will travel to a date.",
+    required: false,
+    hard: false,
+    visibilities: ["private"],
+    about:
+      "Retired (ADR-0017): distance is no longer a hard rule. Kept so older profiles still read; use self.home_area and date.max_commute_minutes.",
+  },
+  "self.home_area": {
+    subject: "self",
+    value: { kind: "region", pattern: /^[A-Z]{2,4}_[A-Z0-9_]{2,24}$/ },
+    required: false,
+    hard: false,
+    visibilities: ["private"],
+    about:
+      "The district or business area the person usually spends time in (GZ_TIANHE), picked from a list; never an address. Only their own agent uses it.",
+  },
+  "date.max_commute_minutes": {
+    subject: "date",
+    value: { kind: "int", min: 10, max: 120, unit: "minutes" },
+    required: false,
+    hard: false,
+    visibilities: ["private"],
+    about:
+      "How long the person is happy to travel to a date. Soft: it can stretch for a pair that fits well (ADR-0017).",
   },
   "seeking.dealbreakers": {
     subject: "seeking",

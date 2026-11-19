@@ -19,7 +19,6 @@ export const BASE_RULES: RawRules = {
   ],
   "seeking.age_range": { min: 25, max: 35 },
   "seeking.relationship_goals": ["long_term", "open_to_long_term"],
-  "seeking.max_distance_km": 15,
   "date.budget_per_person": { currency: "CNY", max_minor: 12_000 },
 };
 
