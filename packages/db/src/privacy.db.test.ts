@@ -115,6 +115,28 @@ describe("self-service privacy data paths", () => {
       [pair, bob],
     );
 
+    for (const [user, phone] of [
+      [alice, "phone-alice"],
+      [bob, "phone-bob"],
+    ] as const) {
+      await pool.query(
+        `INSERT INTO app.auth_phone_accounts (phone_hash, user_id) VALUES ($1, $2)`,
+        [phone, user],
+      );
+      await pool.query(
+        `INSERT INTO app.auth_challenges (phone_hash, ip_hash, code_hash, expires_at, created_at)
+         VALUES ($1, 'ip', 'code', now() + interval '5 minutes', now())`,
+        [phone],
+      );
+      await pool.query(
+        `INSERT INTO app.auth_sessions (family_id, user_id, access_hash, access_expires_at,
+          refresh_hash, refresh_expires_at, created_at)
+         VALUES (gen_random_uuid(), $1, gen_random_uuid()::text, now() + interval '1 hour',
+          gen_random_uuid()::text, now() + interval '30 days', now())`,
+        [user],
+      );
+    }
+
     const mediaRepository = pgMediaRepository(pool);
     await mediaRepository.create({
       id: photo,
@@ -242,6 +264,15 @@ describe("self-service privacy data paths", () => {
       retainedSummary: { dates: 1, paymentOrders: 1 },
     });
     expect(objects.size).toBe(0);
+    for (const [table, column, own, other] of [
+      ["auth_phone_accounts", "user_id", alice, bob],
+      ["auth_sessions", "user_id", alice, bob],
+      ["auth_challenges", "phone_hash", "phone-alice", "phone-bob"],
+    ] as const) {
+      const sql = `SELECT count(*)::int AS count FROM app.${table} WHERE ${column} = $1`;
+      expect(await count(sql, [own])).toBe(0);
+      expect(await count(sql, [other])).toBe(1);
+    }
     expect(await privacy.processDeletion(alice)).toEqual(completed);
     expect(
       await count(`SELECT count(*)::int AS count FROM app.media_assets WHERE owner_user_id = $1`, [

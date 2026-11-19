@@ -270,6 +270,15 @@ async function finalizeDeletion(pool: pg.Pool, userId: string): Promise<Deletion
     await db.query(`DELETE FROM app.match_policies WHERE user_id = $1`, [userId]);
     await db.query(`DELETE FROM app.identity_attestations WHERE user_id = $1`, [userId]);
     await db.query(`DELETE FROM app.consent_grants WHERE user_id = $1`, [userId]);
+    // Sign-in: the hashed phone number, its codes and every session. The
+    // number is free again afterwards; a new sign-up is a new account.
+    await db.query(
+      `DELETE FROM app.auth_challenges WHERE phone_hash IN
+       (SELECT phone_hash FROM app.auth_phone_accounts WHERE user_id = $1)`,
+      [userId],
+    );
+    await db.query(`DELETE FROM app.auth_sessions WHERE user_id = $1`, [userId]);
+    await db.query(`DELETE FROM app.auth_phone_accounts WHERE user_id = $1`, [userId]);
     await db.query(
       `UPDATE app.users SET status = 'deleted', deleted_at = now(), updated_at = now()
        WHERE id = $1`,

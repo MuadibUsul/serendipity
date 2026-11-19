@@ -91,6 +91,9 @@ describe("schema contents", () => {
       [
         "account_deletion_requests",
         "audit_events",
+        "auth_challenges",
+        "auth_phone_accounts",
+        "auth_sessions",
         "candidate_pairs",
         "checkins",
         "consent_grants",

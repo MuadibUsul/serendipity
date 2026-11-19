@@ -27,3 +27,4 @@ export type {
   RecallRepository,
   RefreshOutcome,
 } from "./recall.js";
+export { pgAuthRepository } from "./auth.js";
