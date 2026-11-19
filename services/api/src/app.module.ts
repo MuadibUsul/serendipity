@@ -2,8 +2,9 @@ import { Module } from "@nestjs/common";
 import type { DynamicModule } from "@nestjs/common";
 
 import type { AuthService } from "@serendipity/auth";
-import type { InvitationRepository } from "@serendipity/db";
+import type { AccountRepository, InvitationRepository } from "@serendipity/db";
 
+import { AccountController } from "./account.controller.js";
 import { AuthController } from "./auth.controller.js";
 import type { Callers } from "./callers.js";
 import { HealthController } from "./health.controller.js";
@@ -13,6 +14,7 @@ import type { Logger } from "./logging.js";
 import type { Metrics } from "./metrics.js";
 import type { Readiness } from "./readiness.js";
 import {
+  ACCOUNT,
   AUTH,
   CALLERS,
   CLOCK,
@@ -23,9 +25,11 @@ import {
   READINESS,
 } from "./tokens.js";
 
-/** The invitation endpoints and what they need (ser-p04-02). */
+/** The signed-in person's endpoints and what they need: invitations (ser-p04-02), pause and resume (ser-p05-04). */
 export interface InvitationsDeps {
   readonly repository: InvitationRepository;
+  /** Left out, the pause and resume endpoints are not served. */
+  readonly account?: AccountRepository;
   readonly callers: Callers;
   readonly clock?: () => Date;
 }
@@ -57,6 +61,7 @@ export class AppModule {
       controllers: [
         HealthController,
         ...(deps.invitations === undefined ? [] : [InvitationsController]),
+        ...(deps.invitations?.account === undefined ? [] : [AccountController]),
         ...(deps.auth === undefined ? [] : [AuthController]),
       ],
       providers: [
@@ -71,6 +76,9 @@ export class AppModule {
               { provide: INVITATIONS, useValue: deps.invitations.repository },
               { provide: CALLERS, useValue: deps.invitations.callers },
               { provide: CLOCK, useValue: deps.invitations.clock ?? (() => new Date()) },
+              ...(deps.invitations.account === undefined
+                ? []
+                : [{ provide: ACCOUNT, useValue: deps.invitations.account }]),
             ]),
       ],
     };
