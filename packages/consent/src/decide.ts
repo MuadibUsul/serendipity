@@ -17,7 +17,9 @@ export type Recipient =
   | { readonly kind: "vision_provider" }
   | { readonly kind: "profile_extractor" }
   | { readonly kind: "matching_service" }
-  | { readonly kind: "venue"; readonly venueId: string };
+  | { readonly kind: "venue"; readonly venueId: string }
+  /** The deterministic venue filter (ARCH-001 §7.3 venue negotiation). */
+  | { readonly kind: "venue_filter" };
 
 export interface AccessRequest {
   /** The person the data is about. */
@@ -206,6 +208,7 @@ function actorOf(recipient: Recipient): Pick<AuditRecord, "actorType" | "actorId
     case "vision_provider":
     case "profile_extractor":
     case "matching_service":
+    case "venue_filter":
       return { actorType: "system", actorId: null };
     default:
       return assertNever(recipient, "recipient");

@@ -51,6 +51,38 @@ export const RELATIONSHIP_GOALS = [
   "unsure",
 ] as const;
 
+/** Food the person enjoys on a date (CHG-001 D4): soft, for ranking and choosing a venue. */
+export const TASTES = ["spicy", "mild", "light", "rich", "sweet", "sour", "savory"] as const;
+export const ATMOSPHERES = ["quiet", "lively", "cozy", "outdoor", "elegant", "casual"] as const;
+export const PRICE_BANDS = ["budget", "moderate", "upscale"] as const;
+
+/**
+ * What the person cannot or will not eat. These can reveal religion or
+ * health (PRD-001 §1.8, §8.2), so they are used ONLY to filter venues, never
+ * people: they are private, never a hard rule, never in the matching snapshot,
+ * stored only with the `dietary_restrictions` consent, and never guessed.
+ */
+export const DIETARY_RESTRICTIONS = [
+  "vegetarian",
+  "vegan",
+  "halal",
+  "kosher",
+  "no_pork",
+  "no_beef",
+  "no_alcohol",
+  "gluten_free",
+  "lactose_free",
+  "nut_allergy",
+  "shellfish_allergy",
+  "seafood_allergy",
+  "egg_allergy",
+] as const;
+export type DietaryRestriction = (typeof DIETARY_RESTRICTIONS)[number];
+
+/** Consent scopes a fact can depend on (see `@serendipity/consent` SCOPES). */
+export const FACT_CONSENT_SCOPES = ["dietary_restrictions"] as const;
+export type FactConsentScope = (typeof FACT_CONSENT_SCOPES)[number];
+
 export type ValueSpec =
   | { readonly kind: "choice"; readonly options: readonly string[] }
   | { readonly kind: "choices"; readonly options: readonly string[]; readonly maxItems: number }
@@ -71,6 +103,11 @@ export interface FactSpec {
   readonly hard: boolean;
   /** Allowed visibilities; the first is the default for a new fact. */
   readonly visibilities: readonly Visibility[];
+  /**
+   * A sensitive fact: stored and read only while the person holds this
+   * consent scope, and only ever from the person (never `inferred`).
+   */
+  readonly consent?: FactConsentScope;
   readonly about: string;
 }
 
@@ -221,6 +258,52 @@ export const FACTS = {
     visibilities: ["matching", "private"],
     about: "The most the person will pay for one date, in minor units (fen).",
   },
+  "date.cuisines": {
+    subject: "date",
+    value: { kind: "weighted_tags", maxItems: 12 },
+    required: false,
+    hard: false,
+    visibilities: MATCHING_FIRST,
+    about: "Cuisines the person enjoys (cantonese, sichuan, japanese, …), weighted; soft only.",
+  },
+  "date.tastes": {
+    subject: "date",
+    value: { kind: "choices", options: TASTES, maxItems: TASTES.length },
+    required: false,
+    hard: false,
+    visibilities: MATCHING_FIRST,
+    about: "Flavours the person likes; soft only.",
+  },
+  "date.atmosphere": {
+    subject: "date",
+    value: { kind: "choices", options: ATMOSPHERES, maxItems: ATMOSPHERES.length },
+    required: false,
+    hard: false,
+    visibilities: MATCHING_FIRST,
+    about: "The kind of place the person feels at ease in; soft only.",
+  },
+  "date.price_band": {
+    subject: "date",
+    value: { kind: "choice", options: PRICE_BANDS },
+    required: false,
+    hard: false,
+    visibilities: ["matching", "private"],
+    about: "The price level the person prefers; soft. The budget ceiling stays the hard rule.",
+  },
+  "date.dietary_restrictions": {
+    subject: "date",
+    value: {
+      kind: "choices",
+      options: DIETARY_RESTRICTIONS,
+      maxItems: DIETARY_RESTRICTIONS.length,
+    },
+    required: false,
+    hard: false,
+    visibilities: ["private"],
+    consent: "dietary_restrictions",
+    about:
+      "What the person cannot eat. Filters venues only, never people; private; needs its own consent.",
+  },
 } as const satisfies Record<string, FactSpec>;
 
 export type FactKey = keyof typeof FACTS;
@@ -233,4 +316,10 @@ export function isFactKey(key: string): key is FactKey {
 
 export function specOf(key: FactKey): FactSpec {
   return FACTS[key];
+}
+
+/** Keys that need a consent scope of their own, and which. */
+export function consentFor(key: FactKey): FactConsentScope | undefined {
+  const spec: FactSpec = FACTS[key];
+  return spec.consent;
 }

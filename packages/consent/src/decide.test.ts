@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { FLOWS, OTHER_PERSON_RECIPIENTS, RESOURCES, SCOPES } from "./catalog.js";
+import {
+  CONSENT_POLICY_VERSION,
+  FLOWS,
+  OTHER_PERSON_RECIPIENTS,
+  RESOURCES,
+  SCOPES,
+} from "./catalog.js";
 import type { Resource } from "./catalog.js";
 import { decide } from "./decide.js";
 import {
@@ -205,7 +211,7 @@ describe("audit records", () => {
       action: "consent.authorize",
       objectType: "user",
       objectId: BOB,
-      policyVersion: 1,
+      policyVersion: CONSENT_POLICY_VERSION,
       metadata: {
         allowed: true,
         reason: "grant",

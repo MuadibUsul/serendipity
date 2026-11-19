@@ -4,8 +4,25 @@
 // audited, and supersedes the previous approved version in the same
 // transaction. Approved versions are never edited: a change starts a new
 // draft from them.
-import { isFactKey, missingRequired, snapshotOf } from "@serendipity/profile";
-import type { Certainty, Fact, FactKey, Facts, Provenance, Visibility } from "@serendipity/profile";
+import { SCOPES } from "@serendipity/consent";
+import {
+  FACT_CONSENT_SCOPES,
+  isFactKey,
+  missingRequired,
+  snapshotOf,
+  unconsentedKeys,
+  withConsent,
+} from "@serendipity/profile";
+import type {
+  Certainty,
+  Fact,
+  FactConsentScope,
+  FactKey,
+  Facts,
+  GrantedScopes,
+  Provenance,
+  Visibility,
+} from "@serendipity/profile";
 import type { FactValue, VersionState } from "@serendipity/profile";
 import type pg from "pg";
 
@@ -35,6 +52,26 @@ export class ProfileNotApprovable extends Error {
   constructor(readonly missing: readonly FactKey[]) {
     super(`profile not approvable; unconfirmed required facts: ${missing.join(", ")}`);
   }
+}
+
+/** A sensitive fact (dietary restrictions) without the consent it needs: not stored. */
+export class ProfileConsentMissing extends Error {
+  override readonly name = "ProfileConsentMissing";
+  constructor(readonly keys: readonly FactKey[]) {
+    super(`profile facts need their own consent: ${keys.join(", ")}`);
+  }
+}
+
+/** The fact consent scopes the person holds now: live grants at or above the scope's minimum. */
+async function grantedFactScopes(db: Queryable, userId: string): Promise<GrantedScopes> {
+  const { rows } = await db.query<{ scope: FactConsentScope; version: number }>(
+    `SELECT scope, version FROM app.consent_grants
+     WHERE user_id = $1 AND revoked_at IS NULL AND scope = ANY ($2)`,
+    [userId, [...FACT_CONSENT_SCOPES]],
+  );
+  return new Set(
+    rows.filter((row) => row.version >= SCOPES[row.scope].minimumVersion).map((row) => row.scope),
+  );
 }
 
 /** The version is not a draft (or does not exist), so it cannot be changed. */
@@ -194,7 +231,11 @@ export function pgProfileRepository(pool: TransactionPool & Queryable): ProfileR
         );
         const row = rows[0];
         if (row === undefined) throw new Error("profile: the draft insert returned no row");
-        if (base !== undefined) await writeFacts(client, row.id, base.facts);
+        if (base !== undefined) {
+          // A sensitive fact whose consent was revoked is not carried forward.
+          const kept = withConsent(base.facts, await grantedFactScopes(client, userId));
+          await writeFacts(client, row.id, kept);
+        }
         const draft = await load(client, row);
         if (draft === undefined) throw new Error("profile: the new draft vanished");
         return draft;
@@ -202,7 +243,9 @@ export function pgProfileRepository(pool: TransactionPool & Queryable): ProfileR
 
     saveDraft: (versionId, facts) =>
       inTransaction(async (client) => {
-        await lockDraft(client, versionId);
+        const draft = await lockDraft(client, versionId);
+        const missing = unconsentedKeys(facts, await grantedFactScopes(client, draft.user_id));
+        if (missing.length > 0) throw new ProfileConsentMissing(missing);
         await writeFacts(client, versionId, facts);
       }),
 
