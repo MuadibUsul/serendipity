@@ -10,6 +10,7 @@ import type { AuthService } from "@serendipity/auth";
 import { formatProblems } from "@serendipity/config";
 import type { Environment } from "@serendipity/config";
 import { pgAuthRepository } from "@serendipity/db/auth";
+import { pgAccountRepository } from "@serendipity/db/account";
 import { pgInvitationRepository } from "@serendipity/db/invitations";
 import { knownMigrations } from "@serendipity/db/migration-status";
 import pg from "pg";
@@ -81,6 +82,7 @@ async function main(): Promise<void> {
     auth,
     invitations: {
       repository: pgInvitationRepository(pool),
+      account: pgAccountRepository(pool),
       callers: sessionCallers(config.env, auth),
     },
   });

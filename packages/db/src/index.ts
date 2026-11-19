@@ -33,3 +33,5 @@ export type {
   RefreshOutcome,
 } from "./recall.js";
 export { pgAuthRepository } from "./auth.js";
+export { pgAccountRepository } from "./account.js";
+export type { AccountRepository, PauseOutcome, ResumeOutcome, ResumeStatus } from "./account.js";
