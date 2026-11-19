@@ -29,6 +29,10 @@
       "types": "./src/feedback.ts",
       "default": "./src/feedback.ts"
     },
+    "./reveal": {
+      "types": "./src/reveal.ts",
+      "default": "./src/reveal.ts"
+    },
     "./relationships": {
       "types": "./src/relationships.ts",
       "default": "./src/relationships.ts"

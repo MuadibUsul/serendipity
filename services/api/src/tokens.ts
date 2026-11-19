@@ -11,3 +11,4 @@ export const AUTH = Symbol("Auth");
 export const ACCOUNT = Symbol("Account");
 export const FEEDBACK = Symbol("Feedback");
 export const RELATIONSHIPS = Symbol("Relationships");
+export const REVEAL = Symbol("Reveal");
