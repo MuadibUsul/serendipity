@@ -15,8 +15,9 @@
    sees the other's answer, and nobody can change an answer once given.
 3. **Only a mutual yes is revealed.**
    - Both said yes: both see `mutual`, and a relationship is recorded with
-     `mutual_opt_in_at`. Chat does not open by itself; that is the person's choice
-     (`ser-p05-02`).
+     `mutual_opt_in_at`, with its chat open. Each person still needs the chat consent to send
+     a message, and either may leave or block at any time
+     ([ADR-0020](0020-mutual-chat.md)).
    - Anything else: until the window closes, someone who said yes sees `thanks`; afterwards they
      see `closed`. A "no" looks exactly like no answer. A property test shows that a person's view
      depends on the other's answer only through whether both said yes.

@@ -11,6 +11,8 @@ export interface PersonalExport {
   readonly visualFeatures: readonly unknown[];
   readonly invitations: readonly unknown[];
   readonly feedback: readonly unknown[];
+  /** Messages the person sent; never the other person's. */
+  readonly sentMessages: readonly unknown[];
   readonly auditHistory: readonly unknown[];
   readonly transactionRecords: {
     readonly dates: readonly unknown[];

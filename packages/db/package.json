@@ -29,6 +29,10 @@
       "types": "./src/feedback.ts",
       "default": "./src/feedback.ts"
     },
+    "./relationships": {
+      "types": "./src/relationships.ts",
+      "default": "./src/relationships.ts"
+    },
     "./identity": {
       "types": "./src/identity.ts",
       "default": "./src/identity.ts"
@@ -68,6 +72,7 @@
     "@serendipity/fixtures": "0.0.0",
     "@serendipity/feedback": "0.0.0",
     "@serendipity/identity": "0.0.0",
+    "@serendipity/relationships": "0.0.0",
     "@serendipity/invitations": "0.0.0",
     "@serendipity/matching": "0.0.0",
     "@serendipity/media": "0.0.0",

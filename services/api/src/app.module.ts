@@ -2,7 +2,12 @@ import { Module } from "@nestjs/common";
 import type { DynamicModule } from "@nestjs/common";
 
 import type { AuthService } from "@serendipity/auth";
-import type { AccountRepository, FeedbackRepository, InvitationRepository } from "@serendipity/db";
+import type {
+  AccountRepository,
+  FeedbackRepository,
+  InvitationRepository,
+  RelationshipRepository,
+} from "@serendipity/db";
 
 import { AccountController } from "./account.controller.js";
 import { AuthController } from "./auth.controller.js";
@@ -10,6 +15,7 @@ import { FeedbackController } from "./feedback.controller.js";
 import type { Callers } from "./callers.js";
 import { HealthController } from "./health.controller.js";
 import { InvitationsController } from "./invitations.controller.js";
+import { RelationshipsController } from "./relationships.controller.js";
 import type { Lifecycle } from "./lifecycle.js";
 import type { Logger } from "./logging.js";
 import type { Metrics } from "./metrics.js";
@@ -25,6 +31,7 @@ import {
   LOGGER,
   METRICS,
   READINESS,
+  RELATIONSHIPS,
 } from "./tokens.js";
 
 /** The signed-in person's endpoints and what they need: invitations (ser-p04-02), pause and resume (ser-p05-04). */
@@ -34,6 +41,8 @@ export interface InvitationsDeps {
   readonly account?: AccountRepository;
   /** Left out, the feedback endpoints are not served (ser-p05-01). */
   readonly feedback?: FeedbackRepository;
+  /** Left out, the chat endpoints are not served (ser-p05-02). */
+  readonly relationships?: RelationshipRepository;
   readonly callers: Callers;
   readonly clock?: () => Date;
 }
@@ -67,6 +76,7 @@ export class AppModule {
         ...(deps.invitations === undefined ? [] : [InvitationsController]),
         ...(deps.invitations?.account === undefined ? [] : [AccountController]),
         ...(deps.invitations?.feedback === undefined ? [] : [FeedbackController]),
+        ...(deps.invitations?.relationships === undefined ? [] : [RelationshipsController]),
         ...(deps.auth === undefined ? [] : [AuthController]),
       ],
       providers: [
@@ -87,6 +97,9 @@ export class AppModule {
               ...(deps.invitations.feedback === undefined
                 ? []
                 : [{ provide: FEEDBACK, useValue: deps.invitations.feedback }]),
+              ...(deps.invitations.relationships === undefined
+                ? []
+                : [{ provide: RELATIONSHIPS, useValue: deps.invitations.relationships }]),
             ]),
       ],
     };

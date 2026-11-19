@@ -273,9 +273,10 @@ describe("relationship and money checks (PLAN-001 §8.2, §8.3)", () => {
     const dateId = await date(a, b, "CLOSED", "2026-11-07 11:00Z", "2026-11-07 13:00Z");
     const relationship = (optIn: string | null, chatOpen: boolean, blocked: string | null) =>
       attempt(
-        `INSERT INTO app.relationships (date_id, user_a, user_b, mutual_opt_in_at, chat_open, blocked_at)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [dateId, a, b, optIn, chatOpen, blocked],
+        `INSERT INTO app.relationships
+           (date_id, user_a, user_b, mutual_opt_in_at, chat_open, blocked_at, blocked_by)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [dateId, a, b, optIn, chatOpen, blocked, blocked === null ? null : a],
       );
     expect(await relationship(null, true, null)).toMatchObject({
       code: CHECK,

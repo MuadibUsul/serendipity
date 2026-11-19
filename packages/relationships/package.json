@@ -1,0 +1,16 @@
+{
+  "name": "@serendipity/relationships",
+  "version": "0.0.0",
+  "private": true,
+  "description": "After a mutual yes: when a message may be sent, and how leaving or blocking stops it. Pure.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

@@ -96,6 +96,7 @@ describe("schema contents", () => {
         "auth_phone_accounts",
         "auth_sessions",
         "candidate_pairs",
+        "chat_messages",
         "checkins",
         "consent_grants",
         "date_invites",

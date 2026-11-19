@@ -37,3 +37,10 @@ export { pgAccountRepository } from "./account.js";
 export type { AccountRepository, PauseOutcome, ResumeOutcome, ResumeStatus } from "./account.js";
 export { pgFeedbackRepository } from "./feedback.js";
 export type { FeedbackOutcome, FeedbackRepository } from "./feedback.js";
+export { pgRelationshipRepository } from "./relationships.js";
+export type {
+  ChatMessage,
+  RelationshipRepository,
+  RelationshipSummary,
+  SendOutcome,
+} from "./relationships.js";
