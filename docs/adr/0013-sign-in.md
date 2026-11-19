@@ -52,3 +52,17 @@ mainland mobile number and an SMS code, with a fake SMS provider until a vendor 
 - **Retention:** how long spent codes and ended sessions are kept before a clean-up job
   removes them.
 - **Account deletion** (`ser-p05-06`) must also remove the phone mapping and revoke sessions.
+
+## Amendment (2026-11-19): a suspension survives account deletion
+
+Owner decision: a suspended person must not escape the suspension by deleting their account and
+signing up again.
+
+- **Who is kept:** only accounts that are `suspended` when deletion runs. Anyone else who deletes
+  their account can sign up again with the same number, as a new person.
+- **What is kept:** the keyed hash of the number, in `app.auth_banned_phones` (migration 0014). No
+  user id, profile or anything else is kept.
+- **What sign-in does:** it refuses a listed number exactly as it refuses a closed account. The
+  client sees the same answer as for a wrong code, so the list is never disclosed.
+- **Not covered:** a new phone number gets past this. Banning by verified identity belongs to
+  report and ban (`ser-p05-05`).
