@@ -38,6 +38,44 @@ refused. Inserts are not guarded, so fixtures and seeds can create a row in any 
 
 <!-- generated:lifecycles:start -->
 
+### `app.users.status`
+
+Declared in `packages/identity/src/account.ts`; enforced by `app.guard_transition` (migration 0009).
+Starts as `pending`; final: `deleted`.
+
+```mermaid
+stateDiagram-v2
+  [*] --> pending
+  pending --> active
+  pending --> paused
+  pending --> suspended
+  pending --> deleted
+  active --> paused
+  active --> suspended
+  active --> deleted
+  paused --> active
+  paused --> suspended
+  paused --> deleted
+  suspended --> active
+  suspended --> deleted
+  deleted --> [*]
+```
+
+### `app.account_deletion_requests.status`
+
+Declared in `packages/privacy/src/lifecycle.ts`; enforced by `app.guard_transition` (migration 0009).
+Starts as `requested`; final: `completed`.
+
+```mermaid
+stateDiagram-v2
+  [*] --> requested
+  requested --> purging
+  purging --> failed
+  purging --> completed
+  failed --> purging
+  completed --> [*]
+```
+
 ### `app.date_invites.status`
 
 Declared in `packages/invitations/src/lifecycle.ts`; enforced by `app.guard_transition` (migration 0009).
@@ -118,7 +156,6 @@ These are computed from other state each time and have no transitions of their o
 These columns have a `CHECK` list but no code changes them yet. Whoever first writes one declares
 its lifecycle and adds it to the guard in the same change:
 
-- `app.users.status`
 - `app.venues.status`
 - `app.venue_slots.status`
 - `app.negotiations.status`
