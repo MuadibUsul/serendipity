@@ -277,6 +277,16 @@ async function finalizeDeletion(pool: pg.Pool, userId: string): Promise<Deletion
        (SELECT phone_hash FROM app.auth_phone_accounts WHERE user_id = $1)`,
       [userId],
     );
+    // A suspended person keeps their suspension: their number's hash stays on
+    // the banned list, so it cannot sign up again (migration 0014).
+    await db.query(
+      `INSERT INTO app.auth_banned_phones (phone_hash, reason)
+       SELECT a.phone_hash, 'suspended_account_deleted'
+       FROM app.auth_phone_accounts a JOIN app.users u ON u.id = a.user_id
+       WHERE a.user_id = $1 AND u.status = 'suspended'
+       ON CONFLICT (phone_hash) DO NOTHING`,
+      [userId],
+    );
     await db.query(`DELETE FROM app.auth_sessions WHERE user_id = $1`, [userId]);
     await db.query(`DELETE FROM app.auth_phone_accounts WHERE user_id = $1`, [userId]);
     await db.query(
