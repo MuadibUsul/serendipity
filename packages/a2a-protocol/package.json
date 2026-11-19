@@ -1,0 +1,19 @@
+{
+  "name": "@serendipity/a2a-protocol",
+  "version": "0.0.0",
+  "private": true,
+  "description": "a2a-match/0.1: the closed-vocabulary messages two matchmaking agents may exchange, the coarse compatibility signals each may see, and the bounded negotiation reducer. Pure.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@serendipity/domain": "0.0.0"
+  }
+}
