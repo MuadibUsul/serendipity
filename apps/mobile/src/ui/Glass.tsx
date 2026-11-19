@@ -20,6 +20,7 @@ const liquid = (() => {
 export function Glass({
   raised = false,
   halo = false,
+  tint,
   radius = RADIUS.lg,
   style,
   children,
@@ -39,7 +40,7 @@ export function Glass({
           <GlassView
             glassEffectStyle="regular"
             colorScheme="light"
-            tintColor={raised ? materials.glassRaised : materials.glass}
+            tintColor={tint ?? (raised ? materials.glassRaised : materials.glass)}
             style={StyleSheet.absoluteFill}
           />
         ) : (
@@ -57,9 +58,7 @@ export function Glass({
             {
               backgroundColor: liquid
                 ? "transparent"
-                : raised
-                  ? materials.glassRaised
-                  : materials.glass,
+                : (tint ?? (raised ? materials.glassRaised : materials.glass)),
               borderWidth: StyleSheet.hairlineWidth,
               borderColor: materials.glassHighlight,
             },

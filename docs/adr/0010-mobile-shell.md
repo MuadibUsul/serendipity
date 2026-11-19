@@ -59,7 +59,8 @@ tokens, against a mock backend, with basic accessibility checked automatically a
      天" rather than a ticking countdown. The voice entry is a breathing glass orb, still when the
      person asks for reduced motion. Empty pages get a line drawing and one warm sentence.
    - **Contrast came first:** where the brief's colours fall short of WCAG AA, they were adjusted.
-     - Secondary text `#747982` (4.38:1 on white) became `#6b7079` (4.98:1).
+     - Secondary text `#747982` (4.38:1 on white) became `#6b7079` (4.98:1); in the 剧集版
+       below it is `#4e525a`.
      - The coral is 2.74:1, so it stays decorative. A deeper `#c9304a` carries coral text and
        `#e8435e` carries state (toggle on, selected icon).
      - The primary action is an ink capsule with white text.
@@ -78,6 +79,24 @@ tokens, against a mock backend, with basic accessibility checked automatically a
 
      Outfit (OFL) is loaded for numerals and Latin labels; Chinese stays in the system font.
      The arrival ("见面揭晓") screen waits for check-in (`ser-p04-08`).
+
+   - **Changed to the 剧集版 (episode) intensity by the owner on 2026-11-18.** It is the other
+     board of that day, closer to the colour of "Nosedive", still with no ratings, scores or
+     photos:
+     - a blush-white page (`#fff7f8`) lit by five saturated fields (blush, mint, peach, powder
+       blue and the new lavender) at strength 0.82, in each draft's own layout;
+     - clearer glass (0.5 white, `blur(30px) saturate(180%)` on the web) with a plum-tinted shadow;
+     - the voice orb in the page's own five colours with a white shine and white rings, instead of
+       coral;
+     - a stronger coral halo under the invitation, and a coral tint for its day badge;
+     - the three sign-in promises in mint, peach and blush glass;
+     - the selected tab in near-white glass with a faint coral lift.
+
+     Contrast was rechecked with the light composited at its strongest point. The draft's
+     secondary grey `#5c616a` fell to 3.84:1 straight on the blush light (the AI page), so it
+     became `#4e525a` (4.84:1 there). Coral text became `#b12a42`, which stays AA on the coral
+     badge over every light. `tokens.test.ts` now checks text on glass over each light, and
+     secondary text straight on it.
 
    - **The code step:** six cells that verify on the sixth digit (no button); a wrong code
      shakes, clears and says why; the number with an inline "修改"; one resend control that counts

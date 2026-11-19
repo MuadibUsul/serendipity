@@ -49,7 +49,7 @@ export function Ripple({
     height: size,
     borderRadius: size / 2,
     borderWidth: 1,
-    borderColor: materials.glowCoral,
+    borderColor: materials.ring,
   };
   if (reduced) return <View aria-hidden style={[ring, { opacity: 0.25 }]} />;
   return (

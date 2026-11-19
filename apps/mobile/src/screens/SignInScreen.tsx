@@ -13,26 +13,28 @@ import { CodeInput } from "../ui/CodeInput";
 import { Glass } from "../ui/Glass";
 import { Screen } from "../ui/Screen";
 import { TextField } from "../ui/TextField";
-import { usePalette } from "../ui/theme";
+import { useMaterials, usePalette } from "../ui/theme";
 
 /**
  * The three promises (PRD-001 §1), as glass pills floating at slight angles,
- * after the floating labels of the 柔光 design.
+ * each in its own tint, after the 剧集版 sign-in draft.
  */
 function Promises() {
   const palette = usePalette();
+  const materials = useMaterials();
   const placements = [
-    { left: 4, top: 18, angle: "-3deg" },
-    { left: 132, top: 70, angle: "2deg" },
-    { right: 8, top: 8, angle: "4deg" },
+    { left: 4, top: 18, angle: "-3deg", tint: materials.tintMint },
+    { left: 132, top: 70, angle: "2deg", tint: materials.tintPeach },
+    { right: 8, top: 8, angle: "4deg", tint: materials.tintBlush },
   ] as const;
   return (
     <View style={{ minHeight: 140, marginTop: SPACE.sm }}>
       {SIGN_IN.promises.map((promise, index) => {
-        const { angle, ...position } = placements[index] ?? placements[0];
+        const { angle, tint, ...position } = placements[index] ?? placements[0];
         return (
           <Glass
             key={promise}
+            tint={tint}
             radius={RADIUS.pill}
             style={{
               position: "absolute",

@@ -10,7 +10,7 @@ import { Button } from "../ui/Button";
 import { Glass } from "../ui/Glass";
 import { Illustration } from "../ui/Illustration";
 import { EmptyState, Screen } from "../ui/Screen";
-import { usePalette } from "../ui/theme";
+import { useMaterials, usePalette } from "../ui/theme";
 
 /** A hairline that fades out at both ends. Decorative. */
 function FadingRule() {
@@ -57,6 +57,7 @@ function Invitation({ date, now }: { readonly date: UpcomingDate; readonly now: 
   const { day, time } = dateParts(date.startsAt, date.timeZone);
   const days = daysUntil(date.startsAt, date.timeZone, now);
   const price = formatMoney(date.amountMinor, date.currency);
+  const materials = useMaterials();
   return (
     <Glass halo radius={RADIUS.xl} style={{ padding: SPACE.xxl, gap: SPACE.xs }}>
       <View
@@ -72,7 +73,7 @@ function Invitation({ date, now }: { readonly date: UpcomingDate; readonly now: 
         </AppText>
         <View
           style={{
-            backgroundColor: "rgba(255,107,129,0.1)",
+            backgroundColor: materials.accentFill,
             borderRadius: RADIUS.pill,
             paddingHorizontal: SPACE.md,
             paddingVertical: SPACE.xs,

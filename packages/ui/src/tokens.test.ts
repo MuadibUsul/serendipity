@@ -12,6 +12,28 @@ import {
   TYPE,
 } from "./tokens.js";
 
+/** An opaque `#rrggbb` at `alpha`, as `rgba(...)`. */
+function withAlpha(hex: string, alpha: number): string {
+  const [r, g, b] = [1, 3, 5].map((at) => parseInt(hex.slice(at, at + 2), 16));
+  return `rgba(${String(r)},${String(g)},${String(b)},${String(alpha)})`;
+}
+
+/** `rgba(...)` laid over an opaque `#rrggbb`, as an opaque `#rrggbb`. */
+function over(rgba: string, hex: string): string {
+  const match = /rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/.exec(rgba);
+  if (match === null) throw new Error(`not rgba: ${rgba}`);
+  const alpha = Number(match[4]);
+  const top = [Number(match[1]), Number(match[2]), Number(match[3])];
+  const bottom = [1, 3, 5].map((at) => parseInt(hex.slice(at, at + 2), 16));
+  return `#${top
+    .map((value, index) =>
+      Math.round(value * alpha + (bottom[index] ?? 0) * (1 - alpha))
+        .toString(16)
+        .padStart(2, "0"),
+    )
+    .join("")}`;
+}
+
 describe("contrastRatio", () => {
   it("matches the WCAG reference values", () => {
     expect(contrastRatio("#000000", "#ffffff")).toBeCloseTo(21, 5);
@@ -56,8 +78,46 @@ describe.each(COLOR_SCHEMES)("the %s palette", (scheme) => {
     expect(alpha(materials.glass)).toBeLessThan(0.8);
     expect(alpha(materials.glassRaised)).toBeLessThan(0.9);
     expect(alpha(materials.separator)).toBeLessThanOrEqual(0.08);
-    // Ambient light stays a whisper: white dominates (the 克制版 brief).
-    expect(materials.glowStrength).toBeLessThanOrEqual(0.6);
+    // The 剧集版 light is saturated, but never opaque: the page shows through.
+    expect(materials.glowStrength).toBeGreaterThan(0);
+    expect(materials.glowStrength).toBeLessThanOrEqual(0.9);
+  });
+
+  /** Each ambient light at its centre: the glow at full strength over the page. */
+  const lights = (page: string) => {
+    const materials = MATERIALS[scheme];
+    return [
+      materials.glowBlush,
+      materials.glowMint,
+      materials.glowPeach,
+      materials.glowPowder,
+      materials.glowLavender,
+    ].map((glow) => over(withAlpha(glow, materials.glowStrength), page));
+  };
+
+  it("keeps the coral badge's text readable, over the page and over the strongest light", () => {
+    const palette = PALETTES[scheme];
+    const materials = MATERIALS[scheme];
+    // The badge sits on glass over the page; check it over the bare page and
+    // over each glow at its centre, where the light is strongest.
+    const under = [palette.background, ...lights(palette.background)];
+    for (const backdrop of under) {
+      const badge = over(materials.accentFill, over(materials.glass, backdrop));
+      expect(contrastRatio(palette.accentText, badge)).toBeGreaterThanOrEqual(AA_TEXT);
+    }
+  });
+
+  it("keeps text readable on glass over the strongest light", () => {
+    const palette = PALETTES[scheme];
+    const materials = MATERIALS[scheme];
+    for (const glow of lights(palette.background)) {
+      const surface = over(materials.glass, glow);
+      for (const key of ["text", "textSecondary", "accentText"] as const) {
+        expect(contrastRatio(palette[key], surface)).toBeGreaterThanOrEqual(AA_TEXT);
+      }
+      // Secondary text straight on the page's light, outside any glass.
+      expect(contrastRatio(palette.textSecondary, glow)).toBeGreaterThanOrEqual(AA_TEXT);
+    }
   });
 });
 
