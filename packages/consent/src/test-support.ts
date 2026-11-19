@@ -63,6 +63,7 @@ export function recipientOf(kind: RecipientClass | "person", actor: string): Rec
     case "vision_provider":
     case "profile_extractor":
     case "matching_service":
+    case "venue_filter":
       return { kind };
   }
 }

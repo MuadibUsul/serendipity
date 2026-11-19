@@ -13,11 +13,14 @@
  * - Facts not touched for 180 days become `outdated`: no longer hard rules
  *   until the person confirms them again.
  *
+ * - A sensitive fact (`consent` in the catalog: dietary restrictions) is kept
+ *   only while the person holds its consent scope, and is never a guess.
+ *
  * Every function is pure: it returns a new set of facts and never changes the
  * one it was given.
  */
-import { FACT_KEYS, PROFILE_SCHEMA_VERSION, isFactKey, specOf } from "./catalog.js";
-import type { Certainty, FactKey, Provenance, Visibility } from "./catalog.js";
+import { FACT_KEYS, PROFILE_SCHEMA_VERSION, consentFor, isFactKey, specOf } from "./catalog.js";
+import type { Certainty, FactConsentScope, FactKey, Provenance, Visibility } from "./catalog.js";
 import { sameValue, validateValue } from "./values.js";
 import type { FactValue } from "./values.js";
 
@@ -49,7 +52,16 @@ export interface Conflict {
 }
 
 export type RefusalReason =
-  "unknown_key" | "invalid_value" | "not_a_proposal" | "invalid_certainty" | "duplicate_key";
+  | "unknown_key"
+  | "invalid_value"
+  | "not_a_proposal"
+  | "invalid_certainty"
+  | "duplicate_key"
+  | "needs_consent";
+
+/** The consent scopes the person holds now, for facts that need one. */
+export type GrantedScopes = ReadonlySet<FactConsentScope>;
+const NONE: GrantedScopes = new Set();
 
 export interface Refusal {
   readonly key: string;
@@ -84,6 +96,7 @@ export function applyProposals(
   facts: Facts,
   proposals: readonly Proposal[],
   now: Date,
+  granted: GrantedScopes = NONE,
 ): ProposalOutcome {
   const next = new Map(facts);
   const applied: FactKey[] = [];
@@ -109,6 +122,15 @@ export function applyProposals(
         reason: "not_a_proposal",
         detail: "only explicit or inferred may be proposed",
       });
+      continue;
+    }
+    const scope = consentFor(key);
+    if (scope !== undefined && !granted.has(scope)) {
+      refused.push({ key, reason: "needs_consent", detail: scope });
+      continue;
+    }
+    if (scope !== undefined && proposal.provenance !== "explicit") {
+      refused.push({ key, reason: "not_a_proposal", detail: "a sensitive fact is never a guess" });
       continue;
     }
     if (!CERTAINTY_VALUES.has(proposal.certainty)) {
@@ -171,7 +193,12 @@ export function confirmFact(
   key: FactKey,
   now: Date,
   corrected?: unknown,
+  granted: GrantedScopes = NONE,
 ): EditResult {
+  const scope = consentFor(key);
+  if (scope !== undefined && !granted.has(scope)) {
+    return { ok: false, problem: `${key} needs the ${scope} consent` };
+  }
   const current = facts.get(key);
   let value: FactValue;
   if (corrected === undefined) {
@@ -192,6 +219,23 @@ export function confirmFact(
     updatedAt: now,
   });
   return { ok: true, facts: next };
+}
+
+/** Keys holding a sensitive fact whose consent the person does not hold. */
+export function unconsentedKeys(facts: Facts, granted: GrantedScopes): FactKey[] {
+  return [...facts.keys()].filter((key) => {
+    const scope = consentFor(key);
+    return scope !== undefined && !granted.has(scope);
+  });
+}
+
+/** The facts without any sensitive fact whose consent is gone: what may be kept or read. */
+export function withConsent(facts: Facts, granted: GrantedScopes): Facts {
+  const drop = unconsentedKeys(facts, granted);
+  if (drop.length === 0) return facts;
+  const next = new Map(facts);
+  for (const key of drop) next.delete(key);
+  return next;
 }
 
 /** The person deletes a fact. */

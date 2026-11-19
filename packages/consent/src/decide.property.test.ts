@@ -100,6 +100,7 @@ function actsFor(target: Recipient): string | null {
     case "profile_extractor":
     case "matching_service":
     case "venue":
+    case "venue_filter":
       return null;
   }
 }
