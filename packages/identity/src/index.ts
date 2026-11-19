@@ -30,3 +30,5 @@ export type {
 } from "./service.js";
 export { ACCOUNT_LIFECYCLE, ACCOUNT_STATES } from "./account.js";
 export type { AccountState } from "./account.js";
+export { PAUSE_REASONS, PROFILE_REVIEW_AFTER_DAYS, pauseRefusal, resumeCheck } from "./pause.js";
+export type { PauseReason, PauseRefusal, ResumeCheck, ResumeNeed, ResumeState } from "./pause.js";

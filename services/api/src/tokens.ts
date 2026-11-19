@@ -8,4 +8,5 @@ export const INVITATIONS = Symbol("Invitations");
 export const CALLERS = Symbol("Callers");
 export const CLOCK = Symbol("Clock");
 export const AUTH = Symbol("Auth");
+export const ACCOUNT = Symbol("Account");
 export const FEEDBACK = Symbol("Feedback");
