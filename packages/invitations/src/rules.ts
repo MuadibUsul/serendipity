@@ -8,6 +8,9 @@
  * - Decline: `CANCEL` by that person, so the date ends before any money
  *   (`CANCELLED_BEFORE_PAYMENT`). Someone who accepted may still decline
  *   while the other has not answered: anyone may stop at any time (PRD-001 §1.9).
+ * - Cancel: declining after both accepted cancels the date the same way
+ *   (ser-p04-07). Nothing is charged, nothing is penalised, and the other
+ *   person sees only that the date is off: never who stopped it, or why.
  * - Expiry: `EXPIRE` from the scheduler once the deadline has passed, if the
  *   two have not both accepted. Past the deadline nobody can answer, even
  *   before the job has run.
@@ -67,6 +70,17 @@ export function decideAnswer(record: InvitationRecord, answer: Answer, now: Date
       : refuse("closed");
   }
   if (answer === "accept" && invite.status === "declined") return refuse("already_declined");
+
+  // Cancelling a date both accepted: no deadline applies, and no money is involved.
+  if (answer === "decline" && date.state === "BOTH_ACCEPTED" && invite.status === "accepted") {
+    return {
+      ok: true,
+      changed: true,
+      date: apply(date, { type: "CANCEL" }, person),
+      inviteStatus: "declined",
+      withdrawOther: false,
+    };
+  }
 
   if (date.state !== "INVITED") return refuse(date.state === "EXPIRED" ? "expired" : "closed");
   if (invite.status === "expired") return refuse("expired");

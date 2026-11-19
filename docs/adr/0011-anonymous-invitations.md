@@ -53,3 +53,18 @@ expiresAt)`.
   setting.
 - Real sign-in (sessions or tokens, tied to identity verification) is still to be built. Until
   then the API serves no person in a deployed environment.
+
+## Amendment (2026-11-19): cancelling without money (`ser-p04-07`)
+
+The early phase is free (CHG-001 D2), so cancelling a date never involves money.
+
+- Declining after both accepted cancels the date (`CANCEL` → `CANCELLED_BEFORE_PAYMENT`). It works
+  at any time before the date, with no deadline and no penalty: anyone may stop at any time
+  (PRD-001 §1.9).
+- It reuses `POST /v1/dates/:id/decline`, so the app needs no new action.
+- The other person sees only that the date is `closed`. They never learn who stopped it, or why.
+- Both people's time is freed at once.
+- Not yet covered: once the free flow reaches `CONFIRMED` through the venue negotiation, cancelling
+  from there needs a free path in the domain date machine. Today that state leads to a refund.
+  The change belongs with the domain machine update for CHG-001, which needs owner review
+  (CODEOWNERS).
