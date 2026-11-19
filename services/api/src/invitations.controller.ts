@@ -31,8 +31,8 @@ export class InvitationsController {
     @Inject(CLOCK) private readonly clock: () => Date,
   ) {}
 
-  private caller(request: FastifyRequest): string {
-    const caller = this.callers.callerOf(request.headers);
+  private async caller(request: FastifyRequest): Promise<string> {
+    const caller = await this.callers.callerOf(request.headers);
     if (caller === null) throw new ApiError("unauthenticated");
     return caller;
   }
@@ -41,7 +41,7 @@ export class InvitationsController {
   @Get("upcoming")
   @Header("cache-control", "no-store")
   async upcoming(@Req() request: FastifyRequest): Promise<{ invitations: InvitationView[] }> {
-    const caller = this.caller(request);
+    const caller = await this.caller(request);
     const now = this.clock();
     const records = await this.invitations.forUser(caller);
     return { invitations: records.map((record) => invitationView(record, now)) };
@@ -50,7 +50,7 @@ export class InvitationsController {
   @Get(":id")
   @Header("cache-control", "no-store")
   async one(@Req() request: FastifyRequest, @Param("id") id: string): Promise<InvitationView> {
-    const caller = this.caller(request);
+    const caller = await this.caller(request);
     const record = isUuid(id) ? await this.invitations.forUserDate(caller, id) : null;
     if (record === null) throw new ApiError("not_found");
     return invitationView(record, this.clock());
@@ -75,7 +75,7 @@ export class InvitationsController {
     id: string,
     answer: Answer,
   ): Promise<InvitationView> {
-    const caller = this.caller(request);
+    const caller = await this.caller(request);
     if (!isUuid(id)) throw new ApiError("not_found");
     const now = this.clock();
     const trace = traceOf(request);

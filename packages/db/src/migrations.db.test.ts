@@ -90,6 +90,9 @@ describe("schema contents", () => {
     expect(rows.map((row) => row.table_name)).toEqual(
       [
         "audit_events",
+        "auth_challenges",
+        "auth_phone_accounts",
+        "auth_sessions",
         "candidate_pairs",
         "checkins",
         "consent_grants",

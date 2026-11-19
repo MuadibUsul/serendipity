@@ -40,7 +40,7 @@ refused. Inserts are not guarded, so fixtures and seeds can create a row in any 
 
 ### `app.date_invites.status`
 
-Declared in `packages/invitations/src/lifecycle.ts`; enforced by `app.guard_transition` (migration 0009).
+Declared in `packages/invitations/src/lifecycle.ts`; the database enforces it with `app.guard_transition`.
 Starts as `pending`; final: `declined`, `expired`, `withdrawn`.
 
 ```mermaid
@@ -58,7 +58,7 @@ stateDiagram-v2
 
 ### `app.profile_versions.approval_state`
 
-Declared in `packages/profile/src/lifecycle.ts`; enforced by `app.guard_transition` (migration 0009).
+Declared in `packages/profile/src/lifecycle.ts`; the database enforces it with `app.guard_transition`.
 Starts as `draft`; final: `superseded`, `withdrawn`.
 
 ```mermaid
@@ -73,7 +73,7 @@ stateDiagram-v2
 
 ### `app.media_assets.status`
 
-Declared in `packages/media/src/lifecycle.ts`; enforced by `app.guard_transition` (migration 0009).
+Declared in `packages/media/src/lifecycle.ts`; the database enforces it with `app.guard_transition`.
 Starts as `pending`; final: `deleted`.
 
 ```mermaid
@@ -86,6 +86,36 @@ stateDiagram-v2
   active --> deleted
   expired --> deleted
   deleted --> [*]
+```
+
+### `app.auth_challenges.status`
+
+Declared in `packages/auth/src/lifecycle.ts`; the database enforces it with `app.guard_transition`.
+Starts as `pending`; final: `used`, `expired`, `locked`.
+
+```mermaid
+stateDiagram-v2
+  [*] --> pending
+  pending --> used
+  pending --> expired
+  pending --> locked
+  used --> [*]
+  expired --> [*]
+  locked --> [*]
+```
+
+### `app.auth_sessions.status`
+
+Declared in `packages/auth/src/lifecycle.ts`; the database enforces it with `app.guard_transition`.
+Starts as `active`; final: `revoked`.
+
+```mermaid
+stateDiagram-v2
+  [*] --> active
+  active --> rotated
+  active --> revoked
+  rotated --> revoked
+  revoked --> [*]
 ```
 
 <!-- generated:lifecycles:end -->

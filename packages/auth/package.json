@@ -1,0 +1,19 @@
+{
+  "name": "@serendipity/auth",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Sign-in by phone and one-time code: normalising numbers, keyed hashes, codes, sessions with rotating refresh tokens, and the SMS provider seam. No I/O of its own beyond node:crypto.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@serendipity/domain": "0.0.0"
+  }
+}
