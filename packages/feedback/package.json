@@ -1,0 +1,16 @@
+{
+  "name": "@serendipity/feedback",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Private post-date feedback: each person answers alone, a 'no' looks like no answer, and only a mutual yes is ever revealed. Pure.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

@@ -19,6 +19,8 @@
     "@serendipity/config": "0.0.0",
     "@serendipity/consent": "0.0.0",
     "@serendipity/db": "0.0.0",
+    "@serendipity/feedback": "0.0.0",
+    "@serendipity/identity": "0.0.0",
     "@serendipity/invitations": "0.0.0",
     "@serendipity/media": "0.0.0",
     "@serendipity/privacy": "0.0.0",

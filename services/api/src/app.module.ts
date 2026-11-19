@@ -2,10 +2,11 @@ import { Module } from "@nestjs/common";
 import type { DynamicModule } from "@nestjs/common";
 
 import type { AuthService } from "@serendipity/auth";
-import type { AccountRepository, InvitationRepository } from "@serendipity/db";
+import type { AccountRepository, FeedbackRepository, InvitationRepository } from "@serendipity/db";
 
 import { AccountController } from "./account.controller.js";
 import { AuthController } from "./auth.controller.js";
+import { FeedbackController } from "./feedback.controller.js";
 import type { Callers } from "./callers.js";
 import { HealthController } from "./health.controller.js";
 import { InvitationsController } from "./invitations.controller.js";
@@ -18,6 +19,7 @@ import {
   AUTH,
   CALLERS,
   CLOCK,
+  FEEDBACK,
   INVITATIONS,
   LIFECYCLE,
   LOGGER,
@@ -30,6 +32,8 @@ export interface InvitationsDeps {
   readonly repository: InvitationRepository;
   /** Left out, the pause and resume endpoints are not served. */
   readonly account?: AccountRepository;
+  /** Left out, the feedback endpoints are not served (ser-p05-01). */
+  readonly feedback?: FeedbackRepository;
   readonly callers: Callers;
   readonly clock?: () => Date;
 }
@@ -62,6 +66,7 @@ export class AppModule {
         HealthController,
         ...(deps.invitations === undefined ? [] : [InvitationsController]),
         ...(deps.invitations?.account === undefined ? [] : [AccountController]),
+        ...(deps.invitations?.feedback === undefined ? [] : [FeedbackController]),
         ...(deps.auth === undefined ? [] : [AuthController]),
       ],
       providers: [
@@ -79,6 +84,9 @@ export class AppModule {
               ...(deps.invitations.account === undefined
                 ? []
                 : [{ provide: ACCOUNT, useValue: deps.invitations.account }]),
+              ...(deps.invitations.feedback === undefined
+                ? []
+                : [{ provide: FEEDBACK, useValue: deps.invitations.feedback }]),
             ]),
       ],
     };
