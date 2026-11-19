@@ -42,7 +42,6 @@ const REQUIRED: Record<string, unknown> = {
   "self.availability": [{ day: "sat", from: "14:00", to: "18:00" }],
   "seeking.age_range": { min: 25, max: 35 },
   "seeking.relationship_goals": ["long_term"],
-  "seeking.max_distance_km": 15,
   "date.budget_per_person": { currency: "CNY", max_minor: 8800 },
 };
 
@@ -179,10 +178,13 @@ describe("approval", () => {
     const second = await profiles().openDraft(user);
     expect(second.version).toBe(2);
     expect(second.facts).toEqual((await profiles().approved(user))?.facts);
-    const moved = confirmFact(second.facts, "seeking.max_distance_km", NOW, 30);
+    const moved = confirmFact(second.facts, "seeking.age_range", NOW, { min: 25, max: 40 });
     if (!moved.ok) throw new Error(moved.problem);
     await profiles().saveDraft(second.id, moved.facts);
-    expect((await profiles().approved(user))?.facts.get("seeking.max_distance_km")?.value).toBe(15);
+    expect((await profiles().approved(user))?.facts.get("seeking.age_range")?.value).toEqual({
+      min: 25,
+      max: 35,
+    });
 
     await profiles().approve(second.id, { type: "user", id: user });
     const { rows } = await pool.query<{ version: number; approval_state: string }>(
@@ -193,7 +195,10 @@ describe("approval", () => {
       { version: 1, approval_state: "superseded" },
       { version: 2, approval_state: "approved" },
     ]);
-    expect((await profiles().approved(user))?.facts.get("seeking.max_distance_km")?.value).toBe(30);
+    expect((await profiles().approved(user))?.facts.get("seeking.age_range")?.value).toEqual({
+      min: 25,
+      max: 40,
+    });
   });
 
   it("stores dietary restrictions only with their own consent, and drops them once it is revoked", async () => {

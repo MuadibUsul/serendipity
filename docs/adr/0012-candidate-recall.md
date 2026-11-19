@@ -94,10 +94,9 @@ to come.
 
 ## Not decided here
 
-- **Distance.** `seeking.max_distance_km` has nothing to measure from. People have only a coarse
-  region, by design: no home address (ARCH-001 §2, §10.1, D2). Where a person's travel starts
-  (a chosen area, a district centroid, …) is a product and privacy decision. Until then, distance
-  is not filtered anywhere, and PostGIS is used only for venues.
+- **Distance.** Decided by the owner (CHG-001 D12, [ADR-0017](0017-soft-distance.md)): distance is
+  not a filter on people. Recall keeps only the same city region. Travel is weighed when the venue
+  is chosen, from each person's private home area.
 - **Age source.** This is still the owner's decision (ADR-0009). `refresh()` takes the age from
   its caller, and an unknown age means no entry.
 - **Blocks.** There is no table for them yet. `decidePair` takes blocked ids from its caller.

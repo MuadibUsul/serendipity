@@ -10,7 +10,7 @@ import { applyProposals, confirmFact, hardRules, missingRequired } from "@serend
 // The extractor proposes; nothing it says is ever `confirmed`.
 const { facts, conflicts, refused } = applyProposals(current, extractorOutput, now);
 // The person confirms on the review screen, as shown or corrected.
-const result = confirmFact(facts, "seeking.max_distance_km", now, 20);
+const result = confirmFact(facts, "seeking.age_range", now, { min: 25, max: 35 });
 // Matchable only when every required fact is confirmed.
 missingRequired(facts); // [] → the version can be approved
 hardRules(facts); // confirmed facts of hard-capable keys, nothing else
@@ -39,23 +39,30 @@ When an extractor proposes a value for a fact that already exists:
 
 ## Catalog (schema version 1)
 
-| Key                           | Value                   | Required | Hard | Default visibility |
-| ----------------------------- | ----------------------- | -------- | ---- | ------------------ |
-| `self.city_region`            | region code (`GZ_CORE`) | yes      | yes  | matching           |
-| `self.relationship_goal`      | one goal                | yes      | yes  | matching           |
-| `self.availability`           | weekly windows          | yes      | yes  | matching           |
-| `self.interests`              | tags                    |          |      | matching           |
-| `self.communication_style`    | tags                    |          |      | matching           |
-| `self.lifestyle`              | tags                    |          |      | matching           |
-| `self.occupation_category`    | broad category          |          |      | private            |
-| `seeking.age_range`           | years, 18–99            | yes      | yes  | matching           |
-| `seeking.relationship_goals`  | goals accepted          | yes      | yes  | matching           |
-| `seeking.max_distance_km`     | 1–100 km                | yes      | yes  | matching           |
-| `seeking.dealbreakers`        | tags                    |          | yes  | matching           |
-| `seeking.interests`           | weighted tags (1–3)     |          |      | matching           |
-| `seeking.communication_style` | weighted tags           |          |      | matching           |
-| `seeking.appearance_style`    | weighted tags           |          |      | private            |
-| `date.budget_per_person`      | CNY, minor units        | yes      | yes  | matching           |
+| Key                           | Value                   | Required | Hard | Default visibility         |
+| ----------------------------- | ----------------------- | -------- | ---- | -------------------------- |
+| `self.city_region`            | region code (`GZ_CORE`) | yes      | yes  | matching                   |
+| `self.relationship_goal`      | one goal                | yes      | yes  | matching                   |
+| `self.availability`           | weekly windows          | yes      | yes  | matching                   |
+| `self.interests`              | tags                    |          |      | matching                   |
+| `self.communication_style`    | tags                    |          |      | matching                   |
+| `self.lifestyle`              | tags                    |          |      | matching                   |
+| `self.occupation_category`    | broad category          |          |      | private                    |
+| `seeking.age_range`           | years, 18–99            | yes      | yes  | matching                   |
+| `seeking.relationship_goals`  | goals accepted          | yes      | yes  | matching                   |
+| `seeking.max_distance_km`     | retired (ADR-0017)      |          |      | private                    |
+| `seeking.dealbreakers`        | tags                    |          | yes  | matching                   |
+| `seeking.interests`           | weighted tags (1–3)     |          |      | matching                   |
+| `seeking.communication_style` | weighted tags           |          |      | matching                   |
+| `seeking.appearance_style`    | weighted tags           |          |      | private                    |
+| `date.budget_per_person`      | CNY, minor units        | yes      | yes  | matching                   |
+| `self.home_area`              | area code (`GZ_TIANHE`) |          |      | private only               |
+| `date.max_commute_minutes`    | 10–120 minutes          |          |      | private only               |
+| `date.cuisines`               | weighted tags           |          |      | matching                   |
+| `date.tastes`                 | flavours                |          |      | matching                   |
+| `date.atmosphere`             | kinds of place          |          |      | matching                   |
+| `date.price_band`             | budget/moderate/upscale |          |      | matching                   |
+| `date.dietary_restrictions`   | closed list             |          |      | private only (own consent) |
 
 Visibility:
 
