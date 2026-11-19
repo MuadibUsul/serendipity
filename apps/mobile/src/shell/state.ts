@@ -11,6 +11,8 @@ export type Tab = (typeof TABS)[number];
 export interface Session {
   /** Opaque user id from the backend. */
   readonly userId: string;
+  /** The API session (ser-p01-10); absent against the mock. Kept in memory only, for now. */
+  readonly tokens?: { readonly accessToken: string; readonly refreshToken: string };
 }
 
 export type ShellState =

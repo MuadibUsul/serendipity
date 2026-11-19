@@ -13,6 +13,10 @@
       "types": "./src/audit.ts",
       "default": "./src/audit.ts"
     },
+    "./auth": {
+      "types": "./src/auth.ts",
+      "default": "./src/auth.ts"
+    },
     "./consent": {
       "types": "./src/consent.ts",
       "default": "./src/consent.ts"
@@ -50,6 +54,7 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@serendipity/auth": "0.0.0",
     "@serendipity/consent": "0.0.0",
     "@serendipity/domain": "0.0.0",
     "@serendipity/fixtures": "0.0.0",
@@ -57,7 +62,9 @@
     "@serendipity/invitations": "0.0.0",
     "@serendipity/matching": "0.0.0",
     "@serendipity/media": "0.0.0",
+    "@serendipity/privacy": "0.0.0",
     "@serendipity/profile": "0.0.0",
-    "@serendipity/redact": "0.0.0"
+    "@serendipity/redact": "0.0.0",
+    "@serendipity/vision": "0.0.0"
   }
 }

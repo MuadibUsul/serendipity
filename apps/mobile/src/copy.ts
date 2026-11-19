@@ -33,11 +33,12 @@ export const SIGN_IN = {
   verifying: "正在验证…",
   phonePrefix: "+86",
   submit: "登录",
-  mockNote: (code: string) => `演示版本：不连接服务器，验证码为 ${code}。`,
+  mockNote: (code: string) => `演示环境：验证码为 ${code}。`,
   adultsOnly: "仅限年满 18 周岁并完成实名核验的成年人使用。",
   problems: {
     invalid_phone: "请输入 11 位手机号。",
     invalid_code: "验证码不正确，请重新输入。",
+    rate_limited: "请求太频繁，请稍后再试。",
     unavailable: "暂时无法登录，请稍后再试。",
   } satisfies Record<SignInProblem, string>,
 };
