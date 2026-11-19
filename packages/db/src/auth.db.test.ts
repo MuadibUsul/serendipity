@@ -13,6 +13,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { pgAuthRepository } from "./auth.js";
 import { migrate } from "./migrations.js";
+import { pgPrivacyRepository } from "./privacy.js";
 import { createLoginRole, createTestDatabase, urlFor } from "./test-db.js";
 import type { TestDatabase } from "./test-db.js";
 
@@ -229,6 +230,53 @@ describe("sessions", () => {
       ok: false,
       problem: "invalid_code",
     });
+  });
+
+  /** Deletes the account the way the privacy worker does, with no photos to remove. */
+  async function deleteAccount(userId: string): Promise<void> {
+    const privacy = pgPrivacyRepository(pool);
+    await privacy.requestDeletion(userId);
+    expect(await privacy.claimDeletion(userId)).toBe(true);
+    await privacy.finalizeDeletion(userId);
+  }
+
+  async function signInAgain(phone: string) {
+    advance(AUTH_POLICY.resendAfterS);
+    expect(await auth.requestCode(phone, IP)).toMatchObject({ ok: true });
+    return auth.signIn(phone, sms.lastCodeFor(e164(phone)) ?? "");
+  }
+
+  it("keeps a suspended person out after they delete their account", async () => {
+    const phone = nextPhone();
+    const { userId } = await signIn(phone);
+    await admin.query("UPDATE app.users SET status = 'suspended' WHERE id = $1", [userId]);
+    await deleteAccount(userId);
+    const { rows } = await admin.query<{ count: number }>(
+      "SELECT count(*)::int AS count FROM app.auth_phone_accounts WHERE user_id = $1",
+      [userId],
+    );
+    expect(rows[0]?.count).toBe(0);
+    expect(await signInAgain(phone)).toEqual({ ok: false, problem: "invalid_code" });
+    const users = await admin.query<{ count: number }>(
+      "SELECT count(*)::int AS count FROM app.users",
+    );
+    expect(await signInAgain(phone)).toEqual({ ok: false, problem: "invalid_code" });
+    const after = await admin.query<{ count: number }>(
+      "SELECT count(*)::int AS count FROM app.users",
+    );
+    expect(after.rows[0]?.count).toBe(users.rows[0]?.count);
+  });
+
+  it("lets anyone else who deleted their account start over as a new person", async () => {
+    const phone = nextPhone();
+    const { userId } = await signIn(phone);
+    const before = await admin.query("SELECT 1 FROM app.auth_banned_phones");
+    await deleteAccount(userId);
+    const again = await signInAgain(phone);
+    expect(again).toMatchObject({ ok: true, created: true });
+    expect(again.ok && again.userId).not.toBe(userId);
+    const after = await admin.query("SELECT 1 FROM app.auth_banned_phones");
+    expect(after.rowCount).toBe(before.rowCount);
   });
 
   it("audits sign-ins, refusals and refreshes", async () => {

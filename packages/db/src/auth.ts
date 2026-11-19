@@ -229,6 +229,12 @@ export function pgAuthRepository(pool: TransactionPool & Queryable): AuthReposit
           return refuse("account_closed", challenge.id);
         }
         if (userId === undefined) {
+          // A number banned when its suspended account was deleted cannot start over.
+          const banned = await tx.db.query(
+            "SELECT 1 FROM app.auth_banned_phones WHERE phone_hash = $1",
+            [phoneHash],
+          );
+          if (banned.rowCount !== 0) return refuse("account_closed", challenge.id);
           const user = await tx.db.query<{ id: string }>(
             "INSERT INTO app.users DEFAULT VALUES RETURNING id",
           );
