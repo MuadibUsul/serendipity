@@ -32,7 +32,6 @@ const VALUES = {
   "self.interests": ["hiking"],
   "seeking.age_range": { min: 25, max: 35 },
   "seeking.relationship_goals": ["long_term", "open_to_long_term"],
-  "seeking.max_distance_km": 15,
   "seeking.dealbreakers": ["smoker"],
   "date.budget_per_person": { currency: "CNY", max_minor: 12_000 },
 };
@@ -58,7 +57,6 @@ describe("the profile catalog and this filter", () => {
         availability: [{ day: "sat", from: 840, to: 1080 }],
         seekingAgeRange: { min: 25, max: 35 },
         seekingRelationshipGoals: ["long_term", "open_to_long_term"],
-        seekingMaxDistanceKm: 15,
         seekingDealbreakers: ["smoker"],
         budgetPerPerson: { currency: "CNY", minor: 12_000 },
       },

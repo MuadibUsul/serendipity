@@ -24,14 +24,14 @@ describe("applyProposals", () => {
     const outcome = applyProposals(
       NO_FACTS,
       [
-        propose("seeking.max_distance_km", 10, "explicit"),
+        propose("seeking.age_range", { min: 25, max: 30 }, "explicit"),
         propose("self.interests", ["music"], "inferred"),
       ],
       T0,
     );
-    expect(outcome.applied).toEqual(["seeking.max_distance_km", "self.interests"]);
-    expect(outcome.facts.get("seeking.max_distance_km")).toMatchObject({
-      value: 10,
+    expect(outcome.applied).toEqual(["seeking.age_range", "self.interests"]);
+    expect(outcome.facts.get("seeking.age_range")).toMatchObject({
+      value: { min: 25, max: 30 },
       provenance: "explicit",
       visibility: "matching",
     });
@@ -248,9 +248,9 @@ describe("approval and hard rules", () => {
     expect(hardRules(stale)).toEqual([]);
     expect(missingRequired(stale)).toHaveLength(Object.keys(REQUIRED_VALUES).length);
     expect(markOutdated(facts, new Date(T0.getTime() + 179 * 24 * 60 * 60 * 1000))).toEqual(facts);
-    const reconfirmed = confirmFact(stale, "seeking.max_distance_km", later);
+    const reconfirmed = confirmFact(stale, "seeking.age_range", later);
     expect(reconfirmed.ok && hardRules(reconfirmed.facts).map((r) => r.key)).toEqual([
-      "seeking.max_distance_km",
+      "seeking.age_range",
     ]);
   });
 
@@ -268,6 +268,5 @@ const REQUIRED_VALUES_NORMALISED = {
   "self.availability": [{ day: "sat", from: "14:00", to: "18:00" }],
   "seeking.age_range": { min: 25, max: 35 },
   "seeking.relationship_goals": ["long_term", "open_to_long_term"],
-  "seeking.max_distance_km": 15,
   "date.budget_per_person": { currency: "CNY", max_minor: 8800 },
 };

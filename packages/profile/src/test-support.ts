@@ -16,7 +16,6 @@ export const REQUIRED_VALUES: Readonly<Record<string, unknown>> = {
   "self.availability": [{ day: "sat", from: "14:00", to: "18:00" }],
   "seeking.age_range": { min: 25, max: 35 },
   "seeking.relationship_goals": ["open_to_long_term", "long_term"],
-  "seeking.max_distance_km": 15,
   "date.budget_per_person": { currency: "CNY", max_minor: 8800 },
 };
 

@@ -43,7 +43,8 @@ active dates. Recall (`ser-p03-02`) will apply most of these in SQL, and the dec
 7. **All reasons, internal only.** Every refusal that can be established is returned with the
    side it belongs to, for audit and tuning. They are never shown to a user or an agent, because
    several of them disclose the other person.
-8. **Not here:** distance (needs a venue: `ser-p03-02`), and gender or orientation (not in the
+8. **Not here:** distance, which is now a soft preference weighed when the venue is chosen
+   ([ADR-0017](0017-soft-distance.md)); and gender or orientation (not in the
    catalog; an owner and legal decision, PRD-001 §8.2).
 
 ## Open: where a person's age comes from

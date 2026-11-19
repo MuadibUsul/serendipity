@@ -1,6 +1,7 @@
 # @serendipity/venues
 
-Choosing where a date happens. For now this package holds the dietary filter (CHG-001 D4,
+Choosing where a date happens: fair travel (CHG-001 D12,
+[ADR-0017](../../docs/adr/0017-soft-distance.md)) and the dietary filter (CHG-001 D4,
 [ADR-0016](../../docs/adr/0016-food-taste-and-dietary-restrictions.md)). Pure.
 
 - `dietaryNeedsOf(facts, granted)` reads a person's `date.dietary_restrictions`, but only while
@@ -20,3 +21,10 @@ sees them; the tests in `@serendipity/profile` and the recall database suite pro
 
 Food taste (`date.cuisines`, `date.tastes`, `date.atmosphere`, `date.price_band`) is soft. It
 feeds ranking and the agents' venue negotiation (`ser-p03-10`); it never filters people.
+
+## Fair travel
+
+`fairVenues(venues, a, b, fit, estimate)` keeps the venues each person can reach within their
+tolerance (`toleranceFor`: their stated minutes, 45 if unstated, stretched by up to 50% as the
+pair's fit rises). It orders them so that the longer of the two journeys is as short as possible.
+It returns the venues only: no home areas and no journey times.
