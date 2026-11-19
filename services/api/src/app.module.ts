@@ -2,9 +2,10 @@ import { Module } from "@nestjs/common";
 import type { DynamicModule } from "@nestjs/common";
 
 import type { AuthService } from "@serendipity/auth";
-import type { InvitationRepository } from "@serendipity/db";
+import type { FeedbackRepository, InvitationRepository } from "@serendipity/db";
 
 import { AuthController } from "./auth.controller.js";
+import { FeedbackController } from "./feedback.controller.js";
 import type { Callers } from "./callers.js";
 import { HealthController } from "./health.controller.js";
 import { InvitationsController } from "./invitations.controller.js";
@@ -16,6 +17,7 @@ import {
   AUTH,
   CALLERS,
   CLOCK,
+  FEEDBACK,
   INVITATIONS,
   LIFECYCLE,
   LOGGER,
@@ -26,6 +28,8 @@ import {
 /** The invitation endpoints and what they need (ser-p04-02). */
 export interface InvitationsDeps {
   readonly repository: InvitationRepository;
+  /** Left out, the feedback endpoints are not served (ser-p05-01). */
+  readonly feedback?: FeedbackRepository;
   readonly callers: Callers;
   readonly clock?: () => Date;
 }
@@ -57,6 +61,7 @@ export class AppModule {
       controllers: [
         HealthController,
         ...(deps.invitations === undefined ? [] : [InvitationsController]),
+        ...(deps.invitations?.feedback === undefined ? [] : [FeedbackController]),
         ...(deps.auth === undefined ? [] : [AuthController]),
       ],
       providers: [
@@ -71,6 +76,9 @@ export class AppModule {
               { provide: INVITATIONS, useValue: deps.invitations.repository },
               { provide: CALLERS, useValue: deps.invitations.callers },
               { provide: CLOCK, useValue: deps.invitations.clock ?? (() => new Date()) },
+              ...(deps.invitations.feedback === undefined
+                ? []
+                : [{ provide: FEEDBACK, useValue: deps.invitations.feedback }]),
             ]),
       ],
     };

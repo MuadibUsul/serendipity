@@ -33,3 +33,5 @@ export type {
   RefreshOutcome,
 } from "./recall.js";
 export { pgAuthRepository } from "./auth.js";
+export { pgFeedbackRepository } from "./feedback.js";
+export type { FeedbackOutcome, FeedbackRepository } from "./feedback.js";
