@@ -1,0 +1,19 @@
+{
+  "name": "@serendipity/venues",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Venue choice for a date: the dietary filter (the only place dietary restrictions are read). Pure.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@serendipity/profile": "0.0.0"
+  }
+}

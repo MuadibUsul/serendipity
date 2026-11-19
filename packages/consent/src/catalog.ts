@@ -7,7 +7,7 @@
  * `minimumVersion` when its meaning changes, so older grants stop counting and
  * the person is asked again.
  */
-export const CONSENT_POLICY_VERSION = 1;
+export const CONSENT_POLICY_VERSION = 2;
 
 /** Kinds of personal data the engine guards. */
 export const RESOURCES = [
@@ -19,6 +19,7 @@ export const RESOURCES = [
   "compatibility_signals",
   "chat_messages",
   "booking_details",
+  "dietary_restrictions",
 ] as const;
 export type Resource = (typeof RESOURCES)[number];
 
@@ -30,6 +31,7 @@ export const PURPOSES = [
   "negotiation",
   "relationship_messaging",
   "date_booking",
+  "venue_selection",
 ] as const;
 export type Purpose = (typeof PURPOSES)[number];
 
@@ -43,6 +45,7 @@ export const RECIPIENT_CLASSES = [
   "profile_extractor",
   "matching_service",
   "venue",
+  "venue_filter",
 ] as const;
 export type RecipientClass = (typeof RECIPIENT_CLASSES)[number];
 
@@ -94,6 +97,12 @@ export const SCOPES = {
     minimumVersion: 1,
     description: "The venue receives the booking details it needs to seat and check in the date.",
   },
+  dietary_restrictions: {
+    version: 1,
+    minimumVersion: 1,
+    description:
+      "What the person cannot eat is kept, and used only to rule out venues for their dates; never to choose people.",
+  },
 } as const satisfies Record<string, Scope>;
 export type ScopeId = keyof typeof SCOPES;
 
@@ -105,7 +114,7 @@ export interface Flow {
 }
 
 /**
- * Every permitted flow. Raw voice, transcripts, photos, visual features and
+ * Every permitted flow (policy version 2 added the dietary flows). Raw voice, transcripts, photos, visual features and
  * profiles never go to another person or their agent (PLAN-001 §8.1); to
  * them go only allow-listed compatibility signals and chat messages.
  */
@@ -169,5 +178,20 @@ export const FLOWS: readonly Flow[] = [
     purpose: "date_booking",
     recipient: "venue",
     scope: "venue_booking",
+  },
+  // Dietary restrictions can reveal religion or health (CHG-001 D4): they go
+  // only to the venue filter and to the person's own agent choosing a venue,
+  // never to matching, the other person or their agent.
+  {
+    resource: "dietary_restrictions",
+    purpose: "venue_selection",
+    recipient: "venue_filter",
+    scope: "dietary_restrictions",
+  },
+  {
+    resource: "dietary_restrictions",
+    purpose: "venue_selection",
+    recipient: "own_agent",
+    scope: "dietary_restrictions",
   },
 ];

@@ -147,6 +147,25 @@ describe("recall", () => {
     expect(compared).toBeGreaterThan(100);
   });
 
+  it("is the same whatever food and dietary facts people hold (they filter venues, not people)", async () => {
+    const { me, them } = await town(3);
+    const before = new Map<string, string[]>();
+    for (const id of [me, ...them]) before.set(id, [...(await recall.recall(id, QUERY))].sort());
+    const restrictions = ["halal", "vegan", "nut_allergy"];
+    for (const [i, id] of [me, ...them].entries()) {
+      await admin.query(
+        `INSERT INTO app.profile_facts (profile_version_id, key, value, provenance, certainty, visibility_scope)
+         VALUES ($1, 'date.dietary_restrictions', $2, 'confirmed', 'high', 'private'),
+                ($1, 'date.tastes', '["spicy"]', 'confirmed', 'high', 'matching')`,
+        [versions.get(id), JSON.stringify([restrictions[i % restrictions.length]])],
+      );
+      expect(await recall.refresh(id, { age: byId(id).age }, NOW)).toEqual({ stored: true });
+    }
+    for (const id of [me, ...them]) {
+      expect([...(await recall.recall(id, QUERY))].sort()).toEqual(before.get(id));
+    }
+  });
+
   it("never leaves out a pair decidePair passes", async () => {
     let passes = 0;
     for (const person of city.slice(0, 40)) {

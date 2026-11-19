@@ -7,7 +7,12 @@ import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { migrate } from "./migrations.js";
-import { ProfileNotApprovable, ProfileVersionLocked, pgProfileRepository } from "./profile.js";
+import {
+  ProfileConsentMissing,
+  ProfileNotApprovable,
+  ProfileVersionLocked,
+  pgProfileRepository,
+} from "./profile.js";
 import { createLoginRole, createTestDatabase, urlFor } from "./test-db.js";
 import type { TestDatabase } from "./test-db.js";
 
@@ -189,6 +194,55 @@ describe("approval", () => {
       { version: 2, approval_state: "approved" },
     ]);
     expect((await profiles().approved(user))?.facts.get("seeking.max_distance_km")?.value).toBe(30);
+  });
+
+  it("stores dietary restrictions only with their own consent, and drops them once it is revoked", async () => {
+    const user = await newUser();
+    const diet = (granted: ReadonlySet<"dietary_restrictions">) =>
+      applyProposals(
+        confirmRequired(stated()),
+        [
+          {
+            key: "date.dietary_restrictions",
+            value: ["halal"],
+            provenance: "explicit",
+            certainty: "high",
+          },
+        ],
+        NOW,
+        granted,
+      ).facts;
+    const first = await profiles().openDraft(user);
+    const withDiet = diet(new Set(["dietary_restrictions"]));
+    expect(withDiet.has("date.dietary_restrictions")).toBe(true);
+
+    // Without the grant in the database, the store refuses it and writes nothing.
+    await expect(profiles().saveDraft(first.id, withDiet)).rejects.toBeInstanceOf(
+      ProfileConsentMissing,
+    );
+    expect((await profiles().draft(user))?.facts.size).toBe(0);
+
+    const { rows } = await pool.query<{ id: string }>(
+      `INSERT INTO app.consent_grants (user_id, scope, recipient_class, purpose, version)
+       VALUES ($1, 'dietary_restrictions', 'venue_filter', 'venue_selection', 1) RETURNING id`,
+      [user],
+    );
+    await profiles().saveDraft(first.id, withDiet);
+    await profiles().approve(first.id, { type: "user", id: user });
+    const approved = await profiles().approved(user);
+    expect(approved?.facts.get("date.dietary_restrictions")?.value).toEqual(["halal"]);
+    const snapshot = await pool.query<{ structured_json: unknown }>(
+      `SELECT structured_json FROM app.profile_versions WHERE id = $1`,
+      [first.id],
+    );
+    expect(JSON.stringify(snapshot.rows[0]?.structured_json)).not.toMatch(/halal|dietary/);
+
+    await pool.query(`UPDATE app.consent_grants SET revoked_at = now() WHERE id = $1`, [
+      rows[0]?.id,
+    ]);
+    const next = await profiles().openDraft(user);
+    expect(next.facts.has("date.dietary_restrictions")).toBe(false);
+    expect(next.facts.has("self.city_region")).toBe(true);
   });
 
   it("never edits an approved version", async () => {
