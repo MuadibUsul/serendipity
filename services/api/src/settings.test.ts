@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { DEFAULT_HOST, DEFAULT_PORT, MAX_SHUTDOWN_DELAY_MS, loadApiSettings } from "./settings.js";
+import {
+  DEFAULT_HOST,
+  DEFAULT_PORT,
+  DEV_AUTH_SECRET,
+  MAX_SHUTDOWN_DELAY_MS,
+  loadApiSettings,
+} from "./settings.js";
 
 const DEV = {
   APP_ENV: "dev",
@@ -64,5 +70,32 @@ describe("loadApiSettings", () => {
 
   it("refuses to start without a known environment", () => {
     expect(problemsOf({ ...DEV, APP_ENV: "production" })).toEqual(["APP_ENV"]);
+  });
+});
+
+describe("AUTH_SECRET", () => {
+  const STAGING = {
+    APP_ENV: "staging",
+    SECRET_STORE: "secret-store://serendipity-staging",
+    DATABASE_URL:
+      "postgresql://serendipity_app:s3cret@db.example.invalid:5432/serendipity_staging?sslmode=verify-full",
+  };
+  const OWN = "k".repeat(48);
+
+  it("falls back to the public dev secret in dev, and takes a long enough one", () => {
+    const fallback = loadApiSettings(DEV);
+    expect(fallback.ok && fallback.settings.authSecret).toBe(DEV_AUTH_SECRET);
+    const own = loadApiSettings({ ...DEV, AUTH_SECRET: OWN });
+    expect(own.ok && own.settings.authSecret).toBe(OWN);
+  });
+
+  it("refuses a short secret anywhere", () => {
+    expect(problemsOf({ ...DEV, AUTH_SECRET: "short" })).toEqual(["AUTH_SECRET"]);
+  });
+
+  it("makes staging and prod bring their own, never the dev one", () => {
+    expect(problemsOf(STAGING)).toEqual(["AUTH_SECRET"]);
+    expect(problemsOf({ ...STAGING, AUTH_SECRET: DEV_AUTH_SECRET })).toEqual(["AUTH_SECRET"]);
+    expect(problemsOf({ ...STAGING, AUTH_SECRET: OWN })).toEqual([]);
   });
 });

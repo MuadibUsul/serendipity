@@ -28,3 +28,5 @@ export type {
   IdentityServiceOptions,
   RecordOutcome,
 } from "./service.js";
+export { ACCOUNT_LIFECYCLE, ACCOUNT_STATES } from "./account.js";
+export type { AccountState } from "./account.js";

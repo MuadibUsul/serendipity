@@ -1,8 +1,10 @@
 import { Module } from "@nestjs/common";
 import type { DynamicModule } from "@nestjs/common";
 
+import type { AuthService } from "@serendipity/auth";
 import type { InvitationRepository } from "@serendipity/db";
 
+import { AuthController } from "./auth.controller.js";
 import type { Callers } from "./callers.js";
 import { HealthController } from "./health.controller.js";
 import { InvitationsController } from "./invitations.controller.js";
@@ -10,7 +12,16 @@ import type { Lifecycle } from "./lifecycle.js";
 import type { Logger } from "./logging.js";
 import type { Metrics } from "./metrics.js";
 import type { Readiness } from "./readiness.js";
-import { CALLERS, CLOCK, INVITATIONS, LIFECYCLE, LOGGER, METRICS, READINESS } from "./tokens.js";
+import {
+  AUTH,
+  CALLERS,
+  CLOCK,
+  INVITATIONS,
+  LIFECYCLE,
+  LOGGER,
+  METRICS,
+  READINESS,
+} from "./tokens.js";
 
 /** The invitation endpoints and what they need (ser-p04-02). */
 export interface InvitationsDeps {
@@ -26,6 +37,11 @@ export interface AppModuleDeps {
   readonly logger: Logger;
   /** Left out, the invitation endpoints are not served (the probes-only tests). */
   readonly invitations?: InvitationsDeps;
+  /**
+   * Sign-in (ser-p01-10). Left out, the endpoints are not served; `null`, they
+   * answer 503 (a deployed environment with no SMS provider yet).
+   */
+  readonly auth?: AuthService | null;
 }
 
 /**
@@ -38,15 +54,17 @@ export class AppModule {
   static with(deps: AppModuleDeps): DynamicModule {
     return {
       module: AppModule,
-      controllers:
-        deps.invitations === undefined
-          ? [HealthController]
-          : [HealthController, InvitationsController],
+      controllers: [
+        HealthController,
+        ...(deps.invitations === undefined ? [] : [InvitationsController]),
+        ...(deps.auth === undefined ? [] : [AuthController]),
+      ],
       providers: [
         { provide: READINESS, useValue: deps.readiness },
         { provide: METRICS, useValue: deps.metrics },
         { provide: LIFECYCLE, useValue: deps.lifecycle },
         { provide: LOGGER, useValue: deps.logger },
+        ...(deps.auth === undefined ? [] : [{ provide: AUTH, useValue: deps.auth }]),
         ...(deps.invitations === undefined
           ? []
           : [

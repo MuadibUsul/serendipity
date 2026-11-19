@@ -38,9 +38,47 @@ refused. Inserts are not guarded, so fixtures and seeds can create a row in any 
 
 <!-- generated:lifecycles:start -->
 
+### `app.users.status`
+
+Declared in `packages/identity/src/account.ts`; the database enforces it with `app.guard_transition`.
+Starts as `pending`; final: `deleted`.
+
+```mermaid
+stateDiagram-v2
+  [*] --> pending
+  pending --> active
+  pending --> paused
+  pending --> suspended
+  pending --> deleted
+  active --> paused
+  active --> suspended
+  active --> deleted
+  paused --> active
+  paused --> suspended
+  paused --> deleted
+  suspended --> active
+  suspended --> deleted
+  deleted --> [*]
+```
+
+### `app.account_deletion_requests.status`
+
+Declared in `packages/privacy/src/lifecycle.ts`; the database enforces it with `app.guard_transition`.
+Starts as `requested`; final: `completed`.
+
+```mermaid
+stateDiagram-v2
+  [*] --> requested
+  requested --> purging
+  purging --> failed
+  purging --> completed
+  failed --> purging
+  completed --> [*]
+```
+
 ### `app.date_invites.status`
 
-Declared in `packages/invitations/src/lifecycle.ts`; enforced by `app.guard_transition` (migration 0009).
+Declared in `packages/invitations/src/lifecycle.ts`; the database enforces it with `app.guard_transition`.
 Starts as `pending`; final: `declined`, `expired`, `withdrawn`.
 
 ```mermaid
@@ -58,7 +96,7 @@ stateDiagram-v2
 
 ### `app.profile_versions.approval_state`
 
-Declared in `packages/profile/src/lifecycle.ts`; enforced by `app.guard_transition` (migration 0009).
+Declared in `packages/profile/src/lifecycle.ts`; the database enforces it with `app.guard_transition`.
 Starts as `draft`; final: `superseded`, `withdrawn`.
 
 ```mermaid
@@ -73,7 +111,7 @@ stateDiagram-v2
 
 ### `app.media_assets.status`
 
-Declared in `packages/media/src/lifecycle.ts`; enforced by `app.guard_transition` (migration 0009).
+Declared in `packages/media/src/lifecycle.ts`; the database enforces it with `app.guard_transition`.
 Starts as `pending`; final: `deleted`.
 
 ```mermaid
@@ -86,6 +124,36 @@ stateDiagram-v2
   active --> deleted
   expired --> deleted
   deleted --> [*]
+```
+
+### `app.auth_challenges.status`
+
+Declared in `packages/auth/src/lifecycle.ts`; the database enforces it with `app.guard_transition`.
+Starts as `pending`; final: `used`, `expired`, `locked`.
+
+```mermaid
+stateDiagram-v2
+  [*] --> pending
+  pending --> used
+  pending --> expired
+  pending --> locked
+  used --> [*]
+  expired --> [*]
+  locked --> [*]
+```
+
+### `app.auth_sessions.status`
+
+Declared in `packages/auth/src/lifecycle.ts`; the database enforces it with `app.guard_transition`.
+Starts as `active`; final: `revoked`.
+
+```mermaid
+stateDiagram-v2
+  [*] --> active
+  active --> rotated
+  active --> revoked
+  rotated --> revoked
+  revoked --> [*]
 ```
 
 <!-- generated:lifecycles:end -->
@@ -103,6 +171,13 @@ stateDiagram-v2
 - **Home data** (`apps/mobile/src/App.tsx`, `useHome`): `loading` → `ready` | `failed`, and
   `failed` → `loading` on retry.
 
+## Between the agents
+
+The **A2A negotiation** (`packages/a2a-protocol/src/negotiation.ts`, `step`): a pure reducer over messages,
+model calls and clock ticks. At most three questions per side, one at a time; a side proposes
+once; both proposals decide the verdict; time or model calls running out is `NO_DECISION`.
+A refused event leaves the state unchanged and names why.
+
 ## Derived, not stored
 
 These are computed from other state each time and have no transitions of their own:
@@ -118,10 +193,12 @@ These are computed from other state each time and have no transitions of their o
 These columns have a `CHECK` list but no code changes them yet. Whoever first writes one declares
 its lifecycle and adds it to the guard in the same change:
 
-- `app.users.status`
 - `app.venues.status`
 - `app.venue_slots.status`
-- `app.negotiations.status`
+- `app.negotiations.status`: its lifecycle is already declared as `NEGOTIATION_LIFECYCLE`
+  (`packages/a2a-protocol/src/negotiation.ts`; `RUNNING` → `PASS` | `REJECT` | `NEEDS_USER_CLARIFICATION`
+  | `NO_DECISION`, all final; a retry is a new attempt row). The negotiation worker (ser-p03-05)
+  adds its guard.
 - `app.payment_orders.state`
 - `app.refunds.state`
 

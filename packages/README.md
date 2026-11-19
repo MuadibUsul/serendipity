@@ -10,13 +10,14 @@ Shared libraries, consumed as TypeScript source by the apps and services.
 | `config/`       | Runtime configuration; refuses cross-environment mistakes                                       | `ser-p01-02a`                             |
 | `redact/`       | Removes personal data and secrets from log lines and audit metadata                             | `ser-p01-07a`                             |
 | `identity/`     | Age and real-person verification: provider interface, fail-closed eligibility, signed callbacks | `ser-p01-04a`                             |
+| `auth/`         | Sign-in by phone and one-time code: keyed hashes, limits, rotating sessions, the SMS seam       | `ser-p01-10`                              |
 | `profile/`      | Profile fact catalog, provenance and the rules that keep guesses out of hard rules              | `ser-p02-04a`                             |
 | `matching/`     | Bilateral eligibility and hard filters for a pair, and the recall prefilter; no I/O, no model   | `ser-p03-01a`, `ser-p03-02a`              |
 | `invitations/`  | Anonymous date invitations: the allowlisted view, accept / decline / expiry rules               | `ser-p04-02`                              |
 | `fixtures/`     | Deterministic, fictional test data and the G3 scenarios                                         | `ser-p01-08`                              |
 | `schemas/`      | Zod / JSON schemas and API types                                                                | first task that needs them                |
 | `ai-adapters/`  | Voice, vision and LLM provider adapters                                                         | `ser-p02-01`, `ser-p02-07`                |
-| `a2a-protocol/` | `a2a-match/0.1` messages and the deterministic verifier                                         | `ser-p03-04`, `ser-p03-07`                |
+| `a2a-protocol/` | `a2a-match/0.1`: closed-vocabulary messages, coarse signals, the bounded negotiation reducer    | `ser-p03-04a`; verifier in `ser-p03-07`   |
 | `ui/`           | Design tokens (colour, type, spacing, touch targets) with WCAG contrast checks                  | `ser-p01-06`                              |
 
 `domain/`, `consent/` and the payment modules need owner review (see `CONTRIBUTING.md`).

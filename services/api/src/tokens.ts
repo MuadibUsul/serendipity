@@ -7,3 +7,4 @@ export const LOGGER = Symbol("Logger");
 export const INVITATIONS = Symbol("Invitations");
 export const CALLERS = Symbol("Callers");
 export const CLOCK = Symbol("Clock");
+export const AUTH = Symbol("Auth");

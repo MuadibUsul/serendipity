@@ -88,6 +88,14 @@ Availability is kept as one bit per whole free quarter hour of the week. A share
 minutes always holds ⌈(_L_ − 28) / 15⌉ consecutive whole quarter hours, so asking for that many
 consecutive bits in both masks never loses a pair. Dates shorter than 30 minutes are refused.
 
+## Ranking (`rank.ts`)
+
+Among the people recall puts forward, who to try first ([ADR-0014](../../docs/adr/0014-ranking-baseline.md)).
+`directional(a, b)` is how well B fits what A hopes for. `scorePair` is
+`min(S(A,B), S(B,A))` less penalties for thin information and for over-exposure.
+`rankCandidates` picks up to `k` pairs, best first, with seeded, bounded exploration above a
+floor. Appearance takes at most 15% of S and never decides. Scores are internal only.
+
 ## Verifying an agent's PASS
 
 `verifyPass(proposed, now)` is the decision verifier (`ser-p03-07`). An agent's `PASS` is only a

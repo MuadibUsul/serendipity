@@ -44,6 +44,27 @@ export type {
   RecallEntry,
   RecallSource,
 } from "./recall.js";
+export {
+  DEFAULT_WEIGHTS,
+  EXPOSURE_SATURATION,
+  EXPOSURE_WEIGHT,
+  MAX_APPEARANCE_SHARE,
+  NEUTRAL,
+  UNCERTAINTY_WEIGHT,
+  directional,
+  rankCandidates,
+  scorePair,
+} from "./rank.js";
+export type {
+  Candidate as RankCandidate,
+  PairInput,
+  PairScore,
+  RankOptions,
+  RankProfile,
+  RankWeights,
+  Ranked,
+  Wish,
+} from "./rank.js";
 export { verifyPass } from "./verify.js";
 export type {
   Now as VerifyNow,
