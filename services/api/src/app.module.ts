@@ -7,10 +7,12 @@ import type {
   FeedbackRepository,
   InvitationRepository,
   RelationshipRepository,
+  RevealRepository,
 } from "@serendipity/db";
 
 import { AccountController } from "./account.controller.js";
 import { AuthController } from "./auth.controller.js";
+import { CardsController } from "./cards.controller.js";
 import { FeedbackController } from "./feedback.controller.js";
 import type { Callers } from "./callers.js";
 import { HealthController } from "./health.controller.js";
@@ -32,6 +34,7 @@ import {
   METRICS,
   READINESS,
   RELATIONSHIPS,
+  REVEAL,
 } from "./tokens.js";
 
 /** The signed-in person's endpoints and what they need: invitations (ser-p04-02), pause and resume (ser-p05-04). */
@@ -43,6 +46,8 @@ export interface InvitationsDeps {
   readonly feedback?: FeedbackRepository;
   /** Left out, the chat endpoints are not served (ser-p05-02). */
   readonly relationships?: RelationshipRepository;
+  /** Left out, the card endpoints are not served (ADR-0021). */
+  readonly reveal?: RevealRepository;
   readonly callers: Callers;
   readonly clock?: () => Date;
 }
@@ -77,6 +82,7 @@ export class AppModule {
         ...(deps.invitations?.account === undefined ? [] : [AccountController]),
         ...(deps.invitations?.feedback === undefined ? [] : [FeedbackController]),
         ...(deps.invitations?.relationships === undefined ? [] : [RelationshipsController]),
+        ...(deps.invitations?.reveal === undefined ? [] : [CardsController]),
         ...(deps.auth === undefined ? [] : [AuthController]),
       ],
       providers: [
@@ -100,6 +106,9 @@ export class AppModule {
               ...(deps.invitations.relationships === undefined
                 ? []
                 : [{ provide: RELATIONSHIPS, useValue: deps.invitations.relationships }]),
+              ...(deps.invitations.reveal === undefined
+                ? []
+                : [{ provide: REVEAL, useValue: deps.invitations.reveal }]),
             ]),
       ],
     };

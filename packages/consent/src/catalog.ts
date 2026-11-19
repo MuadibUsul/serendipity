@@ -7,7 +7,7 @@
  * `minimumVersion` when its meaning changes, so older grants stop counting and
  * the person is asked again.
  */
-export const CONSENT_POLICY_VERSION = 2;
+export const CONSENT_POLICY_VERSION = 3;
 
 /** Kinds of personal data the engine guards. */
 export const RESOURCES = [
@@ -20,6 +20,7 @@ export const RESOURCES = [
   "chat_messages",
   "booking_details",
   "dietary_restrictions",
+  "reveal_cards",
 ] as const;
 export type Resource = (typeof RESOURCES)[number];
 
@@ -32,6 +33,7 @@ export const PURPOSES = [
   "relationship_messaging",
   "date_booking",
   "venue_selection",
+  "relationship_reveal",
 ] as const;
 export type Purpose = (typeof PURPOSES)[number];
 
@@ -103,6 +105,12 @@ export const SCOPES = {
     description:
       "What the person cannot eat is kept, and used only to rule out venues for their dates; never to choose people.",
   },
+  relationship_reveal: {
+    version: 1,
+    minimumVersion: 1,
+    description:
+      "After both said yes, the other person turns over one card a day from your deck (soft facts you allow), and their agent may use what they saw to plan a surprise.",
+  },
 } as const satisfies Record<string, Scope>;
 export type ScopeId = keyof typeof SCOPES;
 
@@ -114,9 +122,11 @@ export interface Flow {
 }
 
 /**
- * Every permitted flow (policy version 2 added the dietary flows). Raw voice, transcripts, photos, visual features and
+ * Every permitted flow (policy version 2 added the dietary flows, version 3
+ * the card deck). Raw voice, transcripts, photos, visual features and whole
  * profiles never go to another person or their agent (PLAN-001 §8.1); to
- * them go only allow-listed compatibility signals and chat messages.
+ * them go only allow-listed compatibility signals, chat messages and, after
+ * a mutual yes, one card a day from a deck of soft facts.
  */
 export const FLOWS: readonly Flow[] = [
   {
@@ -193,5 +203,14 @@ export const FLOWS: readonly Flow[] = [
     purpose: "venue_selection",
     recipient: "own_agent",
     scope: "dietary_restrictions",
+  },
+  // Policy version 3: the card deck, one card a day, to the other person of
+  // an open relationship (ADR-0021). Their own agent uses what they saw on
+  // their behalf, as the relationship peer.
+  {
+    resource: "reveal_cards",
+    purpose: "relationship_reveal",
+    recipient: "relationship_peer",
+    scope: "relationship_reveal",
   },
 ];

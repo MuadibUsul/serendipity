@@ -44,3 +44,5 @@ export type {
   RelationshipSummary,
   SendOutcome,
 } from "./relationships.js";
+export { pgRevealRepository } from "./reveal.js";
+export type { FlipOutcome, RevealRepository, RevealView } from "./reveal.js";

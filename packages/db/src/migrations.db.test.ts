@@ -116,6 +116,8 @@ describe("schema contents", () => {
         "recall_entries",
         "refunds",
         "relationships",
+        "reveal_flips",
+        "reveal_settings",
         "users",
         "venue_slots",
         "venues",

@@ -14,6 +14,7 @@ import { pgAccountRepository } from "@serendipity/db/account";
 import { pgFeedbackRepository } from "@serendipity/db/feedback";
 import { pgInvitationRepository } from "@serendipity/db/invitations";
 import { pgRelationshipRepository } from "@serendipity/db/relationships";
+import { pgRevealRepository } from "@serendipity/db/reveal";
 import { knownMigrations } from "@serendipity/db/migration-status";
 import pg from "pg";
 
@@ -87,6 +88,7 @@ async function main(): Promise<void> {
       account: pgAccountRepository(pool),
       feedback: pgFeedbackRepository(pool),
       relationships: pgRelationshipRepository(pool),
+      reveal: pgRevealRepository(pool),
       callers: sessionCallers(config.env, auth),
     },
   });

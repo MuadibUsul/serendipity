@@ -183,6 +183,8 @@ describe("consent properties", () => {
     const channels = new Set([
       "compatibility_signals/counterpart_agent",
       "chat_messages/relationship_peer",
+      // One card a day from a deck of soft facts its owner allows (ADR-0021).
+      "reveal_cards/relationship_peer",
     ]);
     fc.assert(
       fc.property(anyRequest, (req) => {
