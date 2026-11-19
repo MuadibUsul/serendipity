@@ -44,3 +44,12 @@ export type {
   RecallEntry,
   RecallSource,
 } from "./recall.js";
+export { verifyPass } from "./verify.js";
+export type {
+  Now as VerifyNow,
+  ProposedPass,
+  Verification,
+  VerifyAudit,
+  VerifyCode,
+  VerifyReason,
+} from "./verify.js";

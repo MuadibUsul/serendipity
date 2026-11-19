@@ -87,3 +87,18 @@ that, and a database test checks that the SQL agrees with `mayRecall` on a synth
 Availability is kept as one bit per whole free quarter hour of the week. A shared stretch of _L_
 minutes always holds ⌈(_L_ − 28) / 15⌉ consecutive whole quarter hours, so asking for that many
 consecutive bits in both masks never loses a pair. Dates shorter than 30 minutes are refused.
+
+## Verifying an agent's PASS
+
+`verifyPass(proposed, now)` is the decision verifier (`ser-p03-07`). An agent's `PASS` is only a
+proposal. Before anyone is invited, it is checked again against the world as it is now.
+
+- The negotiation ended in `PASS`, under a supported protocol.
+- It is about these two people, and the candidate pair has not expired.
+- Both people still hold matching consent, under the policy version the pair was recalled with.
+  Consent that was withdrawn, or re-granted under a new policy, overturns it.
+- `decidePair` still passes, run fresh. A pause, a block or another date since then overturns it.
+
+Every outcome returns the audit event to write (`match.pass.confirmed` or `match.pass.overturned`).
+The event carries reason codes only, never ids or rule values. A property test checks that the
+verifier never confirms a pair `decidePair` now refuses.
