@@ -1,3 +1,4 @@
+export { INVITE_LIFECYCLE } from "./lifecycle.js";
 export { INVITE_STATUSES } from "./record.js";
 export type { InvitationRecord, InviteStatus, Venue } from "./record.js";
 export { decideAnswer, expireInvitations, openInvitations } from "./rules.js";

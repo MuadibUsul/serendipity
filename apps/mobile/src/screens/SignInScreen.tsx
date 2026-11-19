@@ -1,10 +1,11 @@
 import { RADIUS, SPACE } from "@serendipity/ui";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useRef } from "react";
 import { View } from "react-native";
 
 import { MOCK_CODE } from "../api/mock";
-import type { Api, SignInProblem } from "../api/types";
+import type { Api } from "../api/types";
 import { SIGN_IN } from "../copy";
+import { INITIAL_SIGN_IN, canSend, reduceSignIn } from "../shell/sign-in";
 import type { Session } from "../shell/state";
 import { AppText } from "../ui/AppText";
 import { BrandMark } from "../ui/BrandMark";
@@ -67,8 +68,7 @@ function Promises() {
   );
 }
 
-/** Seconds before another code may be requested. */
-export const RESEND_AFTER_S = 60;
+export { RESEND_AFTER_S } from "../shell/sign-in";
 
 /** 13800000000 → 138****0000: enough to recognise, not to read out. */
 export function maskPhone(phone: string): string {
@@ -87,68 +87,69 @@ export function SignInScreen({
   readonly api: Api;
   readonly onSignedIn: (session: Session) => void;
 }) {
-  const [phone, setPhone] = useState("");
-  const [code, setCode] = useState("");
-  const [step, setStep] = useState<"phone" | "code">("phone");
-  const [wait, setWait] = useState(0);
-  const [problem, setProblem] = useState<SignInProblem | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [shakes, setShakes] = useState(0);
+  const [state, dispatch] = useReducer(reduceSignIn, INITIAL_SIGN_IN);
 
   // The resend countdown, one second at a time.
+  const wait = state.step === "code" ? state.wait : 0;
   useEffect(() => {
     if (wait <= 0) return;
     const timer = setTimeout(() => {
-      setWait((seconds) => seconds - 1);
+      dispatch({ type: "tick" });
     }, 1000);
     return () => {
       clearTimeout(timer);
     };
   }, [wait]);
 
-  async function run(action: () => Promise<void>) {
-    setBusy(true);
-    setProblem(null);
-    try {
-      await action();
-    } catch {
-      setProblem("unavailable");
-    } finally {
-      setBusy(false);
+  // Signed in: hand over once.
+  const handedOver = useRef(false);
+  useEffect(() => {
+    if (state.step === "signed_in" && !handedOver.current) {
+      handedOver.current = true;
+      onSignedIn(state.session);
     }
-  }
+  }, [state, onSignedIn]);
 
-  const sendCode = () =>
-    run(async () => {
-      const result = await api.requestCode(phone.trim());
-      if (result.ok) {
-        setStep("code");
-        setCode("");
-        setWait(RESEND_AFTER_S);
-      } else setProblem(result.problem);
-    });
+  const phone = state.step === "signed_in" ? "" : state.phone.trim();
 
-  const submit = (entered: string) =>
-    run(async () => {
-      const result = await api.signIn(phone.trim(), entered);
-      if (result.ok) {
-        onSignedIn(result.session);
-        return;
-      }
-      setProblem(result.problem);
-      if (result.problem === "invalid_code") {
-        // Shake, clear, and start again from the first cell.
-        setCode("");
-        setShakes((n) => n + 1);
-      }
-    });
-
-  const changePhone = () => {
-    setStep("phone");
-    setCode("");
-    setProblem(null);
-    setWait(0);
+  const sendCode = () => {
+    if (!canSend(state)) return;
+    const attempt = state.attempt + 1;
+    dispatch({ type: "send_requested" });
+    api.requestCode(phone).then(
+      (result) => {
+        dispatch(
+          result.ok
+            ? { type: "code_sent", attempt }
+            : { type: "refused", attempt, problem: result.problem },
+        );
+      },
+      () => {
+        dispatch({ type: "failed", attempt });
+      },
+    );
   };
+
+  const submit = (entered: string) => {
+    if (state.step !== "code" || state.pending !== null) return;
+    const attempt = state.attempt + 1;
+    dispatch({ type: "verify_requested" });
+    api.signIn(phone, entered).then(
+      (result) => {
+        dispatch(
+          result.ok
+            ? { type: "signed_in", attempt, session: result.session }
+            : { type: "refused", attempt, problem: result.problem },
+        );
+      },
+      () => {
+        dispatch({ type: "failed", attempt });
+      },
+    );
+  };
+
+  const busy = state.step !== "signed_in" && state.pending !== null;
+  const problem = state.step === "signed_in" ? null : state.problem;
 
   return (
     <Screen withTabBar={false} ambient="signIn" fill>
@@ -169,14 +170,16 @@ export function SignInScreen({
         radius={RADIUS.xl}
         style={{ marginTop: "auto", padding: SPACE.xxl, gap: SPACE.lg }}
       >
-        {step === "phone" ? (
+        {state.step !== "code" ? (
           <>
             <TextField
               label={SIGN_IN.phoneLabel}
               hint={SIGN_IN.phoneHint}
               prefix={SIGN_IN.phonePrefix}
-              value={phone}
-              onChangeText={setPhone}
+              value={state.step === "phone" ? state.phone : ""}
+              onChangeText={(next) => {
+                dispatch({ type: "phone_edited", phone: next });
+              }}
               keyboardType="phone-pad"
               textContentType="telephoneNumber"
               maxLength={11}
@@ -186,7 +189,7 @@ export function SignInScreen({
                 {SIGN_IN.problems[problem]}
               </AppText>
             )}
-            <Button label={SIGN_IN.sendCode} disabled={busy} onPress={() => void sendCode()} />
+            <Button label={SIGN_IN.sendCode} disabled={busy} onPress={sendCode} />
           </>
         ) : (
           <>
@@ -194,30 +197,31 @@ export function SignInScreen({
               <AppText variant="subtitle">{SIGN_IN.codeTitle}</AppText>
               <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
                 <AppText variant="subhead" color="textSecondary" live="polite">
-                  {SIGN_IN.sentTo(maskPhone(phone.trim()))}
+                  {SIGN_IN.sentTo(maskPhone(phone))}
                 </AppText>
                 <Button
                   label={SIGN_IN.changePhone}
                   spokenLabel={SIGN_IN.changePhoneSpoken}
                   variant="plain"
-                  onPress={changePhone}
+                  onPress={() => {
+                    dispatch({ type: "change_phone" });
+                  }}
                 />
               </View>
             </View>
             <CodeInput
               label={SIGN_IN.codeLabel}
-              value={code}
+              value={state.code}
               onChangeText={(next) => {
-                setCode(next);
-                if (problem !== null) setProblem(null);
+                dispatch({ type: "code_edited", code: next });
               }}
-              onComplete={(entered) => void submit(entered)}
-              shakeKey={shakes}
+              onComplete={submit}
+              shakeKey={state.shakes}
               busy={busy}
               hint={SIGN_IN.autoVerify}
               autoFocus
             />
-            {busy ? (
+            {state.pending === "verifying" ? (
               <AppText variant="footnote" color="textSecondary" live="polite">
                 {SIGN_IN.verifying}
               </AppText>
@@ -230,8 +234,8 @@ export function SignInScreen({
               <Button
                 label={wait > 0 ? SIGN_IN.resendIn(wait) : SIGN_IN.resend}
                 variant="plain"
-                disabled={busy || wait > 0}
-                onPress={() => void sendCode()}
+                disabled={!canSend(state)}
+                onPress={sendCode}
               />
             </View>
           </>

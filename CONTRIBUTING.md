@@ -84,6 +84,10 @@ instead. These paths (and `.github/`) are listed in `.github/CODEOWNERS`; branch
 - TypeScript strict (see `tsconfig.base.json`); no `any`, no non-null assertions.
 - Every `switch` over a union ends in `default: return assertNever(x)` (from
   `@serendipity/domain`); the linter also enforces exhaustiveness.
+- A status that changes is never a loose string or a handful of booleans. Declare it as a
+  lifecycle (`defineLifecycle`), an event machine, or, in the app, a pure reducer, and guard it
+  in the database. [docs/state-machines.md](docs/state-machines.md) lists them all and says how
+  to add one.
 - Unit tests sit next to the code as `*.test.ts`; suites that span packages live in `tests/`.
 - Dependencies are pinned to exact versions (`.npmrc` has `save-exact=true`); add one only with a
   reason in the PR.

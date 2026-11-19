@@ -2,10 +2,10 @@ import { randomUUID } from "node:crypto";
 
 import type { Authorizer, Decision } from "@serendipity/consent";
 
+import type { MediaStatus } from "./lifecycle.js";
 import type { MediaStorage, UploadForm } from "./storage.js";
 
 export type PhotoPurpose = "visual_matching";
-export type MediaStatus = "pending" | "active" | "expired" | "deleted";
 
 export interface MediaAsset {
   readonly id: string;

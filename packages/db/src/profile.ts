@@ -6,14 +6,14 @@
 // draft from them.
 import { isFactKey, missingRequired, snapshotOf } from "@serendipity/profile";
 import type { Certainty, Fact, FactKey, Facts, Provenance, Visibility } from "@serendipity/profile";
-import type { FactValue } from "@serendipity/profile";
+import type { FactValue, VersionState } from "@serendipity/profile";
 import type pg from "pg";
 
 import { inAuditedTransaction } from "./audit.js";
 import type { ActorType, TransactionPool } from "./audit.js";
 import type { Queryable } from "./queryable.js";
 
-export type VersionState = "draft" | "approved" | "superseded" | "withdrawn";
+export type { VersionState };
 
 export interface ProfileVersion {
   readonly id: string;
