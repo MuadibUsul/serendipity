@@ -13,7 +13,16 @@ export interface ApiSettings {
   readonly host: string;
   /** How long `/readyz` reports draining before the server stops taking connections. */
   readonly shutdownDelayMs: number;
+  /**
+   * The key for every sign-in hash (`AUTH_SECRET`, at least 32 bytes). Dev and
+   * test fall back to a fixed, public one; staging and prod must set their
+   * own, and may not use that one.
+   */
+  readonly authSecret: string;
 }
+
+/** The secret dev and test use when none is set. Public, so useless anywhere else. */
+export const DEV_AUTH_SECRET = "serendipity-dev-auth-secret-not-for-deployed-use";
 
 export const DEFAULT_PORT = 4000;
 /** Loopback unless told otherwise; the image sets HOST=0.0.0.0. */
@@ -63,6 +72,31 @@ export function loadApiSettings(source: Source): ApiSettingsResult {
     problems,
   );
 
+  const authSecret = parseAuthSecret(
+    loaded.ok ? loaded.config.env : null,
+    source["AUTH_SECRET"],
+    problems,
+  );
+
   if (!loaded.ok || problems.length > 0) return { ok: false, problems };
-  return { ok: true, settings: { app: loaded.config, port, host, shutdownDelayMs } };
+  return { ok: true, settings: { app: loaded.config, port, host, shutdownDelayMs, authSecret } };
+}
+
+function parseAuthSecret(
+  env: AppConfig["env"] | null,
+  raw: string | undefined,
+  problems: ConfigProblem[],
+): string {
+  const variable = "AUTH_SECRET";
+  const deployed = env === "staging" || env === "prod";
+  if (raw === undefined || raw === "") {
+    if (deployed) problems.push({ variable, message: `${env} needs its own sign-in secret` });
+    return DEV_AUTH_SECRET;
+  }
+  if (Buffer.byteLength(raw, "utf8") < 32) {
+    problems.push({ variable, message: "must be at least 32 bytes" });
+  } else if (deployed && raw === DEV_AUTH_SECRET) {
+    problems.push({ variable, message: `${env} must not use the public dev secret` });
+  }
+  return raw;
 }

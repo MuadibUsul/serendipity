@@ -1,6 +1,7 @@
 // The lifecycle guards (migration 0009) against their TypeScript tables:
 // for every table, every ordered pair of distinct states is tried as the
 // application role, and the database must allow exactly the declared edges.
+import { CHALLENGE_LIFECYCLE, SESSION_LIFECYCLE } from "@serendipity/auth";
 import type { Lifecycle } from "@serendipity/domain";
 import { INVITE_LIFECYCLE } from "@serendipity/invitations";
 import { MEDIA_LIFECYCLE } from "@serendipity/media";
@@ -100,6 +101,52 @@ const media: Table<(typeof MEDIA_LIFECYCLE.states)[number]> = {
   update: (id, to) => app.query("UPDATE app.media_assets SET status = $2 WHERE id = $1", [id, to]),
 };
 
+const ENDED = (state: string, open: string) => (state === open ? null : new Date());
+
+const challenges: Table<(typeof CHALLENGE_LIFECYCLE.states)[number]> = {
+  lifecycle: CHALLENGE_LIFECYCLE,
+  async insert(state) {
+    const { rows } = await admin.query<{ id: string }>(
+      `INSERT INTO app.auth_challenges
+         (phone_hash, ip_hash, code_hash, status, expires_at, created_at, ended_at)
+       VALUES (gen_random_uuid()::text, 'ip', 'code', $1, now() + interval '5 minutes', now(), $2)
+       RETURNING id`,
+      [state, ENDED(state, "pending")],
+    );
+    return rows[0]?.id ?? "";
+  },
+  update: (id, to) =>
+    app.query(
+      `UPDATE app.auth_challenges SET status = $2,
+         ended_at = CASE WHEN $2 = 'pending' THEN NULL ELSE coalesce(ended_at, now()) END
+       WHERE id = $1`,
+      [id, to],
+    ),
+};
+
+const sessions: Table<(typeof SESSION_LIFECYCLE.states)[number]> = {
+  lifecycle: SESSION_LIFECYCLE,
+  async insert(state) {
+    const { rows } = await admin.query<{ id: string }>(
+      `INSERT INTO app.auth_sessions
+         (family_id, user_id, status, access_hash, access_expires_at, refresh_hash,
+          refresh_expires_at, created_at, ended_at)
+       VALUES (gen_random_uuid(), $1, $2, gen_random_uuid()::text, now(), gen_random_uuid()::text,
+               now(), now(), $3)
+       RETURNING id`,
+      [await newUser(), state, ENDED(state, "active")],
+    );
+    return rows[0]?.id ?? "";
+  },
+  update: (id, to) =>
+    app.query(
+      `UPDATE app.auth_sessions SET status = $2,
+         ended_at = CASE WHEN $2 = 'active' THEN NULL ELSE coalesce(ended_at, now()) END
+       WHERE id = $1`,
+      [id, to],
+    ),
+};
+
 async function attempt(update: () => Promise<unknown>): Promise<"allowed" | "refused"> {
   try {
     await update();
@@ -116,6 +163,8 @@ describe.each([
   ["app.date_invites.status", invites],
   ["app.profile_versions.approval_state", versions],
   ["app.media_assets.status", media],
+  ["app.auth_challenges.status", challenges],
+  ["app.auth_sessions.status", sessions],
 ] as const)("%s", (_name, table: Table<string>) => {
   it("allows exactly the moves its lifecycle declares", async () => {
     const { lifecycle } = table;
