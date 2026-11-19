@@ -1,0 +1,19 @@
+{
+  "name": "@serendipity/vision",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@serendipity/consent": "0.0.0",
+    "@serendipity/media": "0.0.0"
+  }
+}

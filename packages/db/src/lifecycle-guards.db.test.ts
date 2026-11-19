@@ -3,8 +3,10 @@
 // application role, and the database must allow exactly the declared edges.
 import { CHALLENGE_LIFECYCLE, SESSION_LIFECYCLE } from "@serendipity/auth";
 import type { Lifecycle } from "@serendipity/domain";
+import { ACCOUNT_LIFECYCLE } from "@serendipity/identity";
 import { INVITE_LIFECYCLE } from "@serendipity/invitations";
 import { MEDIA_LIFECYCLE } from "@serendipity/media";
+import { DELETION_LIFECYCLE } from "@serendipity/privacy";
 import { VERSION_LIFECYCLE } from "@serendipity/profile";
 import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -101,6 +103,47 @@ const media: Table<(typeof MEDIA_LIFECYCLE.states)[number]> = {
   update: (id, to) => app.query("UPDATE app.media_assets SET status = $2 WHERE id = $1", [id, to]),
 };
 
+const accounts: Table<(typeof ACCOUNT_LIFECYCLE.states)[number]> = {
+  lifecycle: ACCOUNT_LIFECYCLE,
+  async insert(state) {
+    const { rows } = await admin.query<{ id: string }>(
+      `INSERT INTO app.users (status, deleted_at) VALUES ($1, CASE WHEN $1 = 'deleted' THEN now() END)
+       RETURNING id`,
+      [state],
+    );
+    return rows[0]?.id ?? "";
+  },
+  update: (id, to) =>
+    app.query(
+      `UPDATE app.users SET status = $2,
+         deleted_at = CASE WHEN $2 = 'deleted' THEN coalesce(deleted_at, now()) END
+       WHERE id = $1`,
+      [id, to],
+    ),
+};
+
+const deletions: Table<(typeof DELETION_LIFECYCLE.states)[number]> = {
+  lifecycle: DELETION_LIFECYCLE,
+  async insert(state) {
+    const { rows } = await admin.query<{ id: string }>(
+      `INSERT INTO app.account_deletion_requests (user_id, status, completed_at, failure_stage)
+       VALUES ($1, $2, CASE WHEN $2 = 'completed' THEN now() END,
+               CASE WHEN $2 = 'failed' THEN 'database' END)
+       RETURNING id`,
+      [await newUser(), state],
+    );
+    return rows[0]?.id ?? "";
+  },
+  update: (id, to) =>
+    app.query(
+      `UPDATE app.account_deletion_requests SET status = $2,
+         completed_at = CASE WHEN $2 = 'completed' THEN coalesce(completed_at, now()) END,
+         failure_stage = CASE WHEN $2 = 'failed' THEN coalesce(failure_stage, 'database') END
+       WHERE id = $1`,
+      [id, to],
+    ),
+};
+
 const ENDED = (state: string, open: string) => (state === open ? null : new Date());
 
 const challenges: Table<(typeof CHALLENGE_LIFECYCLE.states)[number]> = {
@@ -163,6 +206,8 @@ describe.each([
   ["app.date_invites.status", invites],
   ["app.profile_versions.approval_state", versions],
   ["app.media_assets.status", media],
+  ["app.users.status", accounts],
+  ["app.account_deletion_requests.status", deletions],
   ["app.auth_challenges.status", challenges],
   ["app.auth_sessions.status", sessions],
 ] as const)("%s", (_name, table: Table<string>) => {
