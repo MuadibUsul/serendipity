@@ -208,6 +208,15 @@ export function pgRelationshipRepository(
                  WHERE id = $1`,
             [relationshipId, now, userId],
           );
+          if (how === "block") {
+            // A block also keeps the two from ever being matched again (ADR-0022).
+            const row = rows[0];
+            await tx.db.query(
+              `INSERT INTO app.user_blocks (blocker_id, blocked_id, created_at) VALUES ($1, $2, $3)
+               ON CONFLICT DO NOTHING`,
+              [userId, row.user_a === userId ? row.user_b : row.user_a, now],
+            );
+          }
           await audit(
             tx,
             how === "block" ? "relationship.blocked" : "relationship.left",

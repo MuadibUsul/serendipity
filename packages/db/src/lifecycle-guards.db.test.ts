@@ -8,6 +8,7 @@ import { INVITE_LIFECYCLE } from "@serendipity/invitations";
 import { MEDIA_LIFECYCLE } from "@serendipity/media";
 import { DELETION_LIFECYCLE } from "@serendipity/privacy";
 import { VERSION_LIFECYCLE } from "@serendipity/profile";
+import { REPORT_LIFECYCLE } from "@serendipity/safety";
 import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -190,6 +191,27 @@ const sessions: Table<(typeof SESSION_LIFECYCLE.states)[number]> = {
     ),
 };
 
+const reports: Table<(typeof REPORT_LIFECYCLE.states)[number]> = {
+  lifecycle: REPORT_LIFECYCLE,
+  async insert(state) {
+    const [a, b] = [await newUser(), await newUser()];
+    const { rows } = await admin.query<{ id: string }>(
+      `INSERT INTO app.safety_reports (reporter_id, subject_id, category, risk, status, decided_at)
+       VALUES ($1, $2, 'other', 'standard', $3, CASE WHEN $3 = 'open' THEN NULL ELSE now() END)
+       RETURNING id`,
+      [a, b, state],
+    );
+    return rows[0]?.id ?? "";
+  },
+  update: (id, to) =>
+    app.query(
+      `UPDATE app.safety_reports SET status = $2,
+         decided_at = CASE WHEN $2 = 'open' THEN NULL ELSE coalesce(decided_at, now()) END
+       WHERE id = $1`,
+      [id, to],
+    ),
+};
+
 async function attempt(update: () => Promise<unknown>): Promise<"allowed" | "refused"> {
   try {
     await update();
@@ -210,6 +232,7 @@ describe.each([
   ["app.account_deletion_requests.status", deletions],
   ["app.auth_challenges.status", challenges],
   ["app.auth_sessions.status", sessions],
+  ["app.safety_reports.status", reports],
 ] as const)("%s", (_name, table: Table<string>) => {
   it("allows exactly the moves its lifecycle declares", async () => {
     const { lifecycle } = table;

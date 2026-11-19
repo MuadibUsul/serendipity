@@ -105,6 +105,8 @@ export function pgPrivacyRepository(pool: pg.Pool): PrivacyRepository {
             FROM app.post_date_feedback WHERE user_id = $1 ORDER BY created_at`),
           deckSettings: await rows(`SELECT excluded, included, updated_at AS "updatedAt"
             FROM app.reveal_settings WHERE user_id = $1`),
+          reportsFiled: await rows(`SELECT category, status, created_at AS "createdAt"
+            FROM app.safety_reports WHERE reporter_id = $1 ORDER BY created_at`),
           sentMessages: await rows(`SELECT relationship_id AS "relationshipId", body,
             created_at AS "sentAt" FROM app.chat_messages WHERE sender_id = $1 ORDER BY created_at`),
           auditHistory: await rows(`SELECT action, at FROM app.audit_events

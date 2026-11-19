@@ -46,3 +46,5 @@ export type {
 } from "./relationships.js";
 export { pgRevealRepository } from "./reveal.js";
 export type { FlipOutcome, RevealRepository, RevealView } from "./reveal.js";
+export { fileReport, pgSafetyRepository } from "./safety.js";
+export type { OwnReport, QueuedReport, ReportOutcome, SafetyRepository } from "./safety.js";

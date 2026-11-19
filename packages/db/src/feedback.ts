@@ -12,6 +12,7 @@ import type {
 } from "@serendipity/feedback";
 
 import { inAuditedTransaction } from "./audit.js";
+import { fileReport } from "./safety.js";
 import type { AuditedTransaction, TransactionPool } from "./audit.js";
 import type { Queryable } from "./queryable.js";
 
@@ -129,6 +130,18 @@ export function pgFeedbackRepository(pool: TransactionPool & Queryable): Feedbac
           await audit(tx, "date.feedback.submitted", userId, dateId, {
             safety_concern: !answer.feltSafe,
           });
+          if (!answer.feltSafe) {
+            // "I did not feel safe" goes to the safety team as a report (ADR-0022).
+            const [a, b] = state.users;
+            await fileReport(tx, {
+              reporterId: userId,
+              subjectId: a === userId ? b : a,
+              dateId,
+              category: "felt_unsafe",
+              details: null,
+              now,
+            });
+          }
           const next = { ...state, mine: answer };
           if (isMutual(next.mine, next.theirs)) {
             const [a, b] = state.users;

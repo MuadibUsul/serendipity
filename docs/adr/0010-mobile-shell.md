@@ -118,3 +118,22 @@ tokens, against a mock backend, with basic accessibility checked automatically a
   (`ser-p00-04`) and the API.
 - No session is persisted across launches yet. That needs secure storage and a real token, and
   comes with the API client.
+
+## Amendment (2026-11-19): stay small, go deep
+
+Owner direction: keep the app clean and uncluttered, and never let it grow into a do-everything
+super-app. New features win their place through hierarchy, not new surfaces.
+
+1. **Four tabs, never more:** AI, Dates, Relationships, Me. A new feature lives inside one of
+   them.
+2. **One primary action per screen.** Everything else is one tap deeper: a sheet, a detail page,
+   or an overflow menu.
+3. **Show what matters now.** Each tab's first screen shows the current state (the next date, the
+   card of the day, an open chat). Settings and history sit below it.
+4. **Rare and serious actions are reachable but quiet.** Pause, report, block, delete, the card
+   deck settings and the dietary consent all live in a detail page or in Me, never on a primary
+   surface. Help in an emergency is the exception: it is one tap away during a date.
+5. **No feeds, badges or counters that pull people back.** A notification is sent only for
+   something the person must act on.
+6. **Before adding a screen,** a change says which existing screen it sits under and what it
+   leaves out.
