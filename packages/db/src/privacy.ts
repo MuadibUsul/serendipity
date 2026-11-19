@@ -105,6 +105,8 @@ export function pgPrivacyRepository(pool: pg.Pool): PrivacyRepository {
             FROM app.post_date_feedback WHERE user_id = $1 ORDER BY created_at`),
           deckSettings: await rows(`SELECT excluded, included, updated_at AS "updatedAt"
             FROM app.reveal_settings WHERE user_id = $1`),
+          contactOffers: await rows(`SELECT relationship_id AS "relationshipId", kind, value,
+            created_at AS "offeredAt" FROM app.contact_offers WHERE user_id = $1 ORDER BY created_at`),
           reportsFiled: await rows(`SELECT category, status, created_at AS "createdAt"
             FROM app.safety_reports WHERE reporter_id = $1 ORDER BY created_at`),
           sentMessages: await rows(`SELECT relationship_id AS "relationshipId", body,
@@ -252,7 +254,12 @@ async function finalizeDeletion(pool: pg.Pool, userId: string): Promise<Deletion
           (SELECT id FROM app.candidate_pairs WHERE user_a = $1 OR user_b = $1))`,
       [userId],
     );
-    // Cards turned over in either direction go with the relationship too.
+    // Contact cards, and cards turned over in either direction, go with the relationship too.
+    await db.query(
+      `DELETE FROM app.contact_offers WHERE relationship_id IN
+       (SELECT id FROM app.relationships WHERE user_a = $1 OR user_b = $1)`,
+      [userId],
+    );
     await db.query(
       `DELETE FROM app.reveal_flips WHERE relationship_id IN
        (SELECT id FROM app.relationships WHERE user_a = $1 OR user_b = $1)`,

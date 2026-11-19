@@ -13,6 +13,8 @@ export interface PersonalExport {
   readonly feedback: readonly unknown[];
   /** What the person allows in their card deck (ADR-0021). */
   readonly deckSettings: readonly unknown[];
+  /** Contact cards the person offered; never the other person's. */
+  readonly contactOffers: readonly unknown[];
   /** Reports the person filed (category and whether handled); never reports about them. */
   readonly reportsFiled: readonly unknown[];
   /** Messages the person sent; never the other person's. */

@@ -3,8 +3,8 @@
 // @serendipity/relationships' chatRefusal; the database trigger refuses a
 // message into a closed chat even if this module is bypassed.
 import { SCOPES } from "@serendipity/consent";
-import { chatRefusal, peerSees } from "@serendipity/relationships";
-import type { ChatRefusal, ChatState } from "@serendipity/relationships";
+import { chatRefusal, contactView, mayWithdraw, peerSees } from "@serendipity/relationships";
+import type { ChatRefusal, ChatState, ContactCard, ContactView } from "@serendipity/relationships";
 
 import { inAuditedTransaction } from "./audit.js";
 import type { AuditedTransaction, TransactionPool } from "./audit.js";
@@ -45,6 +45,17 @@ export interface RelationshipRepository {
     now: Date,
     context?: { traceId?: string },
   ): Promise<SendOutcome>;
+  /** The contact swap as this person sees it, or `null` when not theirs. */
+  contact(userId: string, relationshipId: string): Promise<ContactView | null>;
+  /** Offers (or replaces) this person's card; refused while chat is closed or after the swap. */
+  offerContact(
+    userId: string,
+    relationshipId: string,
+    card: ContactCard,
+    now: Date,
+  ): Promise<ContactView | "closed" | "swapped" | null>;
+  /** Withdraws an offer the other has not matched yet. */
+  withdrawContact(userId: string, relationshipId: string): Promise<ContactView | "swapped" | null>;
   /** Leaves (or blocks): chat closes for both, for good. `false` when not the person's. */
   close(
     userId: string,
@@ -96,6 +107,29 @@ const stateOf = (row: Row, userId: string, consent: boolean): ChatState => {
     senderConsent: consent,
   };
 };
+
+/** Whether the two are still in touch: mutual, not left or blocked, both active. */
+const inTouch = (row: Row, userId: string): boolean => {
+  const refusal = chatRefusal(stateOf(row, userId, true));
+  return refusal === null;
+};
+
+async function cardsOf(
+  db: Queryable,
+  relationshipId: string,
+  userId: string,
+): Promise<{ mine: ContactCard | null; theirs: ContactCard | null }> {
+  const { rows } = await db.query<{ user_id: string; kind: ContactCard["kind"]; value: string }>(
+    "SELECT user_id, kind, value FROM app.contact_offers WHERE relationship_id = $1",
+    [relationshipId],
+  );
+  const card = (row: (typeof rows)[number] | undefined): ContactCard | null =>
+    row === undefined ? null : { kind: row.kind, value: row.value };
+  return {
+    mine: card(rows.find((row) => row.user_id === userId)),
+    theirs: card(rows.find((row) => row.user_id !== userId)),
+  };
+}
 
 async function audit(
   tx: AuditedTransaction,
@@ -185,6 +219,85 @@ export function pgRelationshipRepository(
         },
         context,
       ),
+
+    async contact(userId, relationshipId) {
+      const { rows } = await pool.query<Row>(`${SELECT} AND r.id = $2`, [userId, relationshipId]);
+      const row = rows[0];
+      if (row === undefined) return null;
+      const { mine, theirs } = await cardsOf(pool, relationshipId, userId);
+      return contactView(inTouch(row, userId), mine, theirs);
+    },
+
+    offerContact: (userId, relationshipId, card, now) =>
+      inAuditedTransaction(pool, async (tx) => {
+        const { rows } = await tx.db.query<Row>(`${SELECT} AND r.id = $2 FOR UPDATE OF r`, [
+          userId,
+          relationshipId,
+        ]);
+        const row = rows[0];
+        if (row === undefined) {
+          await audit(tx, "relationship.contact.not_found", userId, relationshipId);
+          return null;
+        }
+        if (!inTouch(row, userId)) {
+          await audit(tx, "relationship.contact.refused", userId, relationshipId, {
+            refusal: "closed",
+          });
+          return "closed";
+        }
+        const before = await cardsOf(tx.db, relationshipId, userId);
+        if (before.mine !== null && before.theirs !== null) {
+          await audit(tx, "relationship.contact.refused", userId, relationshipId, {
+            refusal: "swapped",
+          });
+          return "swapped";
+        }
+        await tx.db.query(
+          `INSERT INTO app.contact_offers (relationship_id, user_id, kind, value, created_at)
+           VALUES ($1, $2, $3, $4, $5)
+           ON CONFLICT (relationship_id, user_id)
+           DO UPDATE SET kind = EXCLUDED.kind, value = EXCLUDED.value, created_at = EXCLUDED.created_at`,
+          [relationshipId, userId, card.kind, card.value, now],
+        );
+        const swapped = before.theirs !== null;
+        // The audit names the kind of card, never its value.
+        await audit(
+          tx,
+          swapped ? "relationship.contact.swapped" : "relationship.contact.offered",
+          userId,
+          relationshipId,
+          {
+            kind: card.kind,
+          },
+        );
+        return contactView(true, card, before.theirs);
+      }),
+
+    withdrawContact: (userId, relationshipId) =>
+      inAuditedTransaction(pool, async (tx) => {
+        const { rows } = await tx.db.query<Row>(`${SELECT} AND r.id = $2 FOR UPDATE OF r`, [
+          userId,
+          relationshipId,
+        ]);
+        const row = rows[0];
+        if (row === undefined) {
+          await audit(tx, "relationship.contact.not_found", userId, relationshipId);
+          return null;
+        }
+        const { mine, theirs } = await cardsOf(tx.db, relationshipId, userId);
+        if (mine !== null && !mayWithdraw(mine, theirs)) {
+          await audit(tx, "relationship.contact.refused", userId, relationshipId, {
+            refusal: "swapped",
+          });
+          return "swapped";
+        }
+        await tx.db.query(
+          "DELETE FROM app.contact_offers WHERE relationship_id = $1 AND user_id = $2",
+          [relationshipId, userId],
+        );
+        await audit(tx, "relationship.contact.withdrawn", userId, relationshipId);
+        return contactView(inTouch(row, userId), null, theirs);
+      }),
 
     close: (userId, relationshipId, how, now, context = {}) =>
       inAuditedTransaction(

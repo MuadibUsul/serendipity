@@ -99,6 +99,7 @@ describe("schema contents", () => {
         "chat_messages",
         "checkins",
         "consent_grants",
+        "contact_offers",
         "date_invites",
         "date_participants",
         "dates",
