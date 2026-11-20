@@ -70,14 +70,14 @@ function Promises() {
 
 export { RESEND_AFTER_S } from "../shell/sign-in";
 
-/** 13800000000 → 138****0000: enough to recognise, not to read out. */
+/** 4155550123 → (415) •••-0123: enough to recognise, not to read out. */
 export function maskPhone(phone: string): string {
-  return phone.length === 11 ? `${phone.slice(0, 3)}****${phone.slice(7)}` : phone;
+  return phone.length === 10 ? `(${phone.slice(0, 3)}) •••-${phone.slice(6)}` : phone;
 }
 
 /**
  * Sign-in in two steps, one primary action each: the phone number and
- * "获取验证码", then the code and "登录". The code field appears only once a
+ * "Text me a code", then the code and "Sign in". The code field appears only once a
  * code has been sent.
  */
 export function SignInScreen({
@@ -182,7 +182,7 @@ export function SignInScreen({
               }}
               keyboardType="phone-pad"
               textContentType="telephoneNumber"
-              maxLength={11}
+              maxLength={10}
             />
             {problem === null ? null : (
               <AppText color="danger" live="assertive">

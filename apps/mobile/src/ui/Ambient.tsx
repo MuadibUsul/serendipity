@@ -3,7 +3,7 @@ import Svg, { Circle, Defs, RadialGradient, Stop } from "react-native-svg";
 
 import { useMaterials, usePalette } from "./theme";
 
-/** Where the light sits on each kind of page (from the 剧集版 drafts, 390 × 844). */
+/** Where the light sits on each kind of page (from the vivid drafts, 390 × 844). */
 export type AmbientLayout = "default" | "signIn" | "ai" | "invite";
 
 type Glow = "glowBlush" | "glowMint" | "glowPeach" | "glowPowder" | "glowLavender";

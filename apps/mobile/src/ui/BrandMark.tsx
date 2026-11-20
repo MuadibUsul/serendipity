@@ -6,7 +6,7 @@ import { APP_NAME } from "../copy";
 import { AppText } from "./AppText";
 import { useMaterials } from "./theme";
 
-/** The coral orb: 不期's mark, a small light. */
+/** The coral orb: Serendip's mark, a small light. */
 export function Orb({ size = 22 }: { readonly size?: number }) {
   const materials = useMaterials();
   return (
@@ -33,15 +33,12 @@ export function Orb({ size = 22 }: { readonly size?: number }) {
   );
 }
 
-/** The orb, the name and "Serendipity", in one line. */
+/** The orb and the name, in one line. */
 export function BrandMark() {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: SPACE.md }}>
       <Orb />
       <AppText variant="headline">{APP_NAME}</AppText>
-      <AppText variant="latin" color="textSecondary">
-        Serendipity
-      </AppText>
     </View>
   );
 }

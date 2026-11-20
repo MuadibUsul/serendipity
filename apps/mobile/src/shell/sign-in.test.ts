@@ -11,7 +11,7 @@ const run = (events: readonly SignInEvent[], from: SignInState = INITIAL_SIGN_IN
 
 /** On the code step, with a code sent on attempt 1. */
 const ON_CODE = run([
-  { type: "phone_edited", phone: "13800000000" },
+  { type: "phone_edited", phone: "4155550123" },
   { type: "send_requested" },
   { type: "code_sent", attempt: 1 },
 ]);
@@ -20,7 +20,7 @@ describe("the happy path", () => {
   it("goes number → code → signed in", () => {
     expect(ON_CODE).toMatchObject({
       step: "code",
-      phone: "13800000000",
+      phone: "4155550123",
       code: "",
       wait: RESEND_AFTER_S,
       pending: null,
@@ -107,7 +107,7 @@ describe("timing", () => {
 
 describe("late answers", () => {
   it("ignores a code that arrives after the person went back to change the number", () => {
-    // 修改 while resending: the old request must not pull them back to the code step.
+    // "Change" while resending: the old request must not pull them back to the code step.
     const ready = { ...ON_CODE, wait: 0 } as SignInState;
     const back = run([{ type: "send_requested" }, { type: "change_phone" }], ready);
     expect(back).toMatchObject({ step: "phone", pending: null });
@@ -129,7 +129,7 @@ describe("late answers", () => {
         { type: "failed", attempt },
       );
     const action = fc.constantFrom<SignInEvent>(
-      { type: "phone_edited", phone: "13800000000" },
+      { type: "phone_edited", phone: "4155550123" },
       { type: "send_requested" },
       { type: "code_edited", code: "123456" },
       { type: "verify_requested" },

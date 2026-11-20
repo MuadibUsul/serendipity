@@ -1,6 +1,6 @@
 // Formatting for display. Amounts are integers in minor units (CONTRIBUTING.md).
 
-const SYMBOLS: Readonly<Record<string, string>> = { CNY: "¥" };
+const SYMBOLS: Readonly<Record<string, string>> = { USD: "$" };
 
 export function formatMoney(amountMinor: number, currency: string): string {
   const major = (amountMinor / 100).toFixed(2);
@@ -8,28 +8,28 @@ export function formatMoney(amountMinor: number, currency: string): string {
   return symbol === undefined ? `${major} ${currency}` : `${symbol}${major}`;
 }
 
-/** A UTC instant shown as local date and time in `timeZone`, in Chinese. */
+/** A UTC instant shown as local date and time in `timeZone`, in US English. */
 export function formatDateTime(isoUtc: string, timeZone: string): string {
   const { day, time } = dateParts(isoUtc, timeZone);
   return `${day} ${time}`;
 }
 
-/** The local day ("11月21日 · 周六") and time ("15:00") of a UTC instant in `timeZone`. */
+/** The local day ("Sat, Nov 21") and time ("3:00 PM") of a UTC instant in `timeZone`. */
 export function dateParts(isoUtc: string, timeZone: string): { day: string; time: string } {
   const at = new Date(isoUtc);
-  const day = new Intl.DateTimeFormat("zh-CN", {
+  const day = new Intl.DateTimeFormat("en-US", {
     timeZone,
-    month: "long",
-    day: "numeric",
     weekday: "short",
+    month: "short",
+    day: "numeric",
   }).format(at);
-  const time = new Intl.DateTimeFormat("zh-CN", {
+  const time = new Intl.DateTimeFormat("en-US", {
     timeZone,
-    hour: "2-digit",
+    hour: "numeric",
     minute: "2-digit",
-    hourCycle: "h23",
+    hour12: true,
   }).format(at);
-  return { day: day.replace(/(日)\s*(?=\S)/, "$1 · "), time };
+  return { day, time };
 }
 
 /** The local calendar date (YYYY-MM-DD) of an instant in `timeZone`. */
@@ -50,9 +50,14 @@ export function daysUntil(isoUtc: string, timeZone: string, now: Date): number {
   return Math.round((to - from) / DAY);
 }
 
-/** A calendar date ("2026-11-08") in Chinese, without the year: "11月8日". */
+/** A calendar date ("2026-11-08") in US English, without the year: "Nov 8". */
 export function formatDay(isoDate: string): string {
-  const match = /^\d{4}-(\d{2})-(\d{2})$/.exec(isoDate);
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate);
   if (match === null) return isoDate;
-  return `${String(Number(match[1]))}月${String(Number(match[2]))}日`;
+  const at = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "UTC",
+    month: "short",
+    day: "numeric",
+  }).format(at);
 }

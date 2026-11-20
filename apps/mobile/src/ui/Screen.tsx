@@ -99,7 +99,7 @@ export function Row({ label, value }: { readonly label: string; readonly value: 
   return (
     <View
       accessible
-      aria-label={`${label}：${value}`}
+      aria-label={`${label}: ${value}`}
       style={{
         minHeight: 52,
         paddingVertical: SPACE.md,

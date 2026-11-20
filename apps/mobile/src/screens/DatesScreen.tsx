@@ -84,13 +84,13 @@ function Invitation({ date, now }: { readonly date: UpcomingDate; readonly now: 
           </AppText>
         </View>
       </View>
-      <View accessible aria-label={`${DATES_PAGE.when}：${day} ${time}`}>
+      <View accessible aria-label={`${DATES_PAGE.when}: ${day} ${time}`}>
         <AppText variant="subtitle">{day}</AppText>
         <AppText variant="numeral">{time}</AppText>
       </View>
       <View
         accessible
-        aria-label={`${DATES_PAGE.where}：${date.venueName}，${date.venueAddress}`}
+        aria-label={`${DATES_PAGE.where}: ${date.venueName}, ${date.venueAddress}`}
         style={{ gap: SPACE.xs, marginTop: SPACE.lg }}
       >
         <AppText variant="headline">{date.venueName}</AppText>
@@ -104,7 +104,7 @@ function Invitation({ date, now }: { readonly date: UpcomingDate; readonly now: 
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: SPACE.lg }}>
         <View
           accessible
-          aria-label={`${DATES_PAGE.pkg}：${date.packageName}`}
+          aria-label={`${DATES_PAGE.pkg}: ${date.packageName}`}
           style={{ flexGrow: 1, gap: SPACE.xs }}
         >
           <AppText variant="footnote" color="textSecondary">
@@ -114,7 +114,7 @@ function Invitation({ date, now }: { readonly date: UpcomingDate; readonly now: 
         </View>
         <View
           accessible
-          aria-label={`${DATES_PAGE.yourShare}：${price}`}
+          aria-label={`${DATES_PAGE.yourShare}: ${price}`}
           style={{ gap: SPACE.xs, alignItems: "flex-end" }}
         >
           <AppText variant="footnote" color="textSecondary">
@@ -125,7 +125,7 @@ function Invitation({ date, now }: { readonly date: UpcomingDate; readonly now: 
       </View>
       <View
         accessible
-        aria-label={`${DATES_PAGE.cancelRule}：${date.cancelRule}`}
+        aria-label={`${DATES_PAGE.cancelRule}: ${date.cancelRule}`}
         style={{ marginTop: SPACE.md }}
       >
         <AppText variant="footnote" color="textSecondary">
