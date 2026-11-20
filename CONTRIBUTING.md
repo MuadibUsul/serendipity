@@ -91,5 +91,6 @@ instead. These paths (and `.github/`) are listed in `.github/CODEOWNERS`; branch
 - Unit tests sit next to the code as `*.test.ts`; suites that span packages live in `tests/`.
 - Dependencies are pinned to exact versions (`.npmrc` has `save-exact=true`); add one only with a
   reason in the PR.
-- Code, identifiers and comments are in English; product copy and product documents may be Chinese.
+- Code, identifiers, comments and product copy are in English (US market, ADR-0023). Product
+  documents written for the owner may be Chinese.
 - Times are stored in UTC; amounts are integers in minor units with a currency code.

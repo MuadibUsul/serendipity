@@ -1,9 +1,10 @@
-# 不期 Serendipity
+# Serendip
 
-An AI-native blind-date app. A voice conversation builds your profile, two scoped agents check the
-match from both sides, and the two of you meet at a partner venue without photos or chat beforehand.
-Each person pays their own share through a licensed payment provider, and you check in at the venue
-before identities are revealed. Chat opens only if both of you want to continue.
+An AI-native blind-date app for the US, launching first in the San Francisco Bay Area (ADR-0023).
+A voice conversation builds your profile. Two scoped agents check the match from both sides, and
+the two of you meet at a public place you both like, without photos or chat beforehand. In the early
+phase dates are free and each person pays for themselves at the venue. You check in on arrival before
+you see who the other person is. Chat opens only if both of you want to continue.
 
 This directory is the engineering monorepo. The product documents and the task board live in the
 Veynod workspace, namespace `serendipity` (see [docs/](docs/README.md)).

@@ -73,7 +73,21 @@ describe("source rules", () => {
   });
 
   it.each(FILES)("$path names no photo or profile of another person", ({ text }) => {
-    expect(text).not.toMatch(/\b(partner|counterpart|otherUser|candidate)\w*/i);
-    expect(text).not.toMatch(/\bphoto(Url|Uri|s)?\b/i);
+    // Identifiers only: copy may tell people there are "no photos" before a date.
+    const identifiers = text.replace(
+      /"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'|`(?:[^`\\]|\\.)*`/g,
+      '""',
+    );
+    expect(identifiers).not.toMatch(/\b(partner|counterpart|otherUser|candidate)\w*/i);
+    expect(identifiers).not.toMatch(/\bphoto(Url|Uri|s)?\b/i);
+  });
+
+  it("still catches a field that would carry another person's photo", () => {
+    const strip = (text: string) =>
+      text.replace(/"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'|`(?:[^`\\]|\\.)*`/g, '""');
+    expect(strip('const photoUrl = date.photoUrl; const label = "No photos";')).toMatch(
+      /\bphotoUrl\b/,
+    );
+    expect(strip('const label = "No photos";')).not.toMatch(/\bphotos\b/);
   });
 });

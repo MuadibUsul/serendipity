@@ -1,6 +1,6 @@
 # @serendipity/mobile
 
-The 不期 app: React Native + Expo SDK 58, in the Apple White Liquid Glass style (ADR-0010 §9). It has sign-in, the notification-permission explainer and
+The Serendip app: React Native + Expo SDK 58, in the Apple White Liquid Glass style (ADR-0010 §9). It has sign-in, the notification-permission explainer and
 the four pages of PRD-001 §3.1, running against an on-device **mock backend**: no request leaves
 the device. [ADR-0010](../../docs/adr/0010-mobile-shell.md) records the decisions.
 
@@ -56,7 +56,7 @@ src/platform/         notification permission: interface, Expo adapter, fake
 src/ui/               the only place that touches Text, TextInput, Pressable: glass
                       (Glass.tsx native, Glass.web.tsx web), icons, drawings, motion
 src/screens/          one file per screen
-src/copy.ts           all product copy (Chinese) in one place
+src/copy.ts           all product copy (US English) in one place
 ```
 
 ## Accessibility

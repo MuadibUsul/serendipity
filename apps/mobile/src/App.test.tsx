@@ -65,7 +65,7 @@ describe("sign-in steps", () => {
     type(SIGN_IN.phoneLabel, PHONE);
     press(SIGN_IN.sendCode);
     await screen.findByRole("textbox", { name: SIGN_IN.codeLabel });
-    expect(screen.getByText(SIGN_IN.sentTo("138****0000"))).toBeTruthy();
+    expect(screen.getByText(SIGN_IN.sentTo("(415) •••-0123"))).toBeTruthy();
     expect(screen.queryByRole("textbox", { name: SIGN_IN.phoneLabel })).toBeNull();
     expect(screen.getByText(SIGN_IN.resendIn(RESEND_AFTER_S))).toBeTruthy();
     expect(screen.queryByRole("button", { name: SIGN_IN.resend })).toBeNull();
@@ -134,7 +134,7 @@ describe("sign-in steps", () => {
   });
 
   it.each([
-    ["13800000000", "138****0000"],
+    ["4155550123", "(415) •••-0123"],
     ["123", "123"],
   ])("masks %s as %s", (phone, masked) => {
     expect(maskPhone(phone)).toBe(masked);
@@ -198,18 +198,18 @@ describe("the invitation", () => {
     await signIn();
     await screen.findByText(AI_HEADLINES.booked);
     fireEvent.click(screen.getByRole("tab", { name: TAB_LABELS.dates }));
-    expect(await screen.findByText("15:00")).toBeTruthy();
-    expect(screen.getByText("11月21日 · 周六")).toBeTruthy();
+    expect(await screen.findByText("3:00 PM")).toBeTruthy();
+    expect(screen.getByText("Sat, Nov 21")).toBeTruthy();
     expect(screen.getByText(DATES_PAGE.countdown(9))).toBeTruthy();
-    expect(screen.getByText("¥88.00")).toBeTruthy();
+    expect(screen.getByText("$15.00")).toBeTruthy();
     expect(screen.getByText(DATES_PAGE.hidden)).toBeTruthy();
   });
 
   it.each([
-    [2, "还有 2 天"],
-    [1, "明天见"],
-    [0, "就在今天"],
-    [-1, "已结束"],
+    [2, "In 2 days"],
+    [1, "Tomorrow"],
+    [0, "Today"],
+    [-1, "Past"],
   ])("words %i days as %j", (days, text) => {
     expect(DATES_PAGE.countdown(days)).toBe(text);
   });

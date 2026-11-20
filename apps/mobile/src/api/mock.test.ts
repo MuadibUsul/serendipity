@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { MOCK_CODE, createMockApi } from "./mock";
 import { HOME_STATES } from "./types";
 
-const PHONE = "13800000000";
-const SESSION = { userId: "mock-0000" };
+const PHONE = "4155550123";
+const SESSION = { userId: "mock-0123" };
 
 describe("createMockApi", () => {
   it("signs in with the mock code only", async () => {
@@ -14,7 +14,7 @@ describe("createMockApi", () => {
     expect(await api.signIn(PHONE, "0000")).toEqual({ ok: false, problem: "invalid_code" });
   });
 
-  it.each(["", "12345", "23800000000", "138000000001", "1380000000a"])(
+  it.each(["", "12345", "0155550123", "41555501234", "415555012a"])(
     "refuses the phone number %j",
     async (phone) => {
       const api = createMockApi();

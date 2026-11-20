@@ -9,7 +9,7 @@ import { useMaterials } from "./theme";
 /**
  * Placeholders in the shape of what is loading (after BoardUI's Skeleton,
  * MIT): a soft, slow pulse; still when the person asks for reduced motion.
- * Hidden from screen readers; the page's live "加载中" line speaks instead.
+ * Hidden from screen readers; the page's live "Loading…" line speaks instead.
  */
 function Block({
   width,

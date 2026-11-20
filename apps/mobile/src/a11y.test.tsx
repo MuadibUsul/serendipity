@@ -95,7 +95,7 @@ describe.each(COLOR_SCHEMES)("%s scheme", (scheme) => {
   it("sign-in, code step", async () => {
     renderApp({ scheme });
     fireEvent.change(screen.getByRole("textbox", { name: SIGN_IN.phoneLabel }), {
-      target: { value: "13800000000" },
+      target: { value: "4155550123" },
     });
     fireEvent.click(screen.getByRole("button", { name: SIGN_IN.sendCode }));
     await screen.findByRole("textbox", { name: SIGN_IN.codeLabel });

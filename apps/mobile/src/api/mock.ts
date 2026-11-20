@@ -5,8 +5,8 @@
 import type { Session } from "../shell/state";
 import type { Api, Home, HomeState, Me, Relationship, UpcomingDate } from "./types";
 
-/** Mainland mobile numbers: 11 digits starting with 1. Format only; nothing is sent. */
-const PHONE = /^1\d{10}$/;
+/** US numbers: 10 digits, area code and exchange starting 2–9. Format only; nothing is sent. */
+const PHONE = /^[2-9]\d{2}[2-9]\d{6}$/;
 const CODE = /^\d{6}$/;
 
 /** The code the mock accepts. It is shown on the sign-in screen in the mock build. */
@@ -14,19 +14,19 @@ export const MOCK_CODE = "000000";
 
 const DATE: UpcomingDate = {
   id: "date-demo-1",
-  startsAt: "2026-11-21T07:00:00Z",
-  timeZone: "Asia/Shanghai",
-  venueName: "示例咖啡馆（虚构）",
-  venueAddress: "示例路 1 号（虚构地址）",
-  packageName: "双人下午茶套餐",
-  amountMinor: 8_800,
-  currency: "CNY",
-  cancelRule: "开始前 24 小时取消全额退款；之后按商家规则处理。",
+  startsAt: "2026-11-21T23:00:00Z",
+  timeZone: "America/Los_Angeles",
+  venueName: "Example Café (fictional)",
+  venueAddress: "1 Example St, San Francisco (fictional)",
+  packageName: "Coffee for two",
+  amountMinor: 1_500,
+  currency: "USD",
+  cancelRule: "Free to cancel any time before the date.",
 };
 
 const RELATIONSHIP: Relationship = {
   id: "rel-demo-1",
-  sharedName: "小林（虚构）",
+  sharedName: "Sam (fictional)",
   metOn: "2026-11-08",
   chatOpen: true,
 };

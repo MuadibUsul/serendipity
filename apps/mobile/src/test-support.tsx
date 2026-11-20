@@ -11,10 +11,10 @@ import { SIGN_IN } from "./copy";
 import { createFakePermissions } from "./platform/notifications";
 import type { NotificationPermissions, NotificationStatus } from "./platform/notifications";
 
-export const PHONE = "13800000000";
+export const PHONE = "4155550123";
 
 /** A fixed "now" for tests: 2026-11-12 12:00 in Shanghai, nine days before the mock date. */
-export const NOW = new Date("2026-11-12T04:00:00Z");
+export const NOW = new Date("2026-11-12T20:00:00Z"); // noon in San Francisco
 
 export const METRICS: Metrics = {
   frame: { x: 0, y: 0, width: 390, height: 844 },
@@ -48,7 +48,7 @@ export function renderApp(
   return { ...result, api, notifications };
 }
 
-/** Both sign-in steps: the number and "获取验证码", then the six digits. */
+/** Both sign-in steps: the number and "Text me a code", then the six digits. */
 export async function signIn(code = MOCK_CODE, phone = PHONE) {
   fireEvent.change(screen.getByRole("textbox", { name: SIGN_IN.phoneLabel }), {
     target: { value: phone },

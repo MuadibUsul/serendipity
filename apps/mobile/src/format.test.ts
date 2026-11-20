@@ -2,12 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import { dateParts, daysUntil, formatDateTime, formatDay, formatMoney } from "./format";
 
+const LA = "America/Los_Angeles";
+
 describe("formatMoney", () => {
   it.each([
-    [8_800, "CNY", "¥88.00"],
-    [0, "CNY", "¥0.00"],
-    [5, "CNY", "¥0.05"],
-    [12_345, "USD", "123.45 USD"],
+    [1_500, "USD", "$15.00"],
+    [0, "USD", "$0.00"],
+    [5, "USD", "$0.05"],
+    [12_345, "EUR", "123.45 EUR"],
   ])("%i %s → %s", (minor, currency, expected) => {
     expect(formatMoney(minor, currency)).toBe(expected);
   });
@@ -15,44 +17,42 @@ describe("formatMoney", () => {
 
 describe("formatDateTime", () => {
   it("shows the venue's local time, not UTC", () => {
-    // 07:00 UTC is 15:00 in Shanghai.
-    const text = formatDateTime("2026-11-21T07:00:00Z", "Asia/Shanghai");
-    expect(text).toContain("11月21日");
-    expect(text).toContain("15:00");
+    // 23:00 UTC is 3:00 PM in San Francisco (PST).
+    const text = formatDateTime("2026-11-21T23:00:00Z", LA);
+    expect(text).toContain("Nov 21");
+    expect(text).toContain("3:00 PM");
   });
 
   it("crosses midnight correctly", () => {
-    expect(formatDateTime("2026-11-21T17:30:00Z", "Asia/Shanghai")).toContain("11月22日");
+    expect(formatDateTime("2026-11-22T07:30:00Z", LA)).toContain("Nov 21");
+    expect(formatDateTime("2026-11-22T08:30:00Z", LA)).toContain("Nov 22");
   });
 });
 
 describe("dateParts", () => {
   it("splits the local day from the time", () => {
-    expect(dateParts("2026-11-21T07:00:00Z", "Asia/Shanghai")).toEqual({
-      day: "11月21日 · 周六",
-      time: "15:00",
-    });
+    expect(dateParts("2026-11-21T23:00:00Z", LA)).toEqual({ day: "Sat, Nov 21", time: "3:00 PM" });
   });
 });
 
 describe("daysUntil", () => {
-  const AT = "2026-11-21T07:00:00Z"; // 15:00 on 21 November in Shanghai
+  const AT = "2026-11-21T23:00:00Z"; // 3:00 PM on 21 November in San Francisco
 
   it.each([
-    ["2026-11-12T04:00:00Z", 9],
-    ["2026-11-20T15:59:00Z", 1], // 23:59 on the 20th in Shanghai
-    ["2026-11-20T16:00:00Z", 0], // 00:00 on the 21st in Shanghai
-    ["2026-11-21T10:00:00Z", 0],
-    ["2026-11-22T10:00:00Z", -1],
+    ["2026-11-12T20:00:00Z", 9],
+    ["2026-11-21T07:59:00Z", 1], // 11:59 PM on the 20th in San Francisco
+    ["2026-11-21T08:00:00Z", 0], // midnight on the 21st
+    ["2026-11-21T20:00:00Z", 0],
+    ["2026-11-22T20:00:00Z", -1],
   ])("from %s is %i", (now, days) => {
-    expect(daysUntil(AT, "Asia/Shanghai", new Date(now))).toBe(days);
+    expect(daysUntil(AT, LA, new Date(now))).toBe(days);
   });
 });
 
 describe("formatDay", () => {
   it.each([
-    ["2026-11-08", "11月8日"],
-    ["2026-01-31", "1月31日"],
+    ["2026-11-08", "Nov 8"],
+    ["2026-01-31", "Jan 31"],
     ["not a date", "not a date"],
   ])("%s → %s", (date, text) => {
     expect(formatDay(date)).toBe(text);

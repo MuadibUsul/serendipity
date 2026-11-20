@@ -36,14 +36,14 @@ export function RelationshipsScreen({ home }: { readonly home: Home }) {
               <View style={{ flexGrow: 1 }}>
                 <Button
                   label={RELATIONSHIPS_PAGE.chat}
-                  spokenLabel={`${RELATIONSHIPS_PAGE.chat}：${relationship.sharedName}`}
+                  spokenLabel={`${RELATIONSHIPS_PAGE.chat}: ${relationship.sharedName}`}
                   disabled
                 />
               </View>
               <View style={{ flexGrow: 1 }}>
                 <Button
                   label={RELATIONSHIPS_PAGE.block}
-                  spokenLabel={`${RELATIONSHIPS_PAGE.block}：${relationship.sharedName}`}
+                  spokenLabel={`${RELATIONSHIPS_PAGE.block}: ${relationship.sharedName}`}
                   variant="secondary"
                   disabled
                 />
