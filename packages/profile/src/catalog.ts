@@ -121,7 +121,8 @@ export const FACTS = {
     required: true,
     hard: true,
     visibilities: ["matching", "private"],
-    about: "The service area the person meets in, as a region code (GZ_CORE); never an address.",
+    about:
+      "The service area the person meets in, as a region code (SFB_BAYAREA); never an address.",
   },
   "self.relationship_goal": {
     subject: "self",
@@ -206,7 +207,7 @@ export const FACTS = {
     hard: false,
     visibilities: ["private"],
     about:
-      "The district or business area the person usually spends time in (GZ_TIANHE), picked from a list; never an address. Only their own agent uses it.",
+      "The neighborhood or area the person usually spends time in (SFB_SF_MISSION), picked from a list (@serendipity/market); never an address. Only their own agent uses it.",
   },
   "date.max_commute_minutes": {
     subject: "date",
@@ -252,11 +253,11 @@ export const FACTS = {
   },
   "date.budget_per_person": {
     subject: "date",
-    value: { kind: "money", currencies: ["CNY"], maxMinor: 100_000 },
+    value: { kind: "money", currencies: ["USD"], maxMinor: 100_000 },
     required: true,
     hard: true,
     visibilities: ["matching", "private"],
-    about: "The most the person will pay for one date, in minor units (fen).",
+    about: "The most the person will pay for one date, in minor units (cents).",
   },
   "date.cuisines": {
     subject: "date",

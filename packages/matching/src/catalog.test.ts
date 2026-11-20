@@ -26,14 +26,14 @@ function confirmed(values: Readonly<Record<string, unknown>>): Facts {
 }
 
 const VALUES = {
-  "self.city_region": "GZ_CORE",
+  "self.city_region": "SFB_CORE",
   "self.relationship_goal": "long_term",
   "self.availability": [{ day: "sat", from: "14:00", to: "18:00" }],
   "self.interests": ["hiking"],
   "seeking.age_range": { min: 25, max: 35 },
   "seeking.relationship_goals": ["long_term", "open_to_long_term"],
   "seeking.dealbreakers": ["smoker"],
-  "date.budget_per_person": { currency: "CNY", max_minor: 12_000 },
+  "date.budget_per_person": { currency: "USD", max_minor: 12_000 },
 };
 
 describe("the profile catalog and this filter", () => {
@@ -52,13 +52,13 @@ describe("the profile catalog and this filter", () => {
     expect(result).toEqual({
       ok: true,
       rules: {
-        cityRegion: "GZ_CORE",
+        cityRegion: "SFB_CORE",
         relationshipGoal: "long_term",
         availability: [{ day: "sat", from: 840, to: 1080 }],
         seekingAgeRange: { min: 25, max: 35 },
         seekingRelationshipGoals: ["long_term", "open_to_long_term"],
         seekingDealbreakers: ["smoker"],
-        budgetPerPerson: { currency: "CNY", minor: 12_000 },
+        budgetPerPerson: { currency: "USD", minor: 12_000 },
       },
     });
   });
@@ -87,7 +87,7 @@ describe("the profile catalog and this filter", () => {
     });
     const context = {
       dateLengthMinutes: 90,
-      cheapestPackagePerPerson: { currency: "CNY", minor: 8_800 },
+      cheapestPackagePerPerson: { currency: "USD", minor: 8_800 },
     };
     expect(decidePair(person("ana"), person("bo"), context)).toEqual({ pass: true });
   });

@@ -2,7 +2,7 @@ export { MAX_MESSAGE_LENGTH, chatRefusal, parseMessageBody, peerSees } from "./c
 export type { ChatRefusal, ChatState, ParsedMessage } from "./chat.js";
 export {
   CARDS_PER_DAY,
-  DAY_OFFSET_MINUTES,
+  DAY_TIME_ZONE,
   DEFAULT_CATEGORIES,
   DEFAULT_SETTINGS,
   OPT_IN_CATEGORIES,

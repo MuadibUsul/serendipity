@@ -33,9 +33,9 @@ let phones = 0;
 /** A fresh mainland number for each test, so their limits never meet. */
 const nextPhone = () => {
   phones += 1;
-  return `139${String(phones).padStart(8, "0")}`;
+  return `415555${String(phones).padStart(4, "0")}`;
 };
-const e164 = (phone: string) => `+86${phone}`;
+const e164 = (phone: string) => `+1${phone}`;
 const advance = (seconds: number) => {
   clock += seconds * 1000;
 };

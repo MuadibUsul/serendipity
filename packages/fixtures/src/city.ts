@@ -115,7 +115,7 @@ export function buildCity(options: CityOptions): CityPerson[] {
           "seeking.age_range": { min: lower, max: Math.max(lower, age + rng.int(2, 8)) },
           "seeking.relationship_goals": accepts,
           "seeking.dealbreakers": rng.next() < 0.3 ? some(rng, ["smoker", "night_owl"], 1) : [],
-          "date.budget_per_person": { currency: "CNY", max_minor: rng.int(6, 25) * 1_000 },
+          "date.budget_per_person": { currency: "USD", max_minor: rng.int(6, 25) * 1_000 },
         },
       },
       selfTags: {

@@ -30,7 +30,7 @@ let phones = 0;
 
 const nextPhone = () => {
   phones += 1;
-  return `137${String(phones).padStart(8, "0")}`;
+  return `415555${String(phones).padStart(4, "0")}`;
 };
 
 beforeAll(async () => {
@@ -80,7 +80,7 @@ const upcoming = async (headers: Record<string, string>) =>
 
 async function signIn(phone: string) {
   expect((await post("/v1/auth/code", { phone })).status).toBe(202);
-  const code = sms.lastCodeFor(`+86${phone}`);
+  const code = sms.lastCodeFor(`+1${phone}`);
   const response = await post("/v1/auth/session", { phone, code });
   expect(response.status).toBe(200);
   return response.json() as {
@@ -129,7 +129,7 @@ describe("signing in over HTTP", () => {
     expect(wrong.body).not.toContain(phone);
     const logged = api.text();
     expect(logged).not.toContain(phone);
-    expect(logged).not.toContain(sms.lastCodeFor(`+86${phone}`) ?? "never");
+    expect(logged).not.toContain(sms.lastCodeFor(`+1${phone}`) ?? "never");
   });
 });
 
@@ -140,7 +140,7 @@ describe("refusals", () => {
       code: "invalid_request",
     });
     expect((await post("/v1/auth/code", {})).status).toBe(400);
-    expect((await post("/v1/auth/code", { phone: 13800000000 })).status).toBe(400);
+    expect((await post("/v1/auth/code", { phone: 4155550123 })).status).toBe(400);
   });
 
   it("answers a wrong code with invalid_code, the same as no code at all", async () => {
@@ -193,7 +193,7 @@ describe("deployed environments", () => {
       const code = await prod.app.inject({
         method: "POST",
         url: "/v1/auth/code",
-        payload: { phone: "13800000000" },
+        payload: { phone: "4155550123" },
       });
       expect(code.json()).toMatchObject({ status: 503, code: "unavailable" });
       const devHeader = await prod.app.inject({

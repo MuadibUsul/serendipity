@@ -43,3 +43,8 @@ chooses a card to turn over and learns one more thing about the other.
 - The app needs a consent prompt for the cards, deck settings, and the daily card ritual (UI).
 - The planning agent (`ser-p03-10` and later) reads the cards a person has seen through this
   repository, and only for that person's dates with the card owner.
+
+## Amendment (2026-11-20)
+
+The day now follows the market's time zone (`@serendipity/market`). For the Bay Area that is
+Pacific time, with daylight saving handled (ADR-0023). It no longer follows UTC+8.

@@ -29,7 +29,7 @@ describe("the catalog", () => {
 
 describe("validateValue", () => {
   it.each<[FactKey, unknown, unknown]>([
-    ["self.city_region", "GZ_CORE", "GZ_CORE"],
+    ["self.city_region", "SFB_CORE", "SFB_CORE"],
     ["self.relationship_goal", "long_term", "long_term"],
     ["seeking.relationship_goals", ["unsure", "long_term"], ["long_term", "unsure"]],
     ["self.interests", ["hiking", "board_games"], ["board_games", "hiking"]],
@@ -59,8 +59,8 @@ describe("validateValue", () => {
     ],
     [
       "date.budget_per_person",
-      { currency: "CNY", max_minor: 8800 },
-      { currency: "CNY", max_minor: 8800 },
+      { currency: "USD", max_minor: 8800 },
+      { currency: "USD", max_minor: 8800 },
     ],
   ])("accepts and normalises %s", (key, value, normalised) => {
     expect(check(key, value)).toEqual({ ok: true, value: normalised });
@@ -101,9 +101,9 @@ describe("validateValue", () => {
         { day: "sat", from: "11:00", to: "13:00" },
       ],
     ],
-    ["date.budget_per_person", { currency: "USD", max_minor: 100 }],
-    ["date.budget_per_person", { currency: "CNY", max_minor: -1 }],
-    ["date.budget_per_person", { currency: "CNY", max_minor: 100_001 }],
+    ["date.budget_per_person", { currency: "EUR", max_minor: 100 }],
+    ["date.budget_per_person", { currency: "USD", max_minor: -1 }],
+    ["date.budget_per_person", { currency: "USD", max_minor: 100_001 }],
   ])("refuses %s = %j", (key, value) => {
     expect(check(key, value).ok).toBe(false);
   });

@@ -59,7 +59,7 @@ export async function seedInvitationDate(admin: Queryable): Promise<InvitationFi
   const venueId = randomUUID();
   await admin.query(
     `INSERT INTO app.venues (id, name, region, address, location, status)
-     VALUES ($1, '示例咖啡馆（虚构）', 'GZ_CORE', '示例路 1 号（虚构地址）',
+     VALUES ($1, '示例咖啡馆（虚构）', 'SFB_CORE', '示例路 1 号（虚构地址）',
              ST_GeogFromText('POINT(113.32 23.12)'), 'active')`,
     [venueId],
   );

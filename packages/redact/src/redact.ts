@@ -130,6 +130,10 @@ const PATTERNS: readonly (readonly [RegExp, (match: string) => string])[] = [
     /(?<![\d+])(?:\+\d{1,3}[\s-]?)?\d{2,4}(?:[\s-]\d{2,4}){2,}(?!\d)/g,
     (match) => (match.replace(/\D/g, "").length >= 9 ? REDACTED : match),
   ],
+  // US-style numbers with brackets or dots: (415) 555-0123, 415.555.0123,
+  // +1 (415) 555 0123. (A Social Security number, 123-45-6789, is caught by the grouped-digits rule.)
+  [/(?<![\d+])(?:\+?1[\s.-]?)?\(\d{3}\)\s?\d{3}[\s.-]?\d{4}(?!\d)/g, () => REDACTED],
+  [/(?<![\d.])\d{3}\.\d{3}\.\d{4}(?![\d.])/g, () => REDACTED],
   // Long secrets: API keys, signing keys, base64 blobs.
   [/[A-Za-z0-9+/_-]{32,}={0,2}/g, (token) => (looksLikeSecret(token) ? REDACTED : token)],
 ];

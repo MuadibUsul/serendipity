@@ -131,7 +131,7 @@ describe("everything is fictional", () => {
       "accepted",
       "withdrawn",
       "qr",
-      "CNY",
+      "USD",
       "PAYMENT_CREATED",
       "PAID",
       "EXPIRED",

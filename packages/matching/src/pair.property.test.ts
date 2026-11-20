@@ -11,7 +11,7 @@ import type { RawRules } from "./test-support.js";
 const RUNS = { numRuns: 500 };
 
 // Small domains, so that passes and every kind of refusal both turn up often.
-const REGIONS = ["GZ_CORE", "GZ_EAST"];
+const REGIONS = ["SFB_CORE", "SFB_EAST"];
 const GOALS = ["long_term", "open_to_long_term", "casual_dating", "unsure"];
 const TAGS = ["hiking", "night_owl", "smoker", "homebody", "early_riser"];
 const IDS = ["ana", "bo", "cy"];
@@ -54,7 +54,7 @@ const rulesArb: fc.Arbitrary<RawRules> = fc.record({
   "seeking.relationship_goals": fc.subarray(GOALS, { minLength: 1 }),
   "seeking.dealbreakers": fc.subarray(TAGS, { maxLength: 2 }),
   "date.budget_per_person": fc.record({
-    currency: fc.constantFrom("CNY", "CNY", "CNY", "USD"),
+    currency: fc.constantFrom("USD", "USD", "USD", "EUR"),
     max_minor: fc.constantFrom(5_000, 8_800, 12_000),
   }),
 });
@@ -103,7 +103,7 @@ const readableCandidate = candidateArb(rulesArb.map((rules) => snapshot(rules)))
 const contextArb: fc.Arbitrary<PairContext> = fc.record({
   dateLengthMinutes: fc.constantFrom(60, 90, 120),
   cheapestPackagePerPerson: fc.oneof(
-    { weight: 9, arbitrary: fc.constant({ currency: "CNY", minor: 8_800 }) },
+    { weight: 9, arbitrary: fc.constant({ currency: "USD", minor: 8_800 }) },
     { weight: 1, arbitrary: fc.constant(null) },
   ),
 });
@@ -212,7 +212,7 @@ function expected(a: Candidate, b: Candidate, context: PairContext): boolean {
 
 const CONTEXT: PairContext = {
   dateLengthMinutes: 90,
-  cheapestPackagePerPerson: { currency: "CNY", minor: 8_800 },
+  cheapestPackagePerPerson: { currency: "USD", minor: 8_800 },
 };
 
 interface Fit {
@@ -268,7 +268,7 @@ const fitArb: fc.Arbitrary<Fit> = fc
       "seeking.age_range": { min: Math.max(18, otherAge - slack[0]), max: otherAge + slack[1] },
       "seeking.relationship_goals": [...new Set([otherGoal, ...extraGoals])],
       "seeking.dealbreakers": dealbreakers,
-      "date.budget_per_person": { currency: "CNY", max_minor: budget },
+      "date.budget_per_person": { currency: "USD", max_minor: budget },
     });
     const rules = {
       a: rulesFor(
@@ -401,7 +401,7 @@ const BREAKS: readonly Break[] = [
     name: "budget below the cheapest package",
     expect: onSelf("budget_below_package"),
     apply: (fit, side) =>
-      withRules(fit, side, { "date.budget_per_person": { currency: "CNY", max_minor: 8_799 } }),
+      withRules(fit, side, { "date.budget_per_person": { currency: "USD", max_minor: 8_799 } }),
   },
   {
     name: "a dealbreaker the other has",

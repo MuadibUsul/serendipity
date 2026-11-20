@@ -128,7 +128,7 @@ function checkValue(spec: ValueSpec, value: unknown): ValueResult {
     case "region":
       return typeof value === "string" && spec.pattern.test(value)
         ? ok(value)
-        : fail("must be a region code such as GZ_CORE");
+        : fail("must be a region code such as SFB_BAYAREA");
     case "int":
       return Number.isInteger(value) &&
         (value as number) >= spec.min &&

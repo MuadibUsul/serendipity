@@ -164,7 +164,7 @@ describe("request logs", () => {
     const { app, lines, text } = await start(fixedReadiness(READY));
     await app.inject({
       method: "GET",
-      url: "/healthz?email=alice@example.com&phone=13800000000",
+      url: "/healthz?email=alice@example.com&phone=4155550123",
       headers: {
         authorization: "Bearer secret-token-123",
         cookie: "session=cookie-value-456",
@@ -182,7 +182,7 @@ describe("request logs", () => {
 
     for (const secret of [
       "alice",
-      "13800000000",
+      "4155550123",
       "secret-token-123",
       "cookie-value-456",
       "203.0.113.9",

@@ -37,12 +37,12 @@ afterAll(async () => {
 });
 
 const REQUIRED: Record<string, unknown> = {
-  "self.city_region": "GZ_CORE",
+  "self.city_region": "SFB_CORE",
   "self.relationship_goal": "long_term",
   "self.availability": [{ day: "sat", from: "14:00", to: "18:00" }],
   "seeking.age_range": { min: 25, max: 35 },
   "seeking.relationship_goals": ["long_term"],
-  "date.budget_per_person": { currency: "CNY", max_minor: 8800 },
+  "date.budget_per_person": { currency: "USD", max_minor: 8800 },
 };
 
 /** What the extractor heard: every required fact, plus an inferred interest. */

@@ -110,7 +110,7 @@ describe("unique constraints (PLAN-001 §8.2)", () => {
     const order = (userId: string, key: string) =>
       attempt(
         `INSERT INTO app.payment_orders (date_id, user_id, amount_minor, currency, provider, idempotency_key)
-         VALUES ($1, $2, 8800, 'CNY', 'acme-pay', $3)`,
+         VALUES ($1, $2, 8800, 'USD', 'acme-pay', $3)`,
         [dateId, userId, key],
       );
     expect(await order(a, "key-a-1")).toBeNull();
@@ -126,7 +126,7 @@ describe("unique constraints (PLAN-001 §8.2)", () => {
     const order = (key: string) =>
       attempt(
         `INSERT INTO app.payment_orders (date_id, user_id, amount_minor, currency, provider, idempotency_key)
-         VALUES ($1, $2, 8800, 'CNY', 'acme-pay', $3)`,
+         VALUES ($1, $2, 8800, 'USD', 'acme-pay', $3)`,
         [dateId, a, key],
       );
     expect(await order("first")).toBeNull();
@@ -298,13 +298,13 @@ describe("relationship and money checks (PLAN-001 §8.2, §8.3)", () => {
          VALUES ($1, $2, $3, $4, $5, 'acme-pay', gen_random_uuid()::text)`,
         [dateId, a, amount, currency, state],
       );
-    expect(await order(0, "CNY", "PAYMENT_CREATED")).toMatchObject({
+    expect(await order(0, "USD", "PAYMENT_CREATED")).toMatchObject({
       constraint: "payment_orders_amount_check",
     });
     expect(await order(8800, "cny", "PAYMENT_CREATED")).toMatchObject({
       constraint: "payment_orders_currency_check",
     });
-    expect(await order(8800, "CNY", "PAID")).toMatchObject({
+    expect(await order(8800, "USD", "PAID")).toMatchObject({
       constraint: "payment_orders_paid_at_check",
     });
   });

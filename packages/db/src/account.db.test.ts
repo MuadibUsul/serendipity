@@ -52,7 +52,7 @@ async function matchable(daysAgo = 30): Promise<string> {
   );
   await admin.query(
     `INSERT INTO app.profile_versions (user_id, version, approval_state, approved_at, structured_json)
-     VALUES ($1, 1, 'approved', $2, '{"schema_version":1,"hard_rules":{"self.city_region":"GZ_CORE"}}')`,
+     VALUES ($1, 1, 'approved', $2, '{"schema_version":1,"hard_rules":{"self.city_region":"SFB_CORE"}}')`,
     [id, new Date(NOW.getTime() - daysAgo * DAY)],
   );
   return id;
@@ -124,7 +124,7 @@ describe("resuming", () => {
       status: "paused",
       pausedReason: "break",
       needs: [],
-      keyPreferences: { "self.city_region": "GZ_CORE" },
+      keyPreferences: { "self.city_region": "SFB_CORE" },
     });
   });
 

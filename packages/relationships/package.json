@@ -12,5 +12,8 @@
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@serendipity/market": "0.0.0"
   }
 }

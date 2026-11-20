@@ -6,13 +6,13 @@ import type { CommuteEstimate, Traveller } from "./commute.js";
 
 // Journey times in minutes from two fictional areas.
 const TIMES: Record<string, Record<string, number>> = {
-  GZ_TIANHE: { north: 10, middle: 25, south: 50, far: 80 },
-  GZ_HAIZHU: { north: 55, middle: 25, south: 15, far: 90 },
+  SFB_TIANHE: { north: 10, middle: 25, south: 50, far: 80 },
+  SFB_HAIZHU: { north: 55, middle: 25, south: 15, far: 90 },
 };
 const estimate: CommuteEstimate = (area, venue) => TIMES[area]?.[venue] ?? null;
 const VENUES = ["north", "middle", "south", "far", "unrouted"].map((id) => ({ id }));
-const ana: Traveller = { area: "GZ_TIANHE", maxCommuteMinutes: 40 };
-const bo: Traveller = { area: "GZ_HAIZHU", maxCommuteMinutes: 40 };
+const ana: Traveller = { area: "SFB_TIANHE", maxCommuteMinutes: 40 };
+const bo: Traveller = { area: "SFB_HAIZHU", maxCommuteMinutes: 40 };
 const ids = (venues: readonly { id: string }[]) => venues.map((venue) => venue.id);
 
 describe("toleranceFor", () => {
@@ -54,7 +54,7 @@ describe("fairVenues", () => {
     const chosen = fairVenues(VENUES, ana, bo, 1, estimate);
     for (const venue of chosen) expect(VENUES).toContain(venue);
     const text = JSON.stringify(chosen);
-    expect(text).not.toMatch(/GZ_|TIANHE|HAIZHU|\d/);
+    expect(text).not.toMatch(/SFB_|TIANHE|HAIZHU|\d/);
   });
 
   const area = fc.constantFrom("A1_ZONE", "B2_ZONE", "C3_ZONE", null);

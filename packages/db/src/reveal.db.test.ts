@@ -9,9 +9,9 @@ import type { RevealRepository } from "./reveal.js";
 import { createLoginRole, createTestDatabase, urlFor } from "./test-db.js";
 import type { TestDatabase } from "./test-db.js";
 
-const DAY1 = new Date("2026-11-22T02:00:00Z"); // 10:00 in China
-const DAY1_LATER = new Date("2026-11-22T12:00:00Z"); // 20:00, same local day
-const DAY2 = new Date("2026-11-23T02:00:00Z");
+const DAY1 = new Date("2026-11-22T18:00:00Z"); // 10:00 in San Francisco
+const DAY1_LATER = new Date("2026-11-23T04:00:00Z"); // 20:00, same local day
+const DAY2 = new Date("2026-11-23T18:00:00Z");
 const first = () => 0;
 
 let db: TestDatabase;
@@ -69,7 +69,7 @@ async function couple(options: { consent?: boolean } = {}) {
   await profile(a, {
     "self.interests": ["jazz", "hiking"],
     "date.cuisines": [{ tag: "cantonese", weight: 3 }],
-    "self.home_area": "GZ_TIANHE",
+    "self.home_area": "SFB_TIANHE",
     "date.dietary_restrictions": ["halal"],
   });
   await profile(b, { "self.interests": ["films"], "date.tastes": ["spicy", "sweet"] });

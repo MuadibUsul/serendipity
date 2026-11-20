@@ -11,11 +11,11 @@ describe("secrets", () => {
 
   it("hashes per purpose and per secret, never echoing the value", () => {
     const hasher = createHasher(SECRET);
-    const phone = hasher.hash("phone", "+8613800000000");
-    expect(phone).not.toContain("13800000000");
-    expect(hasher.hash("phone", "+8613800000000")).toBe(phone);
-    expect(hasher.hash("ip", "+8613800000000")).not.toBe(phone);
-    expect(createHasher("y".repeat(MIN_SECRET_BYTES)).hash("phone", "+8613800000000")).not.toBe(
+    const phone = hasher.hash("phone", "+14155550123");
+    expect(phone).not.toContain("4155550123");
+    expect(hasher.hash("phone", "+14155550123")).toBe(phone);
+    expect(hasher.hash("ip", "+14155550123")).not.toBe(phone);
+    expect(createHasher("y".repeat(MIN_SECRET_BYTES)).hash("phone", "+14155550123")).not.toBe(
       phone,
     );
   });

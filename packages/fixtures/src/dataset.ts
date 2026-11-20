@@ -97,7 +97,7 @@ export interface PaymentOrderRow {
   readonly dateId: string;
   readonly userId: string;
   readonly amountMinor: number;
-  readonly currency: "CNY";
+  readonly currency: "USD";
   readonly state: PaymentOrderState;
   readonly provider: string;
   readonly providerOrderId: string;
@@ -435,7 +435,7 @@ export function buildDataset(seed: number, options: DatasetOptions = {}): Datase
         dateId,
         userId: personId,
         amountMinor: PRICE_MINOR,
-        currency: "CNY",
+        currency: "USD",
         state: hasPaid
           ? refundPending
             ? "REFUND_REQUESTED"

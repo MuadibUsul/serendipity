@@ -11,12 +11,12 @@ export const propose = (
 
 /** A valid value for every required fact. */
 export const REQUIRED_VALUES: Readonly<Record<string, unknown>> = {
-  "self.city_region": "GZ_CORE",
+  "self.city_region": "SFB_CORE",
   "self.relationship_goal": "long_term",
   "self.availability": [{ day: "sat", from: "14:00", to: "18:00" }],
   "seeking.age_range": { min: 25, max: 35 },
   "seeking.relationship_goals": ["open_to_long_term", "long_term"],
-  "date.budget_per_person": { currency: "CNY", max_minor: 8800 },
+  "date.budget_per_person": { currency: "USD", max_minor: 8800 },
 };
 
 /** Every fact confirmed by the person, as shown. */

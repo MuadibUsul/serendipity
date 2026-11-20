@@ -5,7 +5,7 @@ import { contactView, mayWithdraw, parseContact } from "./contact.js";
 import type { ContactCard } from "./contact.js";
 
 const mine: ContactCard = { kind: "wechat", value: "me_wx" };
-const theirs: ContactCard = { kind: "phone", value: "13800000000" };
+const theirs: ContactCard = { kind: "phone", value: "4155550123" };
 
 describe("contact swap", () => {
   it("shows the other's card only once both have offered", () => {

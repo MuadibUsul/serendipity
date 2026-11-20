@@ -31,7 +31,7 @@ function fakeAccounts(pauseOutcome: PauseOutcome, resumeOutcome: ResumeOutcome) 
               status: "paused",
               pausedReason: "break",
               needs: [],
-              keyPreferences: { "self.city_region": "GZ_CORE" },
+              keyPreferences: { "self.city_region": "SFB_CORE" },
             }
           : null,
       ),
@@ -119,7 +119,7 @@ describe("pause and resume endpoints", () => {
       status: "paused",
       paused_reason: "break",
       needs: [],
-      key_preferences: { "self.city_region": "GZ_CORE" },
+      key_preferences: { "self.city_region": "SFB_CORE" },
     });
     expect(response.headers["cache-control"]).toBe("no-store");
   });

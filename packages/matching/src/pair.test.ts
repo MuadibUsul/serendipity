@@ -66,7 +66,7 @@ describe("decidePair", () => {
 
   describe("hard rules (layer 2)", () => {
     it("rejects different regions", () => {
-      expect(refusalsOf(ANA, person("bo", {}, { "self.city_region": "GZ_EAST" }))).toEqual([
+      expect(refusalsOf(ANA, person("bo", {}, { "self.city_region": "SFB_EAST" }))).toEqual([
         { side: "pair", code: "region_mismatch" },
       ]);
     });
@@ -144,7 +144,7 @@ describe("decidePair", () => {
 
     it("rejects a budget below the cheapest package, and accepts one equal to it", () => {
       const budget = (minor: number) =>
-        person("bo", {}, { "date.budget_per_person": { currency: "CNY", max_minor: minor } });
+        person("bo", {}, { "date.budget_per_person": { currency: "USD", max_minor: minor } });
       expect(decidePair(ANA, budget(8_800), CONTEXT).pass).toBe(true);
       expect(refusalsOf(ANA, budget(8_799))).toEqual([{ side: "b", code: "budget_below_package" }]);
     });
@@ -159,7 +159,7 @@ describe("decidePair", () => {
       const dollars = person(
         "bo",
         {},
-        { "date.budget_per_person": { currency: "USD", max_minor: 90_000 } },
+        { "date.budget_per_person": { currency: "EUR", max_minor: 90_000 } },
       );
       expect(refusalsOf(ANA, dollars)).toEqual([
         { side: "pair", code: "budget_currency_mismatch" },
@@ -231,7 +231,7 @@ describe("decidePair", () => {
   });
 
   it.each([-1, 88.5, Number.NaN])("refuses a package price of %s", (minor) => {
-    const context = { ...CONTEXT, cheapestPackagePerPerson: { currency: "CNY", minor } };
+    const context = { ...CONTEXT, cheapestPackagePerPerson: { currency: "USD", minor } };
     expect(refusalsOf(ANA, BO, context)).toEqual([{ side: "pair", code: "invalid_context" }]);
   });
 });

@@ -5,6 +5,7 @@ Shared libraries, consumed as TypeScript source by the apps and services.
 | Directory        | What                                                                                            | Created by                                |
 | ---------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------- |
 | `domain/`        | Date state machine and invariants; no I/O                                                       | seeded by `ser-p01-01`; `ser-p04-01`      |
+| `market/`        | Where Serendip runs: brand, US, Pacific time, USD, +1 phones, Bay Area areas                    | ADR-0023                                  |
 | `consent/`       | Consent engine: `authorize()` denies by default, audits every decision                          | `ser-p01-05`                              |
 | `db/`            | Runs `infra/migrations`; grant source and audit writers; seeds fixtures; db suites              | `ser-p01-03`, `ser-p01-08`, `ser-p01-07a` |
 | `config/`        | Runtime configuration; refuses cross-environment mistakes                                       | `ser-p01-02a`                             |

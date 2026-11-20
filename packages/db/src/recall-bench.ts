@@ -35,7 +35,7 @@ const LIMIT = Number(values.limit);
 const NOW = new Date("2026-11-18T04:00:00Z");
 const CONTEXT: RecallContext = {
   dateLengthMinutes: 90,
-  cheapestPackagePerPerson: { currency: "CNY", minor: 8_800 },
+  cheapestPackagePerPerson: { currency: "USD", minor: 8_800 },
 };
 
 const percentile = (sorted: readonly number[], p: number) =>
@@ -110,7 +110,7 @@ try {
       const { rows } = await admin.query<{ n: number }>(counting, [
         id,
         NOW,
-        "CNY",
+        "USD",
         8_800,
         PEOPLE,
         salt,
@@ -125,7 +125,7 @@ try {
         const sql = recallQueryText(CONTEXT.dateLengthMinutes);
         const { rows } = await client.query<{ "QUERY PLAN": string }>(
           `EXPLAIN (ANALYZE, BUFFERS, COSTS OFF) ${sql}`,
-          [median, NOW, "CNY", 8_800, LIMIT, salt],
+          [median, NOW, "USD", 8_800, LIMIT, salt],
         );
         plan = rows.map((row) => row["QUERY PLAN"]);
       } finally {

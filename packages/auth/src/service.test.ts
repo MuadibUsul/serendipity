@@ -42,13 +42,13 @@ function setup(overrides: Partial<AuthRepository> = {}) {
 describe("requestCode", () => {
   it("sends the code to the normalised number and stores only hashes", async () => {
     const { service, sms, calls } = setup();
-    expect(await service.requestCode("138 0000 0000", "203.0.113.7")).toEqual({
+    expect(await service.requestCode("415 555 0123", "203.0.113.7")).toEqual({
       ok: true,
       resendAfterS: AUTH_POLICY.resendAfterS,
     });
-    expect(sms.sent).toEqual([{ phone: "+8613800000000", code: "123456" }]);
+    expect(sms.sent).toEqual([{ phone: "+14155550123", code: "123456" }]);
     const stored = JSON.stringify(calls);
-    for (const secret of ["13800000000", "203.0.113.7", "123456"])
+    for (const secret of ["4155550123", "203.0.113.7", "123456"])
       expect(stored).not.toContain(secret);
     expect(calls[0]?.input).toMatchObject({
       expiresAt: new Date(NOW.getTime() + AUTH_POLICY.codeTtlS * 1000),
@@ -69,7 +69,7 @@ describe("requestCode", () => {
     const { service, sms } = setup({
       requestCode: () => Promise.resolve({ ok: false, retryAfterS: 42 }),
     });
-    expect(await service.requestCode("13800000000", "203.0.113.7")).toEqual({
+    expect(await service.requestCode("4155550123", "203.0.113.7")).toEqual({
       ok: false,
       problem: "rate_limited",
       retryAfterS: 42,
@@ -81,7 +81,7 @@ describe("requestCode", () => {
 describe("signIn", () => {
   it("returns fresh tokens and stores only their hashes", async () => {
     const { service, calls } = setup();
-    const result = await service.signIn("13800000000", "123456");
+    const result = await service.signIn("4155550123", "123456");
     if (!result.ok) throw new Error("expected a sign-in");
     expect(result).toMatchObject({ userId: "u-1", created: true });
     expect(result.tokens.accessToken).toMatch(/^sa_/);
@@ -97,13 +97,13 @@ describe("signIn", () => {
       verify: () => Promise.resolve({ ok: false, refusal: "locked" }),
     });
     for (const code of ["", "12345", "1234567", "12345a"]) {
-      expect(await service.signIn("13800000000", code)).toEqual({
+      expect(await service.signIn("4155550123", code)).toEqual({
         ok: false,
         problem: "invalid_code",
       });
     }
     expect(calls).toEqual([]);
-    expect(await service.signIn("13800000000", "123456")).toEqual({
+    expect(await service.signIn("4155550123", "123456")).toEqual({
       ok: false,
       problem: "invalid_code",
     });
@@ -121,7 +121,7 @@ describe("tokens", () => {
 
   it("refreshes into a new pair", async () => {
     const { service } = setup();
-    const signedIn = await service.signIn("13800000000", "123456");
+    const signedIn = await service.signIn("4155550123", "123456");
     if (!signedIn.ok) throw new Error("expected a sign-in");
     const refreshed = await service.refresh(signedIn.tokens.refreshToken);
     if (!refreshed.ok) throw new Error("expected a refresh");
