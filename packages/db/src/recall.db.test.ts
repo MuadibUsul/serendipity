@@ -184,7 +184,7 @@ describe("recall", () => {
   it("keeps a person who passed only a liveness check that fits their age, not one whose estimate is too young", async () => {
     const { me } = await town(1);
     const person = byId(me);
-    const age = person.age ?? 30;
+    const age = person.age;
     const swapToLiveness = async (estimatedAge: number) => {
       await admin.query("DELETE FROM app.identity_attestations WHERE user_id = $1", [me]);
       await admin.query(
