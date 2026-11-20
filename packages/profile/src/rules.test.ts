@@ -187,7 +187,7 @@ describe("the person's edits", () => {
   it("remove a fact, and keep visibility within what the catalog allows", () => {
     const facts = applyProposals(
       NO_FACTS,
-      [propose("self.city_region", "GZ_CORE", "explicit")],
+      [propose("self.city_region", "SFB_CORE", "explicit")],
       T0,
     ).facts;
     expect(removeFact(facts, "self.city_region").size).toBe(0);
@@ -263,10 +263,10 @@ describe("approval and hard rules", () => {
 });
 
 const REQUIRED_VALUES_NORMALISED = {
-  "self.city_region": "GZ_CORE",
+  "self.city_region": "SFB_CORE",
   "self.relationship_goal": "long_term",
   "self.availability": [{ day: "sat", from: "14:00", to: "18:00" }],
   "seeking.age_range": { min: 25, max: 35 },
   "seeking.relationship_goals": ["long_term", "open_to_long_term"],
-  "date.budget_per_person": { currency: "CNY", max_minor: 8800 },
+  "date.budget_per_person": { currency: "USD", max_minor: 8800 },
 };

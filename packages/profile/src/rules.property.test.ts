@@ -43,7 +43,7 @@ function validValue(spec: ValueSpec): fc.Arbitrary<unknown> {
         selector: (item) => item.tag,
       });
     case "region":
-      return fc.constantFrom("GZ_CORE", "SZ_NANSHAN", "SH_XUHUI");
+      return fc.constantFrom("SFB_CORE", "SZ_NANSHAN", "SH_XUHUI");
     case "int":
       return fc.integer({ min: spec.min, max: spec.max });
     case "range":
@@ -70,7 +70,7 @@ function validValue(spec: ValueSpec): fc.Arbitrary<unknown> {
     case "money":
       return fc
         .integer({ min: 0, max: spec.maxMinor })
-        .map((maxMinor) => ({ currency: "CNY", max_minor: maxMinor }));
+        .map((maxMinor) => ({ currency: "USD", max_minor: maxMinor }));
   }
 }
 

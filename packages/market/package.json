@@ -1,0 +1,16 @@
+{
+  "name": "@serendipity/market",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Where Serendip runs: brand, country, time zone, currency, phone format and the pilot's areas. One place to change for a new market.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

@@ -21,8 +21,10 @@
  *   inactive. Each person must hold the `relationship_reveal` consent.
  */
 
-/** Days start at local midnight in China (UTC+8): the version being built first. */
-export const DAY_OFFSET_MINUTES = 8 * 60;
+import { MARKET, startOfLocalDay } from "@serendipity/market";
+
+/** Days start at local midnight in the market's time zone (Pacific time for the Bay Area). */
+export const DAY_TIME_ZONE = MARKET.timeZone;
 export const CARDS_PER_DAY = 1;
 
 /** Categories in every deck unless their owner takes them out. */
@@ -139,9 +141,7 @@ export function flipRefusal(state: FlipState): FlipRefusal | null {
   return null;
 }
 
-/** The start of `now`'s local day, as an instant. */
+/** The start of `now`'s local day, as an instant (daylight saving included). */
 export function startOfDay(now: Date): Date {
-  const shift = DAY_OFFSET_MINUTES * 60_000;
-  const local = now.getTime() + shift;
-  return new Date(local - (local % 86_400_000) - shift);
+  return startOfLocalDay(now, DAY_TIME_ZONE);
 }

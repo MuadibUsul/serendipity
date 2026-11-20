@@ -11,7 +11,7 @@ export const snapshot = (hardRules: Record<string, unknown>, schemaVersion: unkn
 });
 
 export const BASE_RULES: RawRules = {
-  "self.city_region": "GZ_CORE",
+  "self.city_region": "SFB_CORE",
   "self.relationship_goal": "long_term",
   "self.availability": [
     { day: "sat", from: "14:00", to: "18:00" },
@@ -19,12 +19,12 @@ export const BASE_RULES: RawRules = {
   ],
   "seeking.age_range": { min: 25, max: 35 },
   "seeking.relationship_goals": ["long_term", "open_to_long_term"],
-  "date.budget_per_person": { currency: "CNY", max_minor: 12_000 },
+  "date.budget_per_person": { currency: "USD", max_minor: 12_000 },
 };
 
 export const CONTEXT: PairContext = {
   dateLengthMinutes: 90,
-  cheapestPackagePerPerson: { currency: "CNY", minor: 8_800 },
+  cheapestPackagePerPerson: { currency: "USD", minor: 8_800 },
 };
 
 export function person(

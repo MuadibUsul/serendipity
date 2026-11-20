@@ -19,7 +19,7 @@ const NOW = new Date("2026-11-18T04:00:00Z");
 const VERIFIED = new Date("2026-11-17T04:00:00Z");
 const CONTEXT: RecallContext = {
   dateLengthMinutes: 90,
-  cheapestPackagePerPerson: { currency: "CNY", minor: 8_800 },
+  cheapestPackagePerPerson: { currency: "USD", minor: 8_800 },
 };
 const QUERY = { context: CONTEXT, now: NOW, limit: 200, salt: "round-1" };
 const MODEL = "fixture-embedding-1024";
@@ -205,7 +205,7 @@ describe("recall", () => {
 
   it("recalls nobody for a person who cannot afford the package", async () => {
     const { me } = busyRequester(1);
-    const dear = { ...CONTEXT, cheapestPackagePerPerson: { currency: "CNY", minor: 10_000_000 } };
+    const dear = { ...CONTEXT, cheapestPackagePerPerson: { currency: "USD", minor: 10_000_000 } };
     expect(await recall.recall(me, { ...QUERY, context: dear })).toEqual([]);
   });
 

@@ -16,7 +16,7 @@ const facts = new Map<string, unknown>([
   ["self.interests", ["jazz", "hiking"]],
   ["date.cuisines", [{ tag: "cantonese", weight: 3 }]],
   ["date.price_band", "moderate"],
-  ["self.home_area", "GZ_TIANHE"],
+  ["self.home_area", "SFB_TIANHE"],
   ["seeking.age_range", { min: 25, max: 35 }],
   ["date.dietary_restrictions", ["halal"]],
 ]);
@@ -137,12 +137,12 @@ describe("flipRefusal", () => {
 });
 
 describe("startOfDay", () => {
-  it("is local midnight in China (UTC+8)", () => {
-    expect(startOfDay(new Date("2026-11-19T15:59:00Z")).toISOString()).toBe(
-      "2026-11-18T16:00:00.000Z",
+  it("is local midnight in Pacific time", () => {
+    expect(startOfDay(new Date("2026-11-20T07:59:00Z")).toISOString()).toBe(
+      "2026-11-19T08:00:00.000Z",
     );
-    expect(startOfDay(new Date("2026-11-19T16:00:00Z")).toISOString()).toBe(
-      "2026-11-19T16:00:00.000Z",
+    expect(startOfDay(new Date("2026-11-20T08:00:00Z")).toISOString()).toBe(
+      "2026-11-20T08:00:00.000Z",
     );
   });
 });

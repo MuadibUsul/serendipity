@@ -25,7 +25,7 @@ const RUNS = { numRuns: 2_000 };
 const SUPERSET_RUNS = { numRuns: 5_000 };
 const NOW = new Date("2026-11-18T00:00:00Z");
 
-const REGIONS = ["GZ_CORE", "GZ_EAST"];
+const REGIONS = ["SFB_CORE", "SFB_EAST"];
 const GOALS = ["long_term", "open_to_long_term", "casual_dating", "unsure"];
 const TAGS = ["hiking", "night_owl", "smoker", "homebody", "early_riser"];
 const DAYS = ["fri", "sat", "sun"] as const;
@@ -66,7 +66,7 @@ const candidateArb = (id: string): fc.Arbitrary<Candidate> =>
         { weight: 9, arbitrary: fc.integer({ min: 24, max: 34 }) },
         { weight: 1, arbitrary: fc.constant(null) },
       ),
-      region: fc.constantFrom("GZ_CORE", "GZ_CORE", "GZ_CORE", ...REGIONS),
+      region: fc.constantFrom("SFB_CORE", "SFB_CORE", "SFB_CORE", ...REGIONS),
       goal: fc.constantFrom(...GOALS),
       windows: biasedWindowsArb,
       min: fc.integer({ min: 18, max: 28 }),
@@ -80,7 +80,7 @@ const candidateArb = (id: string): fc.Arbitrary<Candidate> =>
         { weight: 1, arbitrary: fc.subarray(TAGS, { maxLength: 2 }) },
       ),
       tags: fc.subarray(TAGS, { maxLength: 3 }),
-      currency: fc.constantFrom("CNY", "CNY", "CNY", "USD"),
+      currency: fc.constantFrom("USD", "USD", "USD", "EUR"),
       budget: fc.constantFrom(5_000, 8_800, 12_000, 12_000),
       eligible: fc.oneof(
         { weight: 9, arbitrary: fc.constant(true) },
@@ -109,7 +109,7 @@ const candidateArb = (id: string): fc.Arbitrary<Candidate> =>
 const contextArb: fc.Arbitrary<RecallContext> = fc.record({
   dateLengthMinutes: fc.integer({ min: MIN_DATE_MINUTES, max: 240 }),
   cheapestPackagePerPerson: fc.record({
-    currency: fc.constant("CNY"),
+    currency: fc.constant("USD"),
     minor: fc.constantFrom(5_000, 8_800, 10_000),
   }),
 });

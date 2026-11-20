@@ -7,7 +7,7 @@ import { BASE_RULES, snapshot } from "./test-support.js";
 const NOW = new Date("2026-11-18T04:00:00Z");
 const CONTEXT: RecallContext = {
   dateLengthMinutes: 90,
-  cheapestPackagePerPerson: { currency: "CNY", minor: 8_800 },
+  cheapestPackagePerPerson: { currency: "USD", minor: 8_800 },
 };
 
 function entry(userId: string, until: Date | null = null): RecallEntry {

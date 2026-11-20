@@ -15,7 +15,7 @@ describe("readHardRules", () => {
     expect(readHardRules(snapshot(BASE_RULES))).toEqual({
       ok: true,
       rules: {
-        cityRegion: "GZ_CORE",
+        cityRegion: "SFB_CORE",
         relationshipGoal: "long_term",
         availability: [
           { day: "sat", from: 840, to: 1080 },
@@ -24,7 +24,7 @@ describe("readHardRules", () => {
         seekingAgeRange: { min: 25, max: 35 },
         seekingRelationshipGoals: ["long_term", "open_to_long_term"],
         seekingDealbreakers: [],
-        budgetPerPerson: { currency: "CNY", minor: 12_000 },
+        budgetPerPerson: { currency: "USD", minor: 12_000 },
       },
     });
   });
@@ -115,10 +115,10 @@ describe("readHardRules", () => {
     ["seeking.dealbreakers", "smoking"],
     ["seeking.dealbreakers", [""]],
     ["date.budget_per_person", 12_000],
-    ["date.budget_per_person", { currency: "CNY", max_minor: -1 }],
-    ["date.budget_per_person", { currency: "CNY", max_minor: 88.5 }],
+    ["date.budget_per_person", { currency: "USD", max_minor: -1 }],
+    ["date.budget_per_person", { currency: "USD", max_minor: 88.5 }],
     ["date.budget_per_person", { currency: "", max_minor: 8_800 }],
-    ["date.budget_per_person", { currency: "CNY" }],
+    ["date.budget_per_person", { currency: "USD" }],
   ] as const)("refuses an invalid %s: %j", (key, value) => {
     expect(readHardRules(snapshot({ ...BASE_RULES, [key]: value }))).toEqual({
       ok: false,
