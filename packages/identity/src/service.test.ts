@@ -120,6 +120,9 @@ describe("the identity service", () => {
         realPersonVerified: true,
         verifiedAt: NOW,
         expiresAt: null,
+        level: "document",
+        estimatedAge: null,
+        faceMatch: null,
       },
     ]);
   });

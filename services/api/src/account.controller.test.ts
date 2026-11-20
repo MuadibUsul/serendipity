@@ -20,6 +20,14 @@ const NO_INVITATIONS: InvitationRepository = {
 function fakeAccounts(pauseOutcome: PauseOutcome, resumeOutcome: ResumeOutcome) {
   const calls: unknown[][] = [];
   const accounts: AccountRepository = {
+    setBirthDate: (...args) => {
+      calls.push(["birth", ...args.slice(0, 3)]);
+      const [, date] = args;
+      if (date === "2010-01-01") return Promise.resolve({ kind: "refused", refusal: "under_age" });
+      if (date === "1990-01-01")
+        return Promise.resolve({ kind: "refused", refusal: "already_set" });
+      return Promise.resolve({ kind: "recorded" });
+    },
     pause: (...args) => {
       calls.push(["pause", ...args]);
       return Promise.resolve(pauseOutcome);
@@ -153,5 +161,23 @@ describe("pause and resume endpoints", () => {
       payload: { confirmed: true },
     });
     expect(response.statusCode).toBe(409);
+  });
+
+  it("records a date of birth once, refusing anyone under 18", async () => {
+    const { app, calls } = await start();
+    const post = (birth_date: unknown) =>
+      app.inject({
+        method: "POST",
+        url: "/v1/me/birth-date",
+        headers: as,
+        payload: { birth_date },
+      });
+    expect((await post("31/12/1990")).statusCode).toBe(400);
+    expect(calls).toEqual([]);
+    expect((await post("1995-06-15")).json()).toEqual({ status: "recorded" });
+    // Today is the market's local date: 2026-11-19 in San Francisco at 09:00Z.
+    expect(calls[0]).toEqual(["birth", ME, "1995-06-15", "2026-11-19"]);
+    expect((await post("2010-01-01")).statusCode).toBe(403);
+    expect((await post("1990-01-01")).statusCode).toBe(409);
   });
 });

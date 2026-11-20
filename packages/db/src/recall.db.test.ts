@@ -181,6 +181,40 @@ describe("recall", () => {
     expect(await recall.recall(heldOne, QUERY)).toEqual([]);
   });
 
+  it("keeps a person who passed only a liveness check that fits their age, not one whose estimate is too young", async () => {
+    const { me } = await town(1);
+    const person = byId(me);
+    const age = person.age;
+    const swapToLiveness = async (estimatedAge: number) => {
+      await admin.query("DELETE FROM app.identity_attestations WHERE user_id = $1", [me]);
+      await admin.query(
+        `INSERT INTO app.identity_attestations
+           (user_id, provider, provider_ref, age_verified, real_person_verified, verified_at,
+            expires_at, level, estimated_age, face_match)
+         VALUES ($1, $2, $3, false, true, $4, $5, 'liveness', $6, true)`,
+        [
+          me,
+          CITY_IDENTITY_POLICY.provider,
+          `live_${me.slice(0, 8)}_${String(estimatedAge)}`,
+          VERIFIED,
+          new Date(NOW.getTime() + 86_400_000 * 300),
+          estimatedAge,
+        ],
+      );
+    };
+    await admin.query("UPDATE app.users SET birth_date = make_date($2, 1, 1) WHERE id = $1", [
+      me,
+      2026 - age,
+    ]);
+    await swapToLiveness(Math.max(age, 26));
+    expect(await recall.refresh(me, { age }, NOW)).toEqual({ stored: true });
+    await swapToLiveness(19);
+    expect(await recall.refresh(me, { age }, NOW)).toEqual({
+      stored: false,
+      reason: "identity_ineligible",
+    });
+  });
+
   it("never leaves out a pair decidePair passes", async () => {
     let passes = 0;
     for (const person of city.slice(0, 40)) {

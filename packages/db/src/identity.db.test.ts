@@ -50,6 +50,9 @@ const verdict = (overrides: Partial<Attestation> = {}): Attestation => ({
   realPersonVerified: true,
   verifiedAt: new Date(NOW.getTime() - DAY),
   expiresAt: new Date(NOW.getTime() + 300 * DAY),
+  level: "document",
+  estimatedAge: null,
+  faceMatch: null,
   ...overrides,
 });
 
@@ -80,8 +83,11 @@ describe("pgAttestationStore", () => {
     expect(Object.keys(rows[0] ?? {}).sort()).toEqual([
       "age_verified",
       "created_at",
+      "estimated_age",
       "expires_at",
+      "face_match",
       "id",
+      "level",
       "provider",
       "provider_ref",
       "real_person_verified",

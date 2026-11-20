@@ -13,6 +13,9 @@
 // recall() returns user ids only: never profile data, never a reason.
 import type { EligibilityPolicy } from "@serendipity/identity";
 import { eligibility } from "@serendipity/identity";
+
+import { ATTESTATION_COLUMNS, identityFacts, toAttestation } from "./identity.js";
+import type { AttestationRow } from "./identity.js";
 import { AVAILABILITY_BITS, recallEntryOf, requiredQuarters } from "@serendipity/matching";
 import type { NoEntryReason, RecallContext, RecallEntry } from "@serendipity/matching";
 
@@ -155,15 +158,6 @@ export interface RecallOptions {
   readonly embeddingModel: string;
 }
 
-interface AttestationRow {
-  provider: string;
-  provider_ref: string;
-  age_verified: boolean;
-  real_person_verified: boolean;
-  verified_at: Date;
-  expires_at: Date | null;
-}
-
 function tagsOf(values: readonly unknown[]): string[] {
   const tags = new Set<string>();
   for (const value of values) {
@@ -297,21 +291,14 @@ export function pgRecallRepository(pool: PreparingPool, options: RecallOptions):
                   )
                 ).rows.map((fact) => fact.value);
           const attestations = await tx.db.query<AttestationRow>(
-            `SELECT provider, provider_ref, age_verified, real_person_verified, verified_at, expires_at
-             FROM app.identity_attestations WHERE user_id = $1`,
+            `SELECT ${ATTESTATION_COLUMNS} FROM app.identity_attestations WHERE user_id = $1`,
             [userId],
           );
           const verdict = eligibility(
-            attestations.rows.map((a) => ({
-              provider: a.provider,
-              providerRef: a.provider_ref,
-              ageVerified: a.age_verified,
-              realPersonVerified: a.real_person_verified,
-              verifiedAt: a.verified_at,
-              expiresAt: a.expires_at,
-            })),
+            attestations.rows.map(toAttestation),
             now,
             options.identity,
+            await identityFacts(tx.db, userId, now),
           );
           const result = recallEntryOf({
             userId,

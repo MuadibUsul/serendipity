@@ -7,6 +7,12 @@ export type VerificationStatus = "pending" | "verified" | "rejected";
 
 export interface VerificationResult {
   readonly providerRef: string;
+  /** Which check this was (ADR-0024); `document` when a vendor does not say. */
+  readonly level: "liveness" | "document";
+  /** A liveness check's age estimate, whole years; `null` when none. */
+  readonly estimatedAge: number | null;
+  /** Whether the selfie matched the profile photos; `null` when not compared. */
+  readonly faceMatch: boolean | null;
   /** Our user id, sent to the provider as its external reference (a pseudonymous UUID). */
   readonly subject: string;
   readonly status: VerificationStatus;
@@ -108,6 +114,9 @@ export function readResult(body: unknown): VerificationResult {
   const realPersonVerified = fields["real_person_verified"];
   const checkedAt = date(fields["checked_at"]);
   const expiresAt = fields["expires_at"] === null ? null : date(fields["expires_at"]);
+  const level = fields["level"] ?? "document";
+  const estimatedAge = fields["estimated_age"] ?? null;
+  const faceMatch = fields["face_match"] ?? null;
   if (
     typeof providerRef !== "string" ||
     !REF.test(providerRef) ||
@@ -119,17 +128,28 @@ export function readResult(body: unknown): VerificationResult {
     typeof realPersonVerified !== "boolean" ||
     checkedAt === undefined ||
     expiresAt === undefined ||
-    (expiresAt !== null && expiresAt.getTime() <= checkedAt.getTime())
+    (expiresAt !== null && expiresAt.getTime() <= checkedAt.getTime()) ||
+    (level !== "liveness" && level !== "document") ||
+    (estimatedAge !== null &&
+      (typeof estimatedAge !== "number" ||
+        !Number.isInteger(estimatedAge) ||
+        estimatedAge < 10 ||
+        estimatedAge > 120)) ||
+    (faceMatch !== null && typeof faceMatch !== "boolean")
   ) {
     throw new CallbackRejected("malformed");
   }
-  // A check that is not verified proves nothing, whatever its flags say.
+  // A check that is not verified proves nothing, whatever its flags say; and a
+  // liveness check never proves adulthood, whatever it says (ADR-0024).
   const verified = status === "verified";
   return {
     providerRef,
+    level,
+    estimatedAge: estimatedAge,
+    faceMatch: verified ? faceMatch : null,
     subject,
     status: status as VerificationStatus,
-    ageVerified: verified && ageVerified,
+    ageVerified: verified && level === "document" && ageVerified,
     realPersonVerified: verified && realPersonVerified,
     checkedAt,
     expiresAt,

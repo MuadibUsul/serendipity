@@ -4,8 +4,14 @@
 // writes the move, audited. The status guard (migration 0013) refuses any
 // move ACCOUNT_LIFECYCLE does not declare.
 import { SCOPES } from "@serendipity/consent";
-import { pauseRefusal, resumeCheck } from "@serendipity/identity";
-import type { AccountState, PauseReason, PauseRefusal, ResumeNeed } from "@serendipity/identity";
+import { birthDateRefusal, pauseRefusal, resumeCheck } from "@serendipity/identity";
+import type {
+  AccountState,
+  BirthDateRefusal,
+  PauseReason,
+  PauseRefusal,
+  ResumeNeed,
+} from "@serendipity/identity";
 
 import { inAuditedTransaction } from "./audit.js";
 import type { AuditedTransaction, TransactionPool } from "./audit.js";
@@ -34,7 +40,22 @@ export type ResumeOutcome =
   | { readonly kind: "needs"; readonly needs: readonly ResumeNeed[] }
   | { readonly kind: "not_found" };
 
+export type BirthDateOutcome =
+  | { readonly kind: "recorded" }
+  | { readonly kind: "refused"; readonly refusal: BirthDateRefusal | "already_set" }
+  | { readonly kind: "not_found" };
+
 export interface AccountRepository {
+  /**
+   * Records the date of birth given at sign-up (ADR-0024): 18 and over only,
+   * once. It is never shown to anyone; a mistake is corrected through support.
+   */
+  setBirthDate(
+    userId: string,
+    birthDate: string,
+    today: string,
+    context?: { traceId?: string },
+  ): Promise<BirthDateOutcome>;
   pause(
     userId: string,
     reason: PauseReason,
@@ -113,6 +134,35 @@ async function audit(
 
 export function pgAccountRepository(pool: TransactionPool & Queryable): AccountRepository {
   return {
+    setBirthDate: (userId, birthDate, today, context = {}) =>
+      inAuditedTransaction(
+        pool,
+        async (tx): Promise<BirthDateOutcome> => {
+          const { rows } = await tx.db.query<{ set: boolean }>(
+            "SELECT birth_date IS NOT NULL AS set FROM app.users WHERE id = $1 FOR UPDATE",
+            [userId],
+          );
+          const row = rows[0];
+          if (row === undefined) {
+            await audit(tx, "account.birth_date.not_found", userId, {});
+            return { kind: "not_found" };
+          }
+          const refusal = row.set ? "already_set" : birthDateRefusal(birthDate, today);
+          if (refusal !== null) {
+            // The date itself is never audited.
+            await audit(tx, "account.birth_date.refused", userId, { refusal });
+            return { kind: "refused", refusal };
+          }
+          await tx.db.query(
+            "UPDATE app.users SET birth_date = $2, updated_at = now() WHERE id = $1",
+            [userId, birthDate],
+          );
+          await audit(tx, "account.birth_date.recorded", userId, {});
+          return { kind: "recorded" };
+        },
+        context,
+      ),
+
     pause: (userId, reason, now, context = {}) =>
       inAuditedTransaction(
         pool,

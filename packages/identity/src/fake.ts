@@ -13,6 +13,10 @@ import type { IdentityProvider, VerificationResult, VerificationSession } from "
 export const FAKE_PROVIDER = "fake";
 
 export interface FakeOutcome {
+  /** Which check the fake pretends to run; `document` when left out. */
+  readonly level?: "liveness" | "document";
+  readonly estimatedAge?: number | null;
+  readonly faceMatch?: boolean | null;
   readonly ageVerified: boolean;
   readonly realPersonVerified: boolean;
   /** Days until the attestation expires; null for never. */
@@ -48,6 +52,9 @@ export function createFakeIdentityProvider(options: {
         providerRef,
         subject: session.subject,
         status: "pending",
+        level: "document",
+        estimatedAge: null,
+        faceMatch: null,
         ageVerified: false,
         realPersonVerified: false,
         checkedAt: new Date(0),
@@ -81,12 +88,17 @@ export function createFakeIdentityProvider(options: {
     complete(providerRef, at, outcome = PASS) {
       const session = sessions.get(providerRef);
       if (session === undefined) throw new Error(`no fake session ${providerRef}`);
-      const verified = outcome.ageVerified;
+      const level = outcome.level ?? "document";
+      // A liveness check passes on a real person; an ID check on a proven age.
+      const verified = level === "liveness" ? outcome.realPersonVerified : outcome.ageVerified;
       const result: VerificationResult = {
         providerRef,
         subject: session.subject,
         status: verified ? "verified" : "rejected",
-        ageVerified: outcome.ageVerified,
+        level,
+        estimatedAge: outcome.estimatedAge ?? null,
+        faceMatch: verified ? (outcome.faceMatch ?? null) : null,
+        ageVerified: verified && level === "document" && outcome.ageVerified,
         realPersonVerified: outcome.realPersonVerified,
         checkedAt: at,
         expiresAt:
@@ -97,6 +109,9 @@ export function createFakeIdentityProvider(options: {
         provider_ref: providerRef,
         subject: session.subject,
         status: result.status,
+        level,
+        estimated_age: result.estimatedAge,
+        face_match: result.faceMatch,
         age_verified: result.ageVerified,
         real_person_verified: result.realPersonVerified,
         checked_at: at.toISOString(),

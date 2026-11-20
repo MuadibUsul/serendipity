@@ -2,6 +2,7 @@ import { Body, Controller, Get, Header, HttpCode, Inject, Post, Req } from "@nes
 import type { AccountRepository, ResumeStatus } from "@serendipity/db";
 import { PAUSE_REASONS } from "@serendipity/identity";
 import type { PauseReason, PauseRefusal, ResumeNeed } from "@serendipity/identity";
+import { MARKET } from "@serendipity/market";
 import type { FastifyRequest } from "fastify";
 
 import type { Callers } from "./callers.js";
@@ -64,6 +65,45 @@ export class AccountController {
   private context(request: FastifyRequest): { traceId?: string } {
     const trace = traceOf(request);
     return trace === undefined ? {} : { traceId: trace.traceId };
+  }
+
+  /** The date of birth, once, at sign-up (ADR-0024). Under 18 is refused and nothing is stored. */
+  @Post("birth-date")
+  @HttpCode(200)
+  @Header("cache-control", "no-store")
+  async birthDate(
+    @Req() request: FastifyRequest,
+    @Body() body: unknown,
+  ): Promise<{ status: "recorded" }> {
+    const caller = await this.caller(request);
+    const value = field(body, "birth_date");
+    if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      throw new ApiError("invalid_request", "Send birth_date as YYYY-MM-DD.");
+    }
+    const today = new Intl.DateTimeFormat("en-CA", {
+      timeZone: MARKET.timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(this.clock());
+    const outcome = await this.accounts.setBirthDate(caller, value, today, this.context(request));
+    switch (outcome.kind) {
+      case "recorded":
+        return { status: "recorded" };
+      case "not_found":
+        throw new ApiError("not_found");
+      case "refused":
+        if (outcome.refusal === "under_age") {
+          throw new ApiError("forbidden", "Serendip is for adults 18 and over.");
+        }
+        if (outcome.refusal === "already_set") {
+          throw new ApiError(
+            "conflict",
+            "Your date of birth is already set. Contact support to correct it.",
+          );
+        }
+        throw new ApiError("invalid_request", "That date doesn't look right.");
+    }
   }
 
   @Post("pause")
