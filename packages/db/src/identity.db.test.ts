@@ -132,7 +132,7 @@ describe("the identity service against the database", () => {
       now: () => NOW,
     });
     expect((await service.eligible(user)).eligible).toBe(false);
-    const session = await service.startVerification(user);
+    const session = await service.startVerification(user, "document");
     const callback = provider.complete(session.providerRef, NOW);
     expect(await service.handleCallback(callback.headers, callback.body)).toBe("recorded");
     expect(await service.handleCallback(callback.headers, callback.body)).toBe("unchanged");

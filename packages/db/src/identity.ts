@@ -96,6 +96,28 @@ export function pgAttestationStore(pool: TransactionPool & Queryable): Attestati
       return inAuditedTransaction(
         pool,
         async (tx) => {
+          // A verdict for a deleted account is not kept: the vendor is asked
+          // to delete its copy instead (ADR-0025).
+          const user = await tx.db.query<{ status: string }>(
+            "SELECT status FROM app.users WHERE id = $1",
+            [userId],
+          );
+          if (user.rows[0]?.status === "deleted") {
+            await tx.db.query(
+              `INSERT INTO app.vendor_deletion_requests (provider, provider_ref) VALUES ($1, $2)
+               ON CONFLICT (provider, provider_ref) DO NOTHING`,
+              [attestation.provider, attestation.providerRef],
+            );
+            await tx.audit({
+              actorType: "system",
+              actorId: null,
+              action: "identity.attestation.discarded",
+              objectType: "user",
+              objectId: userId,
+              metadata: { provider: attestation.provider },
+            });
+            return "unchanged";
+          }
           // Insert, or replace an older verdict for the same reference and person.
           const { rows } = await tx.db.query<{ inserted: boolean }>(
             `INSERT INTO app.identity_attestations AS a

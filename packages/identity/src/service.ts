@@ -38,9 +38,12 @@ export class NotEligible extends Error {
 }
 
 export interface IdentityService {
+  /** The configured vendor's name, as recorded with each check. */
+  readonly provider: string;
   eligible(userId: string): Promise<Eligibility>;
   assertEligible(userId: string): Promise<void>;
-  startVerification(userId: string): Promise<VerificationSession>;
+  /** Starts the check tiering asks for (ADR-0024); the caller checks `startRefusal` first. */
+  startVerification(userId: string, level: "liveness" | "document"): Promise<VerificationSession>;
   /** Verifies and records a provider callback. Pending results record nothing. */
   handleCallback(
     headers: Readonly<Record<string, string | undefined>>,
@@ -110,12 +113,13 @@ export function createIdentityService({
   }
 
   return {
+    provider: provider.name,
     eligible,
     async assertEligible(userId) {
       const answer = await eligible(userId);
       if (!answer.eligible) throw new NotEligible(answer.reason);
     },
-    startVerification: (userId) => within(provider.start(userId), timeoutMs),
+    startVerification: (userId, level) => within(provider.start(userId, level), timeoutMs),
     async handleCallback(headers, rawBody, context = {}) {
       const result = provider.parseCallback(headers, rawBody, now());
       if (result.status === "pending") return "pending";

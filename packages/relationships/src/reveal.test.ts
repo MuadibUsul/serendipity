@@ -16,7 +16,7 @@ const facts = new Map<string, unknown>([
   ["self.interests", ["jazz", "hiking"]],
   ["date.cuisines", [{ tag: "cantonese", weight: 3 }]],
   ["date.price_band", "moderate"],
-  ["self.home_area", "SFB_TIANHE"],
+  ["self.home_area", "SFB_SF_MISSION"],
   ["seeking.age_range", { min: 25, max: 35 }],
   ["date.dietary_restrictions", ["halal"]],
 ]);

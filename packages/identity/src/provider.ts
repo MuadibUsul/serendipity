@@ -31,7 +31,14 @@ export interface VerificationSession {
 
 export interface IdentityProvider {
   readonly name: string;
-  start(subject: string): Promise<VerificationSession>;
+  /** Starts a check of `level` (ADR-0024): a selfie liveness check, or an ID + selfie check. */
+  start(subject: string, level: "liveness" | "document"): Promise<VerificationSession>;
+  /**
+   * Asks the vendor to delete the selfie video, any ID and anything else it
+   * holds for this reference (ADR-0025). Resolves only once the vendor has
+   * accepted the request; deleting twice is not an error.
+   */
+  deleteData(providerRef: string): Promise<void>;
   /** Asks the provider directly (for reconciliation when a callback is missed). */
   result(providerRef: string): Promise<VerificationResult>;
   /** A callback's result, or `CallbackRejected` unless it is authentic and fresh. */

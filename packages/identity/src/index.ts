@@ -49,3 +49,11 @@ export type {
   TierFacts,
   TierPolicy,
 } from "./tiers.js";
+export { STARTS_PER_DAY, drainVendorDeletions, levelFor, startRefusal } from "./verification.js";
+export type {
+  StartFacts,
+  StartRefusal,
+  VendorDeletion,
+  VendorDeletionQueue,
+  VendorEraser,
+} from "./verification.js";

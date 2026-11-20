@@ -123,8 +123,10 @@ describe("schema contents", () => {
         "safety_reports",
         "user_blocks",
         "users",
+        "vendor_deletion_requests",
         "venue_slots",
         "venues",
+        "verification_sessions",
         "visual_feature_snapshots",
       ].sort(),
     );

@@ -48,9 +48,6 @@ internal process, and we never build face recognition ourselves.
 
 ## Not yet
 
-- **Consent.** A separate biometric-verification consent (purpose, retention, deletion), asked
-  before the first selfie. It comes with the endpoints that start a check and receive the
-  vendor's result.
-- **Deletion.** When an account is deleted, a request to the vendor to delete their copy.
+- **Consent, starting checks and vendor deletion:** done in ADR-0025.
 - **Vendor.** The vendor's adapter (Persona or Stripe Identity), the regional rules, and legal
   review (CPRA, state biometric laws such as BIPA, app-store age assurance).

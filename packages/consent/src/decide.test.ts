@@ -41,6 +41,23 @@ describe("the policy (PLAN-001 §8.1)", () => {
     expect(new Set(keys).size).toBe(keys.length);
     for (const flow of FLOWS) expect(SCOPES[flow.scope]).toBeDefined();
   });
+
+  it("sends the selfie video and ID only to the verification provider, under their own scope", () => {
+    const biometric = FLOWS.filter(
+      (flow) =>
+        flow.resource === "verification_media" ||
+        flow.recipient === "identity_provider" ||
+        flow.scope === "biometric_verification",
+    );
+    expect(biometric).toEqual([
+      {
+        resource: "verification_media",
+        purpose: "identity_verification",
+        recipient: "identity_provider",
+        scope: "biometric_verification",
+      },
+    ]);
+  });
 });
 
 describe("own data", () => {

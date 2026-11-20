@@ -25,7 +25,14 @@ describe("home area and commute", () => {
   it("cannot be shared with matching or turned into a signal for the other agent", () => {
     const facts = applyProposals(
       NO_FACTS,
-      [{ key: "self.home_area", value: "SFB_TIANHE", provenance: "explicit", certainty: "high" }],
+      [
+        {
+          key: "self.home_area",
+          value: "SFB_SF_MISSION",
+          provenance: "explicit",
+          certainty: "high",
+        },
+      ],
       NOW,
     ).facts;
     expect(setVisibility(facts, "self.home_area", "matching")).toMatchObject({ ok: false });
@@ -51,7 +58,7 @@ describe("home area and commute", () => {
   it("never becomes a hard rule or part of the matching snapshot, even confirmed", () => {
     let facts = NO_FACTS;
     for (const [key, value] of [
-      ["self.home_area", "SFB_TIANHE"],
+      ["self.home_area", "SFB_SF_MISSION"],
       ["date.max_commute_minutes", 40],
       ["seeking.max_distance_km", 15],
     ] as const) {

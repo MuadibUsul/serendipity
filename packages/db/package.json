@@ -68,6 +68,10 @@
     "./test-invitations": {
       "types": "./src/test-invitations.ts",
       "default": "./src/test-invitations.ts"
+    },
+    "./verification": {
+      "types": "./src/verification.ts",
+      "default": "./src/verification.ts"
     }
   },
   "scripts": {

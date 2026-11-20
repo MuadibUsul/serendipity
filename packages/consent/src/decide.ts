@@ -19,7 +19,9 @@ export type Recipient =
   | { readonly kind: "matching_service" }
   | { readonly kind: "venue"; readonly venueId: string }
   /** The deterministic venue filter (ARCH-001 §7.3 venue negotiation). */
-  | { readonly kind: "venue_filter" };
+  | { readonly kind: "venue_filter" }
+  /** The age and real-person verification vendor (ADR-0024, ADR-0025). */
+  | { readonly kind: "identity_provider" };
 
 export interface AccessRequest {
   /** The person the data is about. */
@@ -209,6 +211,7 @@ function actorOf(recipient: Recipient): Pick<AuditRecord, "actorType" | "actorId
     case "profile_extractor":
     case "matching_service":
     case "venue_filter":
+    case "identity_provider":
       return { actorType: "system", actorId: null };
     default:
       return assertNever(recipient, "recipient");

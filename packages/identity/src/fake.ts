@@ -13,7 +13,7 @@ import type { IdentityProvider, VerificationResult, VerificationSession } from "
 export const FAKE_PROVIDER = "fake";
 
 export interface FakeOutcome {
-  /** Which check the fake pretends to run; `document` when left out. */
+  /** Which check the fake pretends to run; the one the session started with when left out. */
   readonly level?: "liveness" | "document";
   readonly estimatedAge?: number | null;
   readonly faceMatch?: boolean | null;
@@ -30,6 +30,8 @@ export interface FakeIdentityProvider extends IdentityProvider {
     at: Date,
     outcome?: FakeOutcome,
   ): { headers: Record<string, string>; body: string };
+  /** Whether `deleteData` was asked for this reference. */
+  wasDeleted(providerRef: string): boolean;
 }
 
 const PASS: FakeOutcome = { ageVerified: true, realPersonVerified: true, validDays: 365 };
@@ -42,7 +44,11 @@ export function createFakeIdentityProvider(options: {
   if (DEPLOYED.includes(options.env)) {
     throw new Error(`the fake identity provider must not run in ${options.env}`);
   }
-  const sessions = new Map<string, { subject: string; result?: VerificationResult }>();
+  const sessions = new Map<
+    string,
+    { subject: string; level: "liveness" | "document"; result?: VerificationResult }
+  >();
+  const deleted = new Set<string>();
 
   function resultFor(providerRef: string): VerificationResult {
     const session = sessions.get(providerRef);
@@ -52,7 +58,7 @@ export function createFakeIdentityProvider(options: {
         providerRef,
         subject: session.subject,
         status: "pending",
-        level: "document",
+        level: session.level,
         estimatedAge: null,
         faceMatch: null,
         ageVerified: false,
@@ -65,9 +71,9 @@ export function createFakeIdentityProvider(options: {
 
   return {
     name: FAKE_PROVIDER,
-    start(subject): Promise<VerificationSession> {
+    start(subject, level): Promise<VerificationSession> {
       const providerRef = `fake_${randomUUID().replaceAll("-", "")}`;
-      sessions.set(providerRef, { subject });
+      sessions.set(providerRef, { subject, level });
       return Promise.resolve({
         providerRef,
         url: `https://identity.fake.invalid/verify/${providerRef}`,
@@ -75,6 +81,12 @@ export function createFakeIdentityProvider(options: {
       });
     },
     result: (providerRef) => Promise.resolve(resultFor(providerRef)),
+    deleteData(providerRef) {
+      sessions.delete(providerRef);
+      deleted.add(providerRef);
+      return Promise.resolve();
+    },
+    wasDeleted: (providerRef) => deleted.has(providerRef),
     parseCallback(headers, rawBody, now) {
       verifyCallbackSignature(options.secret, headers["x-signature"], rawBody, now);
       let body: unknown;
@@ -88,7 +100,7 @@ export function createFakeIdentityProvider(options: {
     complete(providerRef, at, outcome = PASS) {
       const session = sessions.get(providerRef);
       if (session === undefined) throw new Error(`no fake session ${providerRef}`);
-      const level = outcome.level ?? "document";
+      const level = outcome.level ?? session.level;
       // A liveness check passes on a real person; an ID check on a proven age.
       const verified = level === "liveness" ? outcome.realPersonVerified : outcome.ageVerified;
       const result: VerificationResult = {

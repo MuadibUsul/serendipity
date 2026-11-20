@@ -1,5 +1,5 @@
 /**
- * The consent policy, version 1: the data a person can let flow, to whom, for
+ * The consent policy: the data a person can let flow, to whom, for
  * what, and the consent scope each flow needs (ARCH-001 §4, §6, §7.3, §10).
  *
  * A flow that is not listed here is denied whatever grants exist. Bump
@@ -7,7 +7,7 @@
  * `minimumVersion` when its meaning changes, so older grants stop counting and
  * the person is asked again.
  */
-export const CONSENT_POLICY_VERSION = 3;
+export const CONSENT_POLICY_VERSION = 4;
 
 /** Kinds of personal data the engine guards. */
 export const RESOURCES = [
@@ -21,6 +21,7 @@ export const RESOURCES = [
   "booking_details",
   "dietary_restrictions",
   "reveal_cards",
+  "verification_media",
 ] as const;
 export type Resource = (typeof RESOURCES)[number];
 
@@ -34,6 +35,7 @@ export const PURPOSES = [
   "date_booking",
   "venue_selection",
   "relationship_reveal",
+  "identity_verification",
 ] as const;
 export type Purpose = (typeof PURPOSES)[number];
 
@@ -48,6 +50,7 @@ export const RECIPIENT_CLASSES = [
   "matching_service",
   "venue",
   "venue_filter",
+  "identity_provider",
 ] as const;
 export type RecipientClass = (typeof RECIPIENT_CLASSES)[number];
 
@@ -111,6 +114,12 @@ export const SCOPES = {
     description:
       "After both said yes, the other person turns over one card a day from your deck (soft facts you allow), and their agent may use what they saw to plan a surprise.",
   },
+  biometric_verification: {
+    version: 1,
+    minimumVersion: 1,
+    description:
+      "To check you are a real adult, the verification provider records a short selfie video, compares it with your profile photos and estimates your age; if that is not enough, it also checks a photo ID. The provider keeps the video and any ID, not Serendip: we keep only the result and the provider's reference. Withdraw this, or delete your account, and we ask the provider to delete what it holds.",
+  },
 } as const satisfies Record<string, Scope>;
 export type ScopeId = keyof typeof SCOPES;
 
@@ -123,7 +132,7 @@ export interface Flow {
 
 /**
  * Every permitted flow (policy version 2 added the dietary flows, version 3
- * the card deck). Raw voice, transcripts, photos, visual features and whole
+ * the card deck, version 4 the verification provider). Raw voice, transcripts, photos, visual features and whole
  * profiles never go to another person or their agent (PLAN-001 §8.1); to
  * them go only allow-listed compatibility signals, chat messages and, after
  * a mutual yes, one card a day from a deck of soft facts.
@@ -212,5 +221,14 @@ export const FLOWS: readonly Flow[] = [
     purpose: "relationship_reveal",
     recipient: "relationship_peer",
     scope: "relationship_reveal",
+  },
+  // Policy version 4: the selfie video and, when needed, a photo ID go to
+  // the verification provider and nowhere else (ADR-0025). Serendip never
+  // compares faces or estimates age itself.
+  {
+    resource: "verification_media",
+    purpose: "identity_verification",
+    recipient: "identity_provider",
+    scope: "biometric_verification",
   },
 ];
