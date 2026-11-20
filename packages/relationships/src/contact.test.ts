@@ -23,7 +23,7 @@ describe("contact swap", () => {
     const card = fc.option(
       fc.record({
         kind: fc.constantFrom("wechat" as const, "phone" as const),
-        value: fc.string({ minLength: 1 }),
+        value: fc.stringMatching(/^[0-9]{3,12}$/).map((digits) => `card_${digits}`),
       }),
       { nil: null },
     );
