@@ -1,8 +1,16 @@
 /** The caller must supply the user ID from authenticated server context. */
 export interface PersonalExport {
   readonly schemaVersion: 1;
-  readonly account: { readonly id: string; readonly status: string; readonly createdAt: Date };
+  readonly account: {
+    readonly id: string;
+    readonly status: string;
+    readonly createdAt: Date;
+    /** The date of birth given at sign-up (ADR-0024), YYYY-MM-DD; `null` when not given. */
+    readonly birthDate: string | null;
+  };
   readonly identity: readonly unknown[];
+  /** Checks the person started with a verification vendor (ADR-0025); never the media. */
+  readonly verificationChecks: readonly unknown[];
   readonly consent: readonly unknown[];
   readonly profiles: readonly unknown[];
   readonly profileFacts: readonly unknown[];

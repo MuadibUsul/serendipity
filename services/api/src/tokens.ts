@@ -13,3 +13,4 @@ export const FEEDBACK = Symbol("Feedback");
 export const RELATIONSHIPS = Symbol("Relationships");
 export const REVEAL = Symbol("Reveal");
 export const SAFETY = Symbol("Safety");
+export const VERIFICATION = Symbol("Verification");

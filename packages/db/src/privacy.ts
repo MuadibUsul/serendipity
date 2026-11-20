@@ -2,6 +2,8 @@ import { PrivacyError } from "@serendipity/privacy";
 import type { DeletionReceipt, PersonalExport, PrivacyRepository } from "@serendipity/privacy";
 import type pg from "pg";
 
+import { queueVendorDeletions } from "./verification.js";
+
 interface ReceiptRow {
   id: string;
   status: DeletionReceipt["status"];
@@ -66,16 +68,30 @@ export function pgPrivacyRepository(pool: pg.Pool): PrivacyRepository {
           id: string;
           status: string;
           created_at: Date;
-        }>(`SELECT id, status, created_at FROM app.users WHERE id = $1`, [userId]);
+          birth_date: string | null;
+        }>(
+          `SELECT id, status, created_at, to_char(birth_date, 'YYYY-MM-DD') AS birth_date
+           FROM app.users WHERE id = $1`,
+          [userId],
+        );
         const account = accounts[0];
         if (account === undefined || account.status === "deleted") return null;
         const rows = async (sql: string) => (await db.query<pg.QueryResultRow>(sql, [userId])).rows;
         return {
           schemaVersion: 1,
-          account: { id: account.id, status: account.status, createdAt: account.created_at },
+          account: {
+            id: account.id,
+            status: account.status,
+            createdAt: account.created_at,
+            birthDate: account.birth_date,
+          },
           identity: await rows(`SELECT provider, age_verified AS "ageVerified",
             real_person_verified AS "realPersonVerified", verified_at AS "verifiedAt",
-            expires_at AS "expiresAt" FROM app.identity_attestations WHERE user_id = $1 ORDER BY created_at`),
+            expires_at AS "expiresAt", level, estimated_age AS "estimatedAge",
+            face_match AS "faceMatch"
+            FROM app.identity_attestations WHERE user_id = $1 ORDER BY created_at`),
+          verificationChecks: await rows(`SELECT provider, level, started_at AS "startedAt"
+            FROM app.verification_sessions WHERE user_id = $1 ORDER BY started_at`),
           consent: await rows(`SELECT scope, purpose, recipient_class AS "recipientClass", version,
             granted_at AS "grantedAt", revoked_at AS "revokedAt"
             FROM app.consent_grants WHERE user_id = $1 ORDER BY granted_at`),
@@ -294,6 +310,11 @@ async function finalizeDeletion(pool: pg.Pool, userId: string): Promise<Deletion
     );
     await db.query(`DELETE FROM app.profile_versions WHERE user_id = $1`, [userId]);
     await db.query(`DELETE FROM app.match_policies WHERE user_id = $1`, [userId]);
+    // The vendor holds the selfie video and any ID: ask it to delete them
+    // (ADR-0025). The requests outlive the account; only the vendor's
+    // confirmation closes them.
+    await queueVendorDeletions(db, userId);
+    await db.query(`DELETE FROM app.verification_sessions WHERE user_id = $1`, [userId]);
     await db.query(`DELETE FROM app.identity_attestations WHERE user_id = $1`, [userId]);
     await db.query(`DELETE FROM app.consent_grants WHERE user_id = $1`, [userId]);
     // Sign-in: the hashed phone number, its codes and every session. The
@@ -316,7 +337,8 @@ async function finalizeDeletion(pool: pg.Pool, userId: string): Promise<Deletion
     await db.query(`DELETE FROM app.auth_sessions WHERE user_id = $1`, [userId]);
     await db.query(`DELETE FROM app.auth_phone_accounts WHERE user_id = $1`, [userId]);
     await db.query(
-      `UPDATE app.users SET status = 'deleted', deleted_at = now(), updated_at = now()
+      `UPDATE app.users SET status = 'deleted', birth_date = NULL, deleted_at = now(),
+         updated_at = now()
        WHERE id = $1`,
       [userId],
     );

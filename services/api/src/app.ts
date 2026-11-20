@@ -113,7 +113,9 @@ export async function createApi({
       ...(auth === undefined ? {} : { auth }),
     }),
     adapter,
-    { logger: new NestLogger(logger), abortOnError: false },
+    // The raw body is kept for signed webhooks (the identity callback): a
+    // signature covers the exact bytes, not a re-serialised parse.
+    { logger: new NestLogger(logger), abortOnError: false, rawBody: true },
   );
   app.useGlobalFilters(new SafeExceptionFilter(logger, metrics, revealsErrorMessages(env)));
   await app.init();

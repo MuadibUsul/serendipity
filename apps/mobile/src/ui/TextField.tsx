@@ -16,7 +16,7 @@ export interface TextFieldProps {
   readonly keyboardType?: KeyboardTypeOptions;
   readonly textContentType?: "telephoneNumber" | "oneTimeCode";
   readonly maxLength?: number;
-  /** Fixed text before the value, inside the field (e.g. "+86"). Not part of the value. */
+  /** Fixed text before the value, inside the field (e.g. "+1"). Not part of the value. */
   readonly prefix?: string;
   readonly autoFocus?: boolean;
 }

@@ -16,10 +16,14 @@ import { pgInvitationRepository } from "@serendipity/db/invitations";
 import { pgRelationshipRepository } from "@serendipity/db/relationships";
 import { pgRevealRepository } from "@serendipity/db/reveal";
 import { pgSafetyRepository } from "@serendipity/db/safety";
+import { pgAttestationStore } from "@serendipity/db/identity";
+import { pgVerificationRepository } from "@serendipity/db/verification";
+import { createFakeIdentityProvider, createIdentityService } from "@serendipity/identity";
 import { knownMigrations } from "@serendipity/db/migration-status";
 import pg from "pg";
 
 import { createApi } from "./app.js";
+import type { VerificationDeps } from "./verification.controller.js";
 import { sessionCallers } from "./callers.js";
 import { createLogger, revealsErrorMessages, safeError } from "./logging.js";
 import { databaseReadiness } from "./readiness.js";
@@ -48,6 +52,22 @@ function signIn(env: Environment, pool: pg.Pool, secret: string): AuthService | 
     hasher: createHasher(secret),
     codes: () => DEV_CODE,
   });
+}
+
+/**
+ * Age and real-person checks for this environment (ADR-0025). Dev and test
+ * use the fake vendor; staging and prod have no vendor chosen yet, so the
+ * endpoints are not served there rather than ever the fake.
+ */
+function verification(env: Environment, pool: pg.Pool, secret: string): VerificationDeps | null {
+  if (env !== "dev" && env !== "test") return null;
+  return {
+    repository: pgVerificationRepository(pool),
+    identity: createIdentityService({
+      provider: createFakeIdentityProvider({ env, secret: `identity-callback:${secret}` }),
+      store: pgAttestationStore(pool),
+    }),
+  };
 }
 
 async function main(): Promise<void> {
@@ -79,6 +99,7 @@ async function main(): Promise<void> {
     logger.debug({ check, err: safeError(error, withMessages) }, "readiness check failed");
   });
   const auth = signIn(config.env, pool, authSecret);
+  const checks = verification(config.env, pool, authSecret);
   const api = await createApi({
     env: config.env,
     logger,
@@ -91,6 +112,7 @@ async function main(): Promise<void> {
       relationships: pgRelationshipRepository(pool),
       reveal: pgRevealRepository(pool),
       safety: pgSafetyRepository(pool),
+      ...(checks === null ? {} : { verification: checks }),
       callers: sessionCallers(config.env, auth),
     },
   });

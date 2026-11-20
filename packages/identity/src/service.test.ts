@@ -45,7 +45,7 @@ describe("the identity service", () => {
   it("makes a person eligible once a signed, passing callback arrives", async () => {
     const { provider, service } = setup();
     expect(await service.eligible(USER)).toEqual({ eligible: false, reason: "not_verified" });
-    const session = await service.startVerification(USER);
+    const session = await service.startVerification(USER, "document");
     const callback = provider.complete(session.providerRef, NOW);
     expect(await service.handleCallback(callback.headers, callback.body)).toBe("recorded");
     expect((await service.eligible(USER)).eligible).toBe(true);
@@ -54,7 +54,7 @@ describe("the identity service", () => {
 
   it("records a rejection, and a failed check proves nothing whatever its flags", async () => {
     const { provider, service } = setup();
-    const session = await service.startVerification(USER);
+    const session = await service.startVerification(USER, "document");
     const callback = provider.complete(session.providerRef, NOW, {
       ageVerified: false,
       realPersonVerified: true,
@@ -68,7 +68,7 @@ describe("the identity service", () => {
   it("changes nothing on a replayed callback", async () => {
     const store = memoryStore();
     const { provider, service } = setup(store);
-    const session = await service.startVerification(USER);
+    const session = await service.startVerification(USER, "document");
     const callback = provider.complete(session.providerRef, NOW);
     await service.handleCallback(callback.headers, callback.body);
     expect(await service.handleCallback(callback.headers, callback.body)).toBe("unchanged");
@@ -77,7 +77,7 @@ describe("the identity service", () => {
 
   it("refuses unsigned, forged, stale and malformed callbacks", async () => {
     const { provider, service } = setup();
-    const session = await service.startVerification(USER);
+    const session = await service.startVerification(USER, "document");
     const { headers, body } = provider.complete(session.providerRef, NOW);
     const forged = body.replace('"age_verified":true', '"age_verified":true,"x":1');
     const stale = signCallback(SECRET, body, new Date(NOW.getTime() - 301_000));

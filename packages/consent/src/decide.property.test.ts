@@ -101,6 +101,7 @@ function actsFor(target: Recipient): string | null {
     case "matching_service":
     case "venue":
     case "venue_filter":
+    case "identity_provider":
       return null;
   }
 }

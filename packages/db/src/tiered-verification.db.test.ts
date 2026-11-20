@@ -54,7 +54,7 @@ async function check(
   userId: string,
   outcome: Parameters<typeof provider.complete>[2],
 ): Promise<void> {
-  const session = await provider.start(userId);
+  const session = await provider.start(userId, outcome?.level ?? "document");
   const callback = provider.complete(session.providerRef, NOW, outcome);
   await identity.handleCallback(callback.headers, callback.body);
 }

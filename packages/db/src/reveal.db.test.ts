@@ -69,7 +69,7 @@ async function couple(options: { consent?: boolean } = {}) {
   await profile(a, {
     "self.interests": ["jazz", "hiking"],
     "date.cuisines": [{ tag: "cantonese", weight: 3 }],
-    "self.home_area": "SFB_TIANHE",
+    "self.home_area": "SFB_SF_MISSION",
     "date.dietary_restrictions": ["halal"],
   });
   await profile(b, { "self.interests": ["films"], "date.tastes": ["spicy", "sweet"] });
@@ -103,7 +103,7 @@ describe("turning over cards", () => {
       ],
       refusal: null,
     });
-    expect(JSON.stringify(before)).not.toMatch(/jazz|hiking|cantonese|TIANHE|halal/);
+    expect(JSON.stringify(before)).not.toMatch(/jazz|hiking|cantonese|SF_MISSION|halal/);
     expect(await cards.flip(b, id, "date.cuisines", DAY1, first)).toEqual({
       kind: "flipped",
       card: { category: "date.cuisines", item: "cantonese" },
