@@ -24,13 +24,38 @@ describe("readResult", () => {
     expect(Object.keys(result).sort()).toEqual([
       "ageVerified",
       "checkedAt",
+      "estimatedAge",
       "expiresAt",
+      "faceMatch",
+      "level",
       "providerRef",
       "realPersonVerified",
       "status",
       "subject",
     ]);
     expect(JSON.stringify(result)).not.toMatch(/Alice|1999|11010519|selfie/);
+  });
+
+  it("never lets a liveness check prove adulthood, whatever it says", () => {
+    expect(
+      readResult({ ...BASE, level: "liveness", estimated_age: 31, face_match: true }),
+    ).toMatchObject({
+      level: "liveness",
+      ageVerified: false,
+      realPersonVerified: true,
+      estimatedAge: 31,
+      faceMatch: true,
+    });
+  });
+
+  it.each([
+    { level: "selfie" },
+    { estimated_age: 7 },
+    { estimated_age: 30.5 },
+    { estimated_age: "30" },
+    { face_match: "yes" },
+  ])("refuses a malformed check detail %o", (extra) => {
+    expect(() => readResult({ ...BASE, ...extra })).toThrow();
   });
 
   it.each(["rejected", "pending"])(

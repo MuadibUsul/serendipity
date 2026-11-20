@@ -83,6 +83,7 @@
     "@serendipity/relationships": "0.0.0",
     "@serendipity/safety": "0.0.0",
     "@serendipity/invitations": "0.0.0",
+    "@serendipity/market": "0.0.0",
     "@serendipity/matching": "0.0.0",
     "@serendipity/media": "0.0.0",
     "@serendipity/privacy": "0.0.0",

@@ -32,3 +32,20 @@ export { ACCOUNT_LIFECYCLE, ACCOUNT_STATES } from "./account.js";
 export type { AccountState } from "./account.js";
 export { PAUSE_REASONS, PROFILE_REVIEW_AFTER_DAYS, pauseRefusal, resumeCheck } from "./pause.js";
 export type { PauseReason, PauseRefusal, ResumeCheck, ResumeNeed, ResumeState } from "./pause.js";
+export {
+  DEFAULT_TIER_POLICY,
+  LEVELS,
+  MINIMUM_AGE,
+  ageOn,
+  birthDateRefusal,
+  requiredLevel,
+} from "./tiers.js";
+export type {
+  BirthDateRefusal,
+  DocumentReason,
+  Level,
+  LivenessVerdict,
+  Requirement,
+  TierFacts,
+  TierPolicy,
+} from "./tiers.js";

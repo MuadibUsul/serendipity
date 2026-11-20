@@ -4,6 +4,7 @@
 // carry on past.
 import { eligibility } from "./eligibility.js";
 import type { Attestation, Eligibility, IneligibleReason } from "./eligibility.js";
+import type { TierFacts } from "./tiers.js";
 import type { IdentityProvider, VerificationResult, VerificationSession } from "./provider.js";
 
 export type RecordOutcome = "recorded" | "updated" | "unchanged";
@@ -21,6 +22,11 @@ export interface AttestationStore {
     attestation: Attestation,
     context: { traceId?: string },
   ): Promise<RecordOutcome>;
+  /**
+   * What tiering needs besides the verdicts (ADR-0024). A store without it
+   * keeps the strict reading: only an ID check counts.
+   */
+  factsFor?(userId: string, now: Date): Promise<TierFacts>;
 }
 
 /** Thrown by `assertEligible`: invitation and payment code must not continue past it. */
@@ -74,6 +80,9 @@ function toAttestation(provider: string, result: VerificationResult): Attestatio
     realPersonVerified: result.realPersonVerified,
     verifiedAt: result.checkedAt,
     expiresAt: result.expiresAt,
+    level: result.level,
+    estimatedAge: result.estimatedAge,
+    faceMatch: result.faceMatch,
   };
 }
 
@@ -88,8 +97,13 @@ export function createIdentityService({
 
   async function eligible(userId: string): Promise<Eligibility> {
     try {
+      const at = now();
       const attestations = await within(store.attestationsFor(userId), timeoutMs);
-      return eligibility(attestations, now(), policy);
+      const facts =
+        store.factsFor === undefined
+          ? undefined
+          : await within(store.factsFor(userId, at), timeoutMs);
+      return eligibility(attestations, at, policy, facts);
     } catch {
       return { eligible: false, reason: "unavailable" };
     }
