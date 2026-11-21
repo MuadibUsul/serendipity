@@ -127,6 +127,7 @@ describe("schema contents", () => {
         "user_blocks",
         "users",
         "vendor_deletion_requests",
+        "venue_devices",
         "venue_slots",
         "venues",
         "verification_sessions",

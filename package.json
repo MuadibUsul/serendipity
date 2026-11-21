@@ -37,7 +37,8 @@
     "docs:state-machines": "tsx packages/db/src/state-machines-cli.ts && prettier --write docs/state-machines.md",
     "media:cleanup": "tsx services/api/src/media-cleanup.ts",
     "invites:expire": "tsx services/api/src/invite-expiry.ts",
-    "privacy:cleanup": "tsx services/api/src/privacy-cleanup.ts"
+    "privacy:cleanup": "tsx services/api/src/privacy-cleanup.ts",
+    "venue:device": "tsx services/api/src/register-venue-device.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

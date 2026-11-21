@@ -14,6 +14,8 @@ import type {
 import { AccountController } from "./account.controller.js";
 import { AuthController } from "./auth.controller.js";
 import { CardsController } from "./cards.controller.js";
+import { CheckinController } from "./checkin.controller.js";
+import type { CheckinDeps } from "./checkin.controller.js";
 import { FeedbackController } from "./feedback.controller.js";
 import type { Callers } from "./callers.js";
 import { HealthController } from "./health.controller.js";
@@ -30,6 +32,7 @@ import {
   ACCOUNT,
   AUTH,
   CALLERS,
+  CHECKIN,
   CLOCK,
   FEEDBACK,
   INVITATIONS,
@@ -58,6 +61,8 @@ export interface InvitationsDeps {
   readonly safety?: SafetyRepository;
   /** Left out, the age and real-person check endpoints are not served (ADR-0025). */
   readonly verification?: VerificationDeps;
+  /** Left out, the check-in endpoints are not served (ADR-0028). */
+  readonly checkin?: CheckinDeps;
   readonly callers: Callers;
   readonly clock?: () => Date;
 }
@@ -95,6 +100,7 @@ export class AppModule {
         ...(deps.invitations?.reveal === undefined ? [] : [CardsController]),
         ...(deps.invitations?.safety === undefined ? [] : [SafetyController]),
         ...(deps.invitations?.verification === undefined ? [] : [VerificationController]),
+        ...(deps.invitations?.checkin === undefined ? [] : [CheckinController]),
         ...(deps.auth === undefined ? [] : [AuthController]),
       ],
       providers: [
@@ -127,6 +133,9 @@ export class AppModule {
               ...(deps.invitations.verification === undefined
                 ? []
                 : [{ provide: VERIFICATION, useValue: deps.invitations.verification }]),
+              ...(deps.invitations.checkin === undefined
+                ? []
+                : [{ provide: CHECKIN, useValue: deps.invitations.checkin }]),
             ]),
       ],
     };
