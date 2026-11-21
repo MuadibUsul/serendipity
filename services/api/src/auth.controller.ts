@@ -1,4 +1,5 @@
-import { Body, Controller, Header, HttpCode, Inject, Post, Req, Res } from "@nestjs/common";
+import { Body, Controller, Header, HttpCode, Inject, Param, Post, Req, Res } from "@nestjs/common";
+import { isSocialProvider } from "@serendipity/auth";
 import type { AuthService, IssuedTokens } from "@serendipity/auth";
 import type { FastifyReply, FastifyRequest } from "fastify";
 
@@ -26,10 +27,10 @@ const sessionBody = (userId: string, newAccount: boolean, tokens: IssuedTokens):
   refresh_expires_at: tokens.refreshExpiresAt.toISOString(),
 });
 
-function field(body: unknown, name: string): string {
+function field(body: unknown, name: string, maxLength = 64): string {
   const value =
     typeof body === "object" && body !== null ? (body as Record<string, unknown>)[name] : undefined;
-  if (typeof value !== "string" || value.length > 64) {
+  if (typeof value !== "string" || value.length > maxLength) {
     throw new ApiError("invalid_request", `Send "${name}" as a string.`);
   }
   return value;
@@ -62,7 +63,7 @@ export class AuthController {
     const result = await this.service().requestCode(field(body, "phone"), request.ip);
     if (result.ok) return { resend_after_s: result.resendAfterS };
     if (result.problem === "invalid_phone") {
-      throw new ApiError("invalid_request", "Enter a mainland China mobile number.");
+      throw new ApiError("invalid_request", "Enter a US mobile number.");
     }
     void reply.header("retry-after", String(result.retryAfterS));
     throw new ApiError("rate_limited", "Too many codes requested. Try again later.");
@@ -76,9 +77,59 @@ export class AuthController {
     const result = await this.service().signIn(field(body, "phone"), field(body, "code"));
     if (result.ok) return sessionBody(result.userId, result.created, result.tokens);
     if (result.problem === "invalid_phone") {
-      throw new ApiError("invalid_request", "Enter a mainland China mobile number.");
+      throw new ApiError("invalid_request", "Enter a US mobile number.");
     }
     throw new ApiError("invalid_code", "The code is wrong or has expired.");
+  }
+
+  /**
+   * A one-time nonce for Sign in with Apple or Google (ADR-0026). The app
+   * hands it to the platform's sheet (Apple: its SHA-256 hex) and sends it
+   * back with the ID token. 429 with Retry-After: too many from one address.
+   */
+  @Post("nonce")
+  @HttpCode(201)
+  @Header("cache-control", "no-store")
+  async nonce(
+    @Req() request: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ): Promise<{ nonce: string; expires_at: string; providers: readonly string[] }> {
+    const service = this.service();
+    if (service.socialProviders.length === 0) {
+      throw new ApiError("unavailable", "Sign in with Apple or Google is not available yet.");
+    }
+    const result = await service.issueNonce(request.ip);
+    if (result.ok) {
+      return {
+        nonce: result.nonce,
+        expires_at: result.expiresAt.toISOString(),
+        providers: service.socialProviders,
+      };
+    }
+    void reply.header("retry-after", String(result.retryAfterS));
+    throw new ApiError("rate_limited", "Too many sign-in attempts. Try again later.");
+  }
+
+  /**
+   * Signs in with the ID token from Apple's or Google's sheet. 401 for any
+   * token or nonce that will not do, and for a closed account: which, is
+   * not said. 503 when the provider is not configured here.
+   */
+  @Post(":provider")
+  @HttpCode(200)
+  @Header("cache-control", "no-store")
+  async social(@Param("provider") provider: string, @Body() body: unknown): Promise<SessionBody> {
+    if (!isSocialProvider(provider)) throw new ApiError("not_found");
+    const result = await this.service().signInWith(
+      provider,
+      field(body, "id_token", 8_192),
+      field(body, "nonce"),
+    );
+    if (result.ok) return sessionBody(result.userId, result.created, result.tokens);
+    if (result.problem === "unavailable") {
+      throw new ApiError("unavailable", "This sign-in method is not available yet.");
+    }
+    throw new ApiError("unauthenticated", "That sign-in didn't work. Try again.");
   }
 
   /** A new pair for a refresh token, which is spent. 401 for any token that will not do. */

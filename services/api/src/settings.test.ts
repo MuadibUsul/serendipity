@@ -99,3 +99,28 @@ describe("AUTH_SECRET", () => {
     expect(problemsOf({ ...STAGING, AUTH_SECRET: OWN })).toEqual([]);
   });
 });
+
+describe("social sign-in client IDs", () => {
+  it("offers neither provider by default", () => {
+    const result = loadApiSettings(DEV);
+    expect(result.ok && result.settings.socialClientIds).toEqual({ apple: [], google: [] });
+  });
+
+  it("reads comma-separated client IDs", () => {
+    const result = loadApiSettings({
+      ...DEV,
+      APPLE_CLIENT_IDS: "com.serendip.app, com.serendip.web",
+      GOOGLE_CLIENT_IDS: "123-ios.apps.googleusercontent.com",
+    });
+    expect(result.ok && result.settings.socialClientIds).toEqual({
+      apple: ["com.serendip.app", "com.serendip.web"],
+      google: ["123-ios.apps.googleusercontent.com"],
+    });
+  });
+
+  it("refuses something that is not a client ID", () => {
+    expect(problemsOf({ ...DEV, APPLE_CLIENT_IDS: "com.serendip.app,,x y" })).toEqual([
+      "APPLE_CLIENT_IDS",
+    ]);
+  });
+});

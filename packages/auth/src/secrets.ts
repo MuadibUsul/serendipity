@@ -7,7 +7,10 @@ import { createHmac, randomBytes, randomInt, timingSafeEqual } from "node:crypto
  */
 export interface Hasher {
   /** The keyed hash of `value` for one `purpose` (phone, ip, code, token). */
-  readonly hash: (purpose: "phone" | "ip" | "code" | "token", value: string) => string;
+  readonly hash: (
+    purpose: "phone" | "ip" | "code" | "token" | "subject" | "nonce",
+    value: string,
+  ) => string;
 }
 
 /** The secret must be long enough to resist guessing: at least 32 bytes. */
@@ -36,6 +39,7 @@ export function randomCode(length: number): string {
 }
 
 /** An unguessable bearer token: 256 random bits, with a prefix that says what it is. */
-export function randomToken(kind: "access" | "refresh"): string {
-  return `${kind === "access" ? "sa" : "sr"}_${randomBytes(32).toString("base64url")}`;
+export function randomToken(kind: "access" | "refresh" | "nonce"): string {
+  const prefix = { access: "sa", refresh: "sr", nonce: "sn" }[kind];
+  return `${prefix}_${randomBytes(32).toString("base64url")}`;
 }

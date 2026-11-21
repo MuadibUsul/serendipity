@@ -16,4 +16,8 @@ export const AUTH_POLICY = {
   refreshTtlS: 30 * 24 * 60 * 60,
   /** Digits in a code. */
   codeLength: 6,
+  /** A sign-in nonce (Apple, Google) works for ten minutes, once. */
+  nonceTtlS: 10 * 60,
+  /** Nonces one network address may request per rolling hour. */
+  noncesPerIpPerHour: 30,
 } as const;

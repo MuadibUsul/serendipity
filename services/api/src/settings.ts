@@ -19,6 +19,16 @@ export interface ApiSettings {
    * own, and may not use that one.
    */
   readonly authSecret: string;
+  /**
+   * Our app's client IDs for Sign in with Apple and Google (ADR-0026):
+   * `APPLE_CLIENT_IDS` (the bundle ID, and the services ID for the web) and
+   * `GOOGLE_CLIENT_IDS` (the iOS, Android and web OAuth clients), comma
+   * separated. A provider with none is not offered.
+   */
+  readonly socialClientIds: {
+    readonly apple: readonly string[];
+    readonly google: readonly string[];
+  };
 }
 
 /** The secret dev and test use when none is set. Public, so useless anywhere else. */
@@ -78,8 +88,33 @@ export function loadApiSettings(source: Source): ApiSettingsResult {
     problems,
   );
 
+  const socialClientIds = {
+    apple: parseClientIds("APPLE_CLIENT_IDS", source["APPLE_CLIENT_IDS"], problems),
+    google: parseClientIds("GOOGLE_CLIENT_IDS", source["GOOGLE_CLIENT_IDS"], problems),
+  };
+
   if (!loaded.ok || problems.length > 0) return { ok: false, problems };
-  return { ok: true, settings: { app: loaded.config, port, host, shutdownDelayMs, authSecret } };
+  return {
+    ok: true,
+    settings: { app: loaded.config, port, host, shutdownDelayMs, authSecret, socialClientIds },
+  };
+}
+
+/** A client ID: a bundle ID or an OAuth client ID, never with spaces. */
+const CLIENT_ID = /^[A-Za-z0-9._-]{3,200}$/;
+
+function parseClientIds(
+  variable: string,
+  raw: string | undefined,
+  problems: ConfigProblem[],
+): string[] {
+  if (raw === undefined || raw.trim() === "") return [];
+  const ids = raw.split(",").map((id) => id.trim());
+  if (!ids.every((id) => CLIENT_ID.test(id))) {
+    problems.push({ variable, message: "must be client IDs separated by commas" });
+    return [];
+  }
+  return ids;
 }
 
 function parseAuthSecret(

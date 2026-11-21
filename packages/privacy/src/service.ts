@@ -9,6 +9,8 @@ export interface PersonalExport {
     readonly birthDate: string | null;
   };
   readonly identity: readonly unknown[];
+  /** How the person signs in: Apple, Google (ADR-0026), and since when; never the provider's id. */
+  readonly signInMethods: readonly unknown[];
   /** Checks the person started with a verification vendor (ADR-0025); never the media. */
   readonly verificationChecks: readonly unknown[];
   readonly consent: readonly unknown[];
