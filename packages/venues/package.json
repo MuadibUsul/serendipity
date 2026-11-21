@@ -14,6 +14,8 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@serendipity/market": "0.0.0",
+    "@serendipity/matching": "0.0.0",
     "@serendipity/profile": "0.0.0"
   }
 }

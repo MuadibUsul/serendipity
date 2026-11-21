@@ -15,6 +15,7 @@ export {
   SUPPORTED_PROFILE_SCHEMA,
   WEEKDAYS,
   longestSharedMinutes,
+  mergedDay,
   readHardRules,
 } from "./rules.js";
 export type {
