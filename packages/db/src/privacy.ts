@@ -265,6 +265,7 @@ async function finalizeDeletion(pool: pg.Pool, userId: string): Promise<Deletion
       [userId],
     );
     await db.query(`DELETE FROM app.media_assets WHERE owner_user_id = $1`, [userId]);
+    await db.query(`DELETE FROM app.push_devices WHERE user_id = $1`, [userId]);
     await db.query(
       `DELETE FROM app.notification_outbox WHERE recipient_user_id = $1
         OR (aggregate_type = 'user' AND aggregate_id = $1)

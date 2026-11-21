@@ -72,3 +72,5 @@ export { pgCheckinRepository } from "./checkin.js";
 export type { CheckinOutcome, CheckinRepository, OwnCheckin, RevealOutcome } from "./checkin.js";
 export { pgReminderQueue, reminderOutboxKind } from "./reminders.js";
 export type { ReminderQueue } from "./reminders.js";
+export { pgOutboxStore, pgPushDeviceRepository } from "./push.js";
+export type { PushDeviceRepository } from "./push.js";
