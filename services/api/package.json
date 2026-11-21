@@ -25,6 +25,7 @@
     "@serendipity/invitations": "0.0.0",
     "@serendipity/market": "0.0.0",
     "@serendipity/media": "0.0.0",
+    "@serendipity/notify": "0.0.0",
     "@serendipity/privacy": "0.0.0",
     "@serendipity/redact": "0.0.0",
     "@serendipity/relationships": "0.0.0",

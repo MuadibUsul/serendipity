@@ -38,6 +38,7 @@
     "media:cleanup": "tsx services/api/src/media-cleanup.ts",
     "invites:expire": "tsx services/api/src/invite-expiry.ts",
     "dates:remind": "tsx services/api/src/date-reminders.ts",
+    "notifications:send": "tsx services/api/src/send-notifications.ts",
     "privacy:cleanup": "tsx services/api/src/privacy-cleanup.ts",
     "venue:device": "tsx services/api/src/register-venue-device.ts"
   },

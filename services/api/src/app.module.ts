@@ -4,6 +4,7 @@ import type { DynamicModule } from "@nestjs/common";
 import type { AuthService } from "@serendipity/auth";
 import type {
   AccountRepository,
+  PushDeviceRepository,
   FeedbackRepository,
   InvitationRepository,
   RelationshipRepository,
@@ -21,6 +22,7 @@ import type { Callers } from "./callers.js";
 import { HealthController } from "./health.controller.js";
 import { InvitationsController } from "./invitations.controller.js";
 import { RelationshipsController } from "./relationships.controller.js";
+import { PushController } from "./push.controller.js";
 import { SafetyController } from "./safety.controller.js";
 import { VerificationController } from "./verification.controller.js";
 import type { VerificationDeps } from "./verification.controller.js";
@@ -39,6 +41,7 @@ import {
   LIFECYCLE,
   LOGGER,
   METRICS,
+  PUSH,
   READINESS,
   RELATIONSHIPS,
   REVEAL,
@@ -63,6 +66,8 @@ export interface InvitationsDeps {
   readonly verification?: VerificationDeps;
   /** Left out, the check-in endpoints are not served (ADR-0028). */
   readonly checkin?: CheckinDeps;
+  /** Left out, the push device endpoints are not served (ADR-0030). */
+  readonly push?: PushDeviceRepository;
   readonly callers: Callers;
   readonly clock?: () => Date;
 }
@@ -101,6 +106,7 @@ export class AppModule {
         ...(deps.invitations?.safety === undefined ? [] : [SafetyController]),
         ...(deps.invitations?.verification === undefined ? [] : [VerificationController]),
         ...(deps.invitations?.checkin === undefined ? [] : [CheckinController]),
+        ...(deps.invitations?.push === undefined ? [] : [PushController]),
         ...(deps.auth === undefined ? [] : [AuthController]),
       ],
       providers: [
@@ -136,6 +142,9 @@ export class AppModule {
               ...(deps.invitations.checkin === undefined
                 ? []
                 : [{ provide: CHECKIN, useValue: deps.invitations.checkin }]),
+              ...(deps.invitations.push === undefined
+                ? []
+                : [{ provide: PUSH, useValue: deps.invitations.push }]),
             ]),
       ],
     };

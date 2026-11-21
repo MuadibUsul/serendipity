@@ -1,0 +1,16 @@
+{
+  "name": "@serendipity/notify",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Push notifications: the sender contract, the Expo push adapter, a fake for dev and test, and the loop that delivers the outbox.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}
