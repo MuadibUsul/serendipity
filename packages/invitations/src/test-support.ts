@@ -46,6 +46,6 @@ export function record(
     },
     startsAt: new Date("2026-11-21T07:00:00Z"),
     endsAt: new Date("2026-11-21T08:30:00Z"),
-    venue: { name: "示例咖啡馆（虚构）", address: "示例路 1 号（虚构地址）" },
+    venue: { name: "Example Cafe (fictional)", address: "1 Example St (fictional), San Francisco" },
   };
 }

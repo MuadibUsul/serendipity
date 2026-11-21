@@ -16,13 +16,12 @@
  */
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
+export { OPENS_BEFORE_MIN, checkinOpen } from "./window.js";
+
 export type Party = "A" | "B";
 
 /** Seconds a code is shown for before the next one. */
 export const CODE_STEP_S = 60;
-/** Check-in opens this long before the date starts. */
-export const OPENS_BEFORE_MIN = 30;
-
 const PREFIX = "sc1";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -78,14 +77,6 @@ export function readCode(secret: string, scanned: string, now: Date): CodeCheck 
   const current = stepOf(now);
   if (step !== current && step !== current - 1) return { ok: false, refusal: "stale" };
   return { ok: true, dateId, party };
-}
-
-/** Whether check-in is open for a date starting and ending at these times. */
-export function checkinOpen(startAt: Date, endAt: Date, now: Date): boolean {
-  return (
-    now.getTime() >= startAt.getTime() - OPENS_BEFORE_MIN * 60_000 &&
-    now.getTime() < endAt.getTime()
-  );
 }
 
 /** A new device key for a venue: shown once to whoever registers the device, stored only as a hash. */

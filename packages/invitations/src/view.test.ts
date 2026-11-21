@@ -43,8 +43,20 @@ describe("invitationView", () => {
       answer_by: "2026-11-19T04:00:00.000Z",
       starts_at: "2026-11-21T07:00:00.000Z",
       ends_at: "2026-11-21T08:30:00.000Z",
-      venue: { name: "示例咖啡馆（虚构）", address: "示例路 1 号（虚构地址）" },
+      venue: {
+        name: "Example Cafe (fictional)",
+        address: "1 Example St (fictional), San Francisco",
+      },
+      checkin_opens_at: null,
     });
+  });
+
+  it("says when check-in opens, once the date is confirmed", () => {
+    const confirmed = record({
+      status: "accepted",
+      date: { ...record().date, state: "CONFIRMED" },
+    });
+    expect(invitationView(confirmed, NOW).checkin_opens_at).toBe("2026-11-21T06:30:00.000Z");
   });
 
   it("drops the deadline once no answer is possible", () => {
@@ -57,13 +69,17 @@ describe("invitationView", () => {
       ...record(),
       otherUserId: "22222222-2222-4222-8222-222222222222",
       otherPhoto: "media/b/photo.jpg",
-      venue: { name: "示例咖啡馆（虚构）", address: "示例路 1 号", managerPhone: "13900000000" },
+      venue: {
+        name: "Example Cafe (fictional)",
+        address: "1 Example St",
+        managerPhone: "4155550199",
+      },
     };
     const view = invitationView(leaky, NOW);
     expect(Object.keys(view).sort()).toEqual([...VIEW_KEYS].sort());
     expect(Object.keys(view.venue ?? {}).sort()).toEqual([...VENUE_KEYS].sort());
     const text = JSON.stringify(view);
-    for (const secret of ["22222222", "media/b", "13900000000"]) expect(text).not.toContain(secret);
+    for (const secret of ["22222222", "media/b", "4155550199"]) expect(text).not.toContain(secret);
   });
 });
 
