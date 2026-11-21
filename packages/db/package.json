@@ -80,6 +80,10 @@
     "./checkin": {
       "types": "./src/checkin.ts",
       "default": "./src/checkin.ts"
+    },
+    "./reminders": {
+      "types": "./src/reminders.ts",
+      "default": "./src/reminders.ts"
     }
   },
   "scripts": {

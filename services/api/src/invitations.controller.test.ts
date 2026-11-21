@@ -34,17 +34,18 @@ const RECORD: InvitationRecord = {
   invite: { status: "pending", expiresAt: new Date("2026-11-19T04:00:00Z"), respondedAt: null },
   startsAt: new Date("2026-11-21T07:00:00Z"),
   endsAt: new Date("2026-11-21T08:30:00Z"),
-  venue: { name: "示例咖啡馆（虚构）", address: "示例路 1 号（虚构地址）" },
+  venue: { name: "Example Cafe (fictional)", address: "1 Example St (fictional), San Francisco" },
 };
 
 function fakeRepository(
   outcome: AnswerOutcome = { kind: "answered", changed: true, record: RECORD },
+  record: InvitationRecord = RECORD,
 ) {
   const calls: unknown[][] = [];
   const repository: InvitationRepository = {
-    forUser: (userId) => Promise.resolve(userId === ME ? [RECORD] : []),
+    forUser: (userId) => Promise.resolve(userId === ME ? [record] : []),
     forUserDate: (userId, dateId) =>
-      Promise.resolve(userId === ME && dateId === DATE_ID ? RECORD : null),
+      Promise.resolve(userId === ME && dateId === DATE_ID ? record : null),
     answer: (...args) => {
       calls.push(args);
       return Promise.resolve(outcome);
@@ -57,9 +58,11 @@ function fakeRepository(
 
 let running: Awaited<ReturnType<typeof testApi>> | undefined;
 
-async function start(options: { env?: "test" | "prod"; outcome?: AnswerOutcome } = {}) {
+async function start(
+  options: { env?: "test" | "prod"; outcome?: AnswerOutcome; record?: InvitationRecord } = {},
+) {
   const env = options.env ?? "test";
-  const fake = fakeRepository(options.outcome);
+  const fake = fakeRepository(options.outcome, options.record);
   running = await testApi(fixedReadiness(READY), env, {
     repository: fake.repository,
     callers: devHeaderCallers(env),
@@ -190,5 +193,45 @@ describe("answering", () => {
     });
     expect(response.statusCode).toBe(404);
     expect(calls).toHaveLength(0);
+  });
+});
+
+describe("the calendar file", () => {
+  const confirmed: InvitationRecord = {
+    ...RECORD,
+    invite: { ...RECORD.invite, status: "accepted", respondedAt: NOW },
+    date: { ...RECORD.date, state: "CONFIRMED" },
+  };
+
+  it("is served for a confirmed date, with the time and venue and no one's name", async () => {
+    const { app } = await start({ record: confirmed });
+    const response = await app.inject({
+      method: "GET",
+      url: `/v1/dates/${DATE_ID}/calendar.ics`,
+      headers: as(ME),
+    });
+    expect(response.statusCode).toBe(200);
+    expect(response.headers["content-type"]).toBe("text/calendar; charset=utf-8");
+    expect(response.headers["cache-control"]).toBe("no-store");
+    expect(response.body).toContain("DTSTART:20261121T070000Z");
+    expect(response.body).toContain("Example Cafe (fictional)");
+  });
+
+  it("is not served before the date is confirmed, nor for someone else's date", async () => {
+    const pending = await start();
+    const early = await pending.app.inject({
+      method: "GET",
+      url: `/v1/dates/${DATE_ID}/calendar.ics`,
+      headers: as(ME),
+    });
+    expect(early.statusCode).toBe(404);
+    await pending.app.close();
+    const { app } = await start({ record: confirmed });
+    const other = await app.inject({
+      method: "GET",
+      url: `/v1/dates/${DATE_ID}/calendar.ics`,
+      headers: as("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
+    });
+    expect(other.statusCode).toBe(404);
   });
 });

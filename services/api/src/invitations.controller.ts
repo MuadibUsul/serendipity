@@ -1,8 +1,8 @@
-import { Controller, Get, Header, HttpCode, Inject, Param, Post, Req } from "@nestjs/common";
+import { Controller, Get, Header, HttpCode, Inject, Param, Post, Req, Res } from "@nestjs/common";
 import type { AnswerOutcome, InvitationRepository } from "@serendipity/db";
-import { invitationView } from "@serendipity/invitations";
+import { calendarFile, invitationView } from "@serendipity/invitations";
 import type { Answer, AnswerRefusal, InvitationView } from "@serendipity/invitations";
-import type { FastifyRequest } from "fastify";
+import type { FastifyReply, FastifyRequest } from "fastify";
 
 import type { Callers } from "./callers.js";
 import { isUuid } from "./callers.js";
@@ -54,6 +54,27 @@ export class InvitationsController {
     const record = isUuid(id) ? await this.invitations.forUserDate(caller, id) : null;
     if (record === null) throw new ApiError("not_found");
     return invitationView(record, this.clock());
+  }
+
+  /**
+   * A confirmed date as a calendar file (ADR-0029): the time, the venue and
+   * how to check in, never the other person. 404 until the date is confirmed.
+   */
+  @Get(":id/calendar.ics")
+  @Header("cache-control", "no-store")
+  async calendar(
+    @Req() request: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+    @Param("id") id: string,
+  ): Promise<string> {
+    const caller = await this.caller(request);
+    const record = isUuid(id) ? await this.invitations.forUserDate(caller, id) : null;
+    const now = this.clock();
+    const file = record === null ? null : calendarFile(invitationView(record, now), now);
+    if (file === null) throw new ApiError("not_found");
+    void reply.header("content-type", "text/calendar; charset=utf-8");
+    void reply.header("content-disposition", 'attachment; filename="serendip-date.ics"');
+    return file;
   }
 
   @Post(":id/accept")

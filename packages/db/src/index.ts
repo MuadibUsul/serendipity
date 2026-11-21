@@ -70,3 +70,5 @@ export { pgDatePlanner } from "./planning.js";
 export type { DatePlanner, PlanOutcome } from "./planning.js";
 export { pgCheckinRepository } from "./checkin.js";
 export type { CheckinOutcome, CheckinRepository, OwnCheckin, RevealOutcome } from "./checkin.js";
+export { pgReminderQueue, reminderOutboxKind } from "./reminders.js";
+export type { ReminderQueue } from "./reminders.js";

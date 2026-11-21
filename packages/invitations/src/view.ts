@@ -9,6 +9,7 @@
  * - A date the other person declined looks exactly like one that expired:
  *   "closed", with no reason (PRD-001 §7: a refusal is never made public).
  */
+import { OPENS_BEFORE_MIN } from "@serendipity/checkin/window";
 import type { DateState } from "@serendipity/domain";
 
 import type { InvitationRecord } from "./record.js";
@@ -35,6 +36,8 @@ export interface InvitationView {
   readonly starts_at: string | null;
   readonly ends_at: string | null;
   readonly venue: { readonly name: string; readonly address: string } | null;
+  /** When the check-in code starts working (ADR-0028); only once the date is confirmed. */
+  readonly checkin_opens_at: string | null;
 }
 
 /** The keys a view may carry, for tests and for anyone reviewing the contract. */
@@ -45,6 +48,7 @@ export const VIEW_KEYS = [
   "starts_at",
   "ends_at",
   "venue",
+  "checkin_opens_at",
 ] as const;
 export const VENUE_KEYS = ["name", "address"] as const;
 
@@ -92,5 +96,9 @@ export function invitationView(record: InvitationRecord, now: Date): InvitationV
     ends_at: record.endsAt === null ? null : record.endsAt.toISOString(),
     venue:
       record.venue === null ? null : { name: record.venue.name, address: record.venue.address },
+    checkin_opens_at:
+      status === "confirmed" && record.startsAt !== null
+        ? new Date(record.startsAt.getTime() - OPENS_BEFORE_MIN * 60_000).toISOString()
+        : null,
   };
 }
