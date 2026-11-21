@@ -90,6 +90,8 @@ export function pgPrivacyRepository(pool: pg.Pool): PrivacyRepository {
             expires_at AS "expiresAt", level, estimated_age AS "estimatedAge",
             face_match AS "faceMatch"
             FROM app.identity_attestations WHERE user_id = $1 ORDER BY created_at`),
+          signInMethods: await rows(`SELECT provider, created_at AS "createdAt"
+            FROM app.auth_social_accounts WHERE user_id = $1 ORDER BY created_at`),
           verificationChecks: await rows(`SELECT provider, level, started_at AS "startedAt"
             FROM app.verification_sessions WHERE user_id = $1 ORDER BY started_at`),
           consent: await rows(`SELECT scope, purpose, recipient_class AS "recipientClass", version,
@@ -334,6 +336,16 @@ async function finalizeDeletion(pool: pg.Pool, userId: string): Promise<Deletion
        ON CONFLICT (phone_hash) DO NOTHING`,
       [userId],
     );
+    // The same for an Apple or Google account (migration 0022).
+    await db.query(
+      `INSERT INTO app.auth_banned_social (provider, subject_hash, reason)
+       SELECT a.provider, a.subject_hash, 'suspended_account_deleted'
+       FROM app.auth_social_accounts a JOIN app.users u ON u.id = a.user_id
+       WHERE a.user_id = $1 AND u.status = 'suspended'
+       ON CONFLICT (provider, subject_hash) DO NOTHING`,
+      [userId],
+    );
+    await db.query(`DELETE FROM app.auth_social_accounts WHERE user_id = $1`, [userId]);
     await db.query(`DELETE FROM app.auth_sessions WHERE user_id = $1`, [userId]);
     await db.query(`DELETE FROM app.auth_phone_accounts WHERE user_id = $1`, [userId]);
     await db.query(

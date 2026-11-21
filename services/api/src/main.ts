@@ -5,8 +5,15 @@ import "reflect-metadata";
 import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
-import { DEV_CODE, createAuthService, createFakeSms, createHasher } from "@serendipity/auth";
-import type { AuthService } from "@serendipity/auth";
+import {
+  DEV_CODE,
+  PROVIDER_ENDPOINTS,
+  createAuthService,
+  createFakeSms,
+  createHasher,
+  publishedKeys,
+} from "@serendipity/auth";
+import type { AuthService, SocialConfig } from "@serendipity/auth";
 import { formatProblems } from "@serendipity/config";
 import type { Environment } from "@serendipity/config";
 import { pgAuthRepository } from "@serendipity/db/auth";
@@ -44,13 +51,27 @@ const SHUTDOWN_TIMEOUT_MS = 10_000;
  * Staging and prod have no SMS provider yet, so they have no sign-in (503)
  * rather than ever the fake.
  */
-function signIn(env: Environment, pool: pg.Pool, secret: string): AuthService | null {
+function signIn(
+  env: Environment,
+  pool: pg.Pool,
+  secret: string,
+  clientIds: { readonly apple: readonly string[]; readonly google: readonly string[] },
+): AuthService | null {
   if (env !== "dev" && env !== "test") return null;
+  // Apple's and Google's public keys, fetched from them; offered only with client IDs (ADR-0026).
+  const social: SocialConfig = {
+    audiences: clientIds,
+    keys: {
+      apple: publishedKeys(PROVIDER_ENDPOINTS.apple.jwksUrl),
+      google: publishedKeys(PROVIDER_ENDPOINTS.google.jwksUrl),
+    },
+  };
   return createAuthService({
     repository: pgAuthRepository(pool),
     sms: createFakeSms(),
     hasher: createHasher(secret),
     codes: () => DEV_CODE,
+    social,
   });
 }
 
@@ -76,7 +97,7 @@ async function main(): Promise<void> {
     process.stderr.write(`${formatProblems(loaded.problems)}\n`);
     process.exit(1);
   }
-  const { app: config, port, host, shutdownDelayMs, authSecret } = loaded.settings;
+  const { app: config, port, host, shutdownDelayMs, authSecret, socialClientIds } = loaded.settings;
   const logger = createLogger(config.logLevel);
   const withMessages = revealsErrorMessages(config.env);
 
@@ -98,7 +119,7 @@ async function main(): Promise<void> {
   const readiness = databaseReadiness(pool, known, (check, error) => {
     logger.debug({ check, err: safeError(error, withMessages) }, "readiness check failed");
   });
-  const auth = signIn(config.env, pool, authSecret);
+  const auth = signIn(config.env, pool, authSecret, socialClientIds);
   const checks = verification(config.env, pool, authSecret);
   const api = await createApi({
     env: config.env,

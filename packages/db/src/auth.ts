@@ -86,6 +86,101 @@ async function endChallenge(
 
 export function pgAuthRepository(pool: TransactionPool & Queryable): AuthRepository {
   return {
+    issueNonce({ nonceHash, ipHash, now, expiresAt, perIpPerHour }) {
+      return inAuditedTransaction(pool, async (tx) => {
+        await tx.db.query("SELECT pg_advisory_xact_lock(hashtext('auth:nonce-ip:' || $1))", [
+          ipHash,
+        ]);
+        const since = new Date(now.getTime() - HOUR_MS);
+        const { rows } = await tx.db.query<{ count: number; oldest: Date | null }>(
+          `SELECT count(*)::int AS count, min(created_at) AS oldest FROM app.auth_nonces
+           WHERE ip_hash = $1 AND created_at > $2`,
+          [ipHash, since],
+        );
+        const seen = rows[0];
+        if (seen !== undefined && seen.count >= perIpPerHour && seen.oldest !== null) {
+          const retryAfterS = secondsUntil(now, new Date(seen.oldest.getTime() + HOUR_MS));
+          await audit(
+            tx,
+            "auth.nonce.limited",
+            null,
+            { type: "auth_nonce", id: null },
+            { retry_after_s: retryAfterS },
+          );
+          return { ok: false, retryAfterS } as const;
+        }
+        await tx.db.query(
+          `INSERT INTO app.auth_nonces (nonce_hash, ip_hash, created_at, expires_at)
+           VALUES ($1, $2, $3, $4)`,
+          [nonceHash, ipHash, now, expiresAt],
+        );
+        await audit(tx, "auth.nonce.issued", null, { type: "auth_nonce", id: null });
+        return { ok: true } as const;
+      });
+    },
+
+    socialSignIn({ provider, subjectHash, nonceHash, now, tokens }) {
+      return inAuditedTransaction(pool, async (tx) => {
+        const refuse = async (refusal: "bad_nonce" | "account_closed") => {
+          await audit(
+            tx,
+            "auth.signin.refused",
+            null,
+            { type: "auth_nonce", id: null },
+            { reason: refusal, provider },
+          );
+          return { ok: false, refusal } as const;
+        };
+        // The nonce is spent whatever happens next: a token works once.
+        const spent = await tx.db.query(
+          `UPDATE app.auth_nonces SET used_at = $2
+           WHERE nonce_hash = $1 AND used_at IS NULL AND expires_at > $2`,
+          [nonceHash, now],
+        );
+        if (spent.rowCount !== 1) return refuse("bad_nonce");
+
+        await tx.db.query(
+          "SELECT pg_advisory_xact_lock(hashtext('auth:subject:' || $1 || ':' || $2))",
+          [provider, subjectHash],
+        );
+        const account = await tx.db.query<{ user_id: string; status: string }>(
+          `SELECT a.user_id, u.status FROM app.auth_social_accounts a
+           JOIN app.users u ON u.id = a.user_id
+           WHERE a.provider = $1 AND a.subject_hash = $2`,
+          [provider, subjectHash],
+        );
+        const found = account.rows[0];
+        if (found !== undefined && CLOSED.includes(found.status)) return refuse("account_closed");
+        let userId = found?.user_id;
+        const created = userId === undefined;
+        if (userId === undefined) {
+          const banned = await tx.db.query(
+            "SELECT 1 FROM app.auth_banned_social WHERE provider = $1 AND subject_hash = $2",
+            [provider, subjectHash],
+          );
+          if (banned.rowCount !== 0) return refuse("account_closed");
+          const user = await tx.db.query<{ id: string }>(
+            "INSERT INTO app.users DEFAULT VALUES RETURNING id",
+          );
+          userId = user.rows[0]?.id ?? "";
+          await tx.db.query(
+            `INSERT INTO app.auth_social_accounts (provider, subject_hash, user_id)
+             VALUES ($1, $2, $3)`,
+            [provider, subjectHash, userId],
+          );
+        }
+        const session = await insertSession(tx.db, userId, null, tokens, now);
+        await audit(
+          tx,
+          "auth.signin",
+          userId,
+          { type: "auth_session", id: session },
+          { created, method: provider },
+        );
+        return { ok: true, userId, created } as const;
+      });
+    },
+
     requestCode({ phoneHash, ipHash, codeHash, now, expiresAt, limits }) {
       return inAuditedTransaction(pool, async (tx) => {
         // Number first, then address, in every transaction: no lock cycle.
