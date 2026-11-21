@@ -63,7 +63,8 @@ const SELECT_MINE = `
   LEFT JOIN app.venues v ON v.id = d.venue_id
   WHERE i.user_id = $1`;
 
-function toDate(
+/** A stored date row as the domain machine reads it. */
+export function toDate(
   row: Pick<Row, "status" | "machine_version" | "revision" | "machine_context">,
 ): DateRecord {
   const defaults = createDate();
@@ -109,7 +110,7 @@ function contextOf(date: DateRecord): string {
 }
 
 /** Writes `next` over the stored date, which must still be at `expected` (optimistic lock). */
-async function saveDate(db: Queryable, dateId: string, next: DateRecord, expected: number) {
+export async function saveDate(db: Queryable, dateId: string, next: DateRecord, expected: number) {
   const { rowCount } = await db.query(
     `UPDATE app.dates
        SET status = $2, revision = $3, machine_context = $4, updated_at = now()

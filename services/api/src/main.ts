@@ -23,6 +23,7 @@ import { pgInvitationRepository } from "@serendipity/db/invitations";
 import { pgRelationshipRepository } from "@serendipity/db/relationships";
 import { pgRevealRepository } from "@serendipity/db/reveal";
 import { pgSafetyRepository } from "@serendipity/db/safety";
+import { pgCheckinRepository } from "@serendipity/db/checkin";
 import { pgAttestationStore } from "@serendipity/db/identity";
 import { pgVerificationRepository } from "@serendipity/db/verification";
 import { createFakeIdentityProvider, createIdentityService } from "@serendipity/identity";
@@ -134,6 +135,7 @@ async function main(): Promise<void> {
       reveal: pgRevealRepository(pool),
       safety: pgSafetyRepository(pool),
       ...(checks === null ? {} : { verification: checks }),
+      checkin: { repository: pgCheckinRepository(pool), secret: `checkin:${authSecret}` },
       callers: sessionCallers(config.env, auth),
     },
   });

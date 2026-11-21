@@ -68,3 +68,5 @@ export type {
 } from "./verification.js";
 export { pgDatePlanner } from "./planning.js";
 export type { DatePlanner, PlanOutcome } from "./planning.js";
+export { pgCheckinRepository } from "./checkin.js";
+export type { CheckinOutcome, CheckinRepository, OwnCheckin, RevealOutcome } from "./checkin.js";

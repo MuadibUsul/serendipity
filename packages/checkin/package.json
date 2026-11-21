@@ -1,0 +1,16 @@
+{
+  "name": "@serendipity/checkin",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Checking in at the venue: a code on the person's phone that changes every minute, the window it works in, and the device key a venue scans with. Pure.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}
