@@ -72,6 +72,10 @@
     "./verification": {
       "types": "./src/verification.ts",
       "default": "./src/verification.ts"
+    },
+    "./planning": {
+      "types": "./src/planning.ts",
+      "default": "./src/planning.ts"
     }
   },
   "scripts": {
@@ -81,11 +85,9 @@
     "@serendipity/auth": "0.0.0",
     "@serendipity/consent": "0.0.0",
     "@serendipity/domain": "0.0.0",
-    "@serendipity/fixtures": "0.0.0",
     "@serendipity/feedback": "0.0.0",
+    "@serendipity/fixtures": "0.0.0",
     "@serendipity/identity": "0.0.0",
-    "@serendipity/relationships": "0.0.0",
-    "@serendipity/safety": "0.0.0",
     "@serendipity/invitations": "0.0.0",
     "@serendipity/market": "0.0.0",
     "@serendipity/matching": "0.0.0",
@@ -93,6 +95,9 @@
     "@serendipity/privacy": "0.0.0",
     "@serendipity/profile": "0.0.0",
     "@serendipity/redact": "0.0.0",
+    "@serendipity/relationships": "0.0.0",
+    "@serendipity/safety": "0.0.0",
+    "@serendipity/venues": "0.0.0",
     "@serendipity/vision": "0.0.0"
   }
 }
